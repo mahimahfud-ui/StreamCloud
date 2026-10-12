@@ -14,7 +14,7 @@
 <script src="/logo-manifest.js"></script>
 <script>
 try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches&&!sessionStorage.getItem("nf-intro"))document.documentElement.classList.add("intro-on")}catch(e){}
-document.documentElement.classList.add("cin");setTimeout(function(){if(!window.__cinema)document.documentElement.classList.remove("cin")},4000);
+document.documentElement.classList.add("cin");setTimeout(function(){if(!window.__cinema)document.documentElement.classList.remove("cin")},1500);
 </script>
 <style>
 :root{--bg:#141414;--panel:#181818;--card:#242424;--text:#fff;--dim:#a7a7a7;--muted:#707070;--red:#e50914;--green:#46d369;--yellow:#f5c518;--border:#343434}
@@ -164,13 +164,14 @@ function logoHTML(it){
     base+"/logo.png"
   ];
   const local=(window.MAHIFLIX_LOGOS&&window.MAHIFLIX_LOGOS[it.domain])||"";
-  const sources=[...new Set([...curated,...highResCandidates,google512,google,googleV2,...direct,duck,local].filter(Boolean))];
+  // Prefer committed local assets first: remote favicon servers often stall or rate-limit.
+  const sources=[...new Set([local,...curated,google512,google,googleV2,...highResCandidates,...direct,duck].filter(Boolean))];
   if(!sources.length){
     const fallbackSvg='<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><rect width="1024" height="1024" rx="180" fill="#090909"/><text x="512" y="560" text-anchor="middle" font-family="Arial,sans-serif" font-size="170" font-weight="800" fill="#fff">'+encodeURIComponent(initials(it.name))+'</text></svg>';
     sources.push('data:image/svg+xml;charset=UTF-8,'+fallbackSvg);
   }
   const json=JSON.stringify(sources);
-  return "<img class='logo-img' loading='eager' decoding='async' fetchpriority='high' alt='"+clean(it.name)+" logo' src='"+sources[0]+"' data-logo-sources='"+clean(json)+"' data-logo-index='0' onload='logoLoaded(this)' onerror='nextLogo(this)'>";
+  return "<img class='logo-img' loading='lazy' decoding='async' fetchpriority='auto' alt='"+clean(it.name)+" logo' src='"+sources[0]+"' data-logo-sources='"+clean(json)+"' data-logo-index='0' onload='logoLoaded(this)' onerror='nextLogo(this)'>";
 }
 function logoLoaded(img){
   const w=img.naturalWidth||0,h=img.naturalHeight||0;
@@ -370,7 +371,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   if(!d.classList.contains("intro-on"))return;
   var done=false;
   function end(){if(done)return;done=true;try{sessionStorage.setItem("nf-intro","1")}catch(e){}d.classList.add("intro-leave");setTimeout(function(){d.classList.remove("intro-on","intro-leave")},650)}
-  var i=document.getElementById("intro");i.addEventListener("click",end);addEventListener("keydown",end,{once:true});i.addEventListener("touchstart",end,{passive:true});setTimeout(end,2450)
+  var i=document.getElementById("intro");i.addEventListener("click",end);addEventListener("keydown",end,{once:true});i.addEventListener("touchstart",end,{passive:true});setTimeout(end,1100)
 })();
 </script>
 <script type="module" src="/cinema/main.js"></script>
