@@ -77,8 +77,7 @@ function checkRateLimit(req) {
 function cleanRateBuckets() {
   const now = Date.now();
   for (const [ip, bucket] of rateBuckets) {
-    if (now - bucket.startedAt >= RATE_WINDOW_MS) {
-      rateBuckets.delete(ip);
+    if (now - bucket.startedAt >= RATE_WINDOW_MS) {      rateBuckets.delete(ip);
     }
   }
 }
@@ -157,8 +156,7 @@ app.get("/api/tmdb/*", async (req, res) => {
   const requestedPath = "/" + (req.params[0] || "").replace(/^\/+/, "");
 
   if (!isAllowedTmdbPath(requestedPath)) {
-    return res.status(404).json({
-      error: "TMDB endpoint is not available through this proxy."
+    return res.status(404).json({      error: "TMDB endpoint is not available through this proxy."
     });
   }
 
@@ -187,6 +185,7 @@ app.get("/api/tmdb/*", async (req, res) => {
   const cached = getCached(target);
   if (cached) {
     res.setHeader("X-MahiFlix-Cache", "HIT");
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
     return res.type("application/json").send(cached);
   }
 
@@ -214,6 +213,8 @@ app.get("/api/tmdb/*", async (req, res) => {
     }
 
     setCached(target, text);
+    // Let Vercel's edge cache reuse public catalogue responses across cold starts.
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
 
     return res
       .status(200)
@@ -237,8 +238,7 @@ const APP_MAX_REDIRECTS = 5;
 const APP_DOWNLOADS = {
   "7reel": {
     page: "https://7reels.cc/download",
-    fallback: null,
-    allowedHosts: ["7reels.cc"],
+    fallback: null,    allowedHosts: ["7reels.cc"],
     patterns: [/https?:\/\/[^"\']+\.apk(?:\?[^"\']*)?/i]
   },
   vega: {
@@ -317,8 +317,7 @@ const APP_DOWNLOADS = {
     githubLatest: true,
     assetPattern: { test: (name) => String(name || "") === "app-release.apk" }
   },
-  outertune: {
-    page: "https://api.github.com/repos/OuterTune/OuterTune/releases/latest",
+  outertune: {    page: "https://api.github.com/repos/OuterTune/OuterTune/releases/latest",
     fallback: null,
     allowedHosts: ["github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com"],
     githubLatest: true,
@@ -397,8 +396,7 @@ function extractLatestApk(html, config, baseUrl = config.page) {
 
   // Also catch quoted absolute/relative APK URLs embedded in scripts.
   for (const match of html.matchAll(/["']((?:https?:\/\/|\/)[^"'\s<>]+\.(?:apk|xapk)(?:\?[^"'\s<>]*)?)["']/gi)) {
-    addCandidate(match[1]);
-  }
+    addCandidate(match[1]);  }
 
   const unique = [...new Set(candidates)];
   if (!unique.length) return null;
@@ -477,8 +475,7 @@ async function resolveLatestAppDownloadUncached(id) {
 
       if (response.ok) {
         const release = await response.json();
-        const asset = Array.isArray(release.assets)
-          ? release.assets.find((item) =>
+        const asset = Array.isArray(release.assets)          ? release.assets.find((item) =>
               item &&
               item.browser_download_url &&
               config.assetPattern.test(String(item.name || "")) &&
@@ -557,8 +554,7 @@ async function fetchApk(url, config) {
         throw new Error("APK redirect host/path rejected.");
       }
 
-      current = next;
-      continue;
+      current = next;      continue;
     }
 
     if (!response.ok || !response.body) {
@@ -637,8 +633,7 @@ app.get("/download/app/:id", async (req, res) => {
     if (!res.headersSent) {
       errorPage(res, 502, "Download unavailable", "We couldn't reach the download source. Please try again shortly.");
     } else {
-      res.destroy(error);
-    }
+      res.destroy(error);    }
   }
 });
 
