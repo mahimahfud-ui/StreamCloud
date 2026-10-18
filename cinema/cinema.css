@@ -34,7 +34,7 @@ nav.solid{background:rgba(13,13,14,.62);backdrop-filter:blur(16px) saturate(1.25
 /* ---------- hero ---------- */
 .hero{background:none;z-index:1;min-height:calc(100svh - 24px);justify-content:center;padding:96px 4% 90px}
 .hero-in{max-width:1100px;transform:translate3d(0,calc(var(--hp,0)*-46px),0) scale(calc(1 - var(--hp,0)*.05));
-  opacity:calc(1 - var(--hp,0)*1.2);filter:blur(calc(var(--hp,0)*5px));will-change:transform,opacity}
+  opacity:calc(1 - var(--hp,0)*1.2);filter:none;will-change:transform,opacity}
 .hero h1{margin:0 0 22px;display:flex;flex-direction:column;align-items:center;text-wrap:balance;font:400 clamp(56px,10.5vw,138px)/.9 "Bebas Neue",Impact,sans-serif;letter-spacing:.012em}
 .hero h1 .sm{font-size:.34em;letter-spacing:.2em;color:#b9b9bd;margin-bottom:.35em;line-height:1}
 .hero h1 .big{background:linear-gradient(100deg,#fff 0 42%,#ffd9d6 50%,#fff 58% 100%);background-size:260% 100%;background-position:120% 0;-webkit-background-clip:text;background-clip:text;color:transparent;
@@ -171,3 +171,59 @@ nav ul a{transition:color .3s ease}
 }
 @media(max-width:760px){.mode-thumb{top:5px;bottom:5px}.mode-switch{backdrop-filter:none;-webkit-backdrop-filter:none}}
 @media(prefers-reduced-motion:reduce){.mode-thumb{transition:none}.view.active{animation:none}.round.pop{animation:none}}
+
+
+/* ---------- centered compact navigation + lower-cost motion ---------- */
+nav{
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  gap:6px;
+  padding:8px 4% 10px;
+}
+nav .logo{width:30px;height:30px;flex:0 0 30px}
+nav ul{display:flex;align-items:center;justify-content:center;gap:0;min-height:15px}
+nav ul li{margin:0;padding:0}
+nav ul a{display:block;font-size:12px;line-height:1.2}
+.nav-tools{position:static;right:auto;display:flex;justify-content:center;width:100%;gap:0}
+.search{
+  width:min(250px,88vw);
+  max-width:88vw;
+  justify-content:center;
+  gap:8px;
+  padding:5px 10px;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+.search button{flex:0 0 22px}
+.search input,.search.open input{
+  width:clamp(110px,18vw,178px);
+  max-width:calc(88vw - 50px);
+  min-width:0;
+  flex:1 1 auto;
+  opacity:1;
+  margin-left:0;
+}
+nav.solid{backdrop-filter:blur(8px) saturate(1.1);-webkit-backdrop-filter:blur(8px) saturate(1.1)}
+.mode-switch{backdrop-filter:blur(8px) saturate(1.08);-webkit-backdrop-filter:blur(8px) saturate(1.08)}
+.mode-wrap{top:108px}
+.card.live{will-change:auto}
+@media(max-width:760px){
+  nav{gap:5px;padding:7px 4% 9px}
+  nav .logo{width:28px;height:28px;flex-basis:28px}
+  nav ul{display:flex}
+  nav ul a{font-size:12px}
+  .nav-tools{width:100%}
+  .search{width:min(250px,88vw);max-width:88vw}
+  .search input,.search.open input{
+    width:clamp(120px,40vw,185px);
+    max-width:calc(88vw - 50px);
+    min-width:0;
+    flex:1 1 auto;
+  }
+  .mode-wrap{top:102px}
+  nav.solid{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(13,13,14,.94)}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-in{filter:none!important}
+}
