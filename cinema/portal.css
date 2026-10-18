@@ -1,10 +1,10 @@
 /* MahiFlix "Channel Jump" portal + preloader counter. Loaded after cinema.css. */
 
 /* ---------- portal (hidden entirely unless cinema/portal.js booted) ---------- */
-.portal-wrap{display:none;position:relative;width:min(190px,19svh,48vw);margin:10px auto 0;text-align:center}
-.portal-on .portal-wrap{display:block}
-.portal-heading{display:flex;justify-content:center;align-items:center;gap:0;margin-bottom:7px;font-size:13px;color:#c9c9ce;letter-spacing:.02em;text-align:center;opacity:0}
-.portal-heading strong{font-size:16px;margin-left:0;color:#fff;font-weight:700}
+.portal-wrap{display:none;position:relative;width:min(176px,18svh,45vw);margin:8px auto 0;text-align:center;flex-direction:column;align-items:center}
+.portal-on .portal-wrap{display:flex}
+.portal-heading{display:flex;width:100%;align-self:stretch;justify-content:center;align-items:center;gap:0;margin:0 0 7px;font-size:13px;color:#c9c9ce;letter-spacing:.02em;text-align:center;opacity:0}
+.portal-heading strong{display:block;width:100%;margin:0;color:#fff;font-size:16px;font-weight:700;text-align:center;line-height:1.2}
 .portal-in .portal-heading{animation:portal-caption .85s var(--ease,cubic-bezier(.22,1,.36,1)) both}
 @keyframes portal-caption{from{opacity:0;filter:blur(7px);transform:translateY(22px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
 
@@ -19,7 +19,7 @@
 .no-portal-gl .portal-heading{opacity:1;animation:none}
 
 /* make room: with the portal in the hero, size type by viewport height too so it stays above the fold */
-.portal-on .hero{padding:84px 4% 36px}
+.portal-on .hero{padding:112px 4% 28px}
 .portal-on .hero h1{font-size:clamp(48px,min(10.5vw,15svh),138px);margin-bottom:14px}
 .portal-on .hero p{max-width:640px;margin-bottom:6px}
 .portal-on .hero-in .ig-link{margin:0 auto 2px}
@@ -42,7 +42,8 @@
 .fly-logo{position:fixed;z-index:101;background:url(../m-logo-v2.svg) center/contain no-repeat;transform-origin:0 0;pointer-events:none;will-change:transform,opacity}
 
 @media(max-width:640px){
-  .portal-wrap{width:min(170px,20svh,50vw);margin-top:10px}
+  .portal-wrap{width:min(158px,18svh,46vw);margin-top:8px}
+  .portal-on .hero{padding-top:104px}
   .portal-on .hero h1{font-size:clamp(46px,min(16vw,11svh),84px)}
   .portal-heading{font-size:12px}.portal-heading strong{font-size:14px}
 }
