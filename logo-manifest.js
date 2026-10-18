@@ -21,3 +21,5 @@ window.MAHIFLIX_LOGOS = {
   "anivortex.in": "assets/logos/anivortex.svg",
   "nxsha.app": "assets/logos/nxsha.svg"
 };
+
+window.STREAMCLOUD_ITEM_LOGOS = {};
