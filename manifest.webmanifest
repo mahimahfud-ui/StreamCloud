@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "MahiFlix — Movie & Series Directory",
+  "short_name": "MahiFlix",
+  "description": "A curated directory of movie and series websites and apps by Mahi.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#141414",
+  "theme_color": "#141414",
+  "categories": ["entertainment", "video"],
+  "icons": [
+    {
+      "src": "./m-logo-v2.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
