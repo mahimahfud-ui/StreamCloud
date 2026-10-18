@@ -1,0 +1,846 @@
+From a755176eea6857483771963837d767837cf4e76e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 18 Oct 2026 15:22:16 +0000
+Subject: [PATCH] Rewire cinematic layer, add Channel Jump portal + preloader,
+ fix dead app links
+
+- Re-wire cinema/ (dropped from index.html in d93b085): stylesheet, #cinema
+  canvas + CSS fallback, hero headline, finale, module entry, .cin failsafe.
+- Fix root-absolute paths that break on the /StreamCloud/ Pages project URL
+  (scene.js three import, cinema.css mask url, logo-manifest.js).
+- Fix choreography so cards/rows re-rendered by filters, search and mode
+  switches are observed (previously stayed hidden under .cin).
+- Replace 10 dead /download/app/* routes (needed the deleted server.js) with
+  each app's official page or GitHub Releases page, per the old resolver config.
+- New cinema/portal.js + portal.css: canvas-masked tilting "Channel Jump"
+  window that expands, switches Websites/Apps, and irises onto the catalog.
+  Content is generated from the catalog + local logos (no remote media).
+  Keyboard, touch and reduced-motion paths included.
+- New cinema/preloader.js: real-progress counter in the existing intro, logo
+  flies to the nav slot; hard 4.5s failsafe retained.
+- Use local logo marks as a fallback source before generic favicon services.
+- sw.js: cache v2, precache cinema modules, vendor three and local logos.
+- Docs: project map and path rules.
+---
+ CLAUDE.md              |   5 +-
+ README.md              |   2 +-
+ cinema/choreography.js |  33 +++--
+ cinema/cinema.css      |   2 +-
+ cinema/main.js         |  13 +-
+ cinema/portal.css      |  53 ++++++++
+ cinema/portal.js       | 277 +++++++++++++++++++++++++++++++++++++++++
+ cinema/preloader.js    |  66 ++++++++++
+ cinema/scene.js        |   2 +-
+ index.html             |  62 ++++++---
+ logo-manifest.js       |  42 +++----
+ sw.js                  |  46 +++++--
+ 12 files changed, 542 insertions(+), 61 deletions(-)
+ create mode 100644 cinema/portal.css
+ create mode 100644 cinema/portal.js
+ create mode 100644 cinema/preloader.js
+
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 0638ae8..95a08fa 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -34,6 +34,8 @@ Replace `PATH` with the real path; preserve case. Prefer small, targeted file re
+   - `interactions.js`
+   - `choreography.js`
+   - `cinema.css`
++  - `portal.js` / `portal.css` — the hero "Channel Jump" portal: a tilting canvas window showing a reel of the *other* collection; activating it expands to full screen, switches Websites/Apps through the page's own `.mode` buttons, then irises open onto the catalog. Generated from the catalog + local logos only (no remote media). Reduced-motion users get an instant jump.
++  - `preloader.js` — real-progress counter inside the existing `#intro` overlay; logo glides into the nav slot. `index.html` keeps a 4.5 s hard failsafe.
+ - `assets/logos/` — locally stored SVG marks for catalog entries.
+ - `logo-manifest.js` — mapping of site domains to local logo assets.
+ - `m-logo-v2.svg`, `m-logo.svg` — MahiFlix brand marks.
+@@ -41,6 +43,7 @@ Replace `PATH` with the real path; preserve case. Prefer small, targeted file re
+ - `link-status.json` — output consumed by the UI for the most recent scheduled external-link checks.
+ - `scripts/check_links.py` — conservative external-link health checker.
+ - `scripts/fetch-logos.mjs` — helper for fetching/refreshing logo assets.
++- App "Download" buttons link to each app's official page (or GitHub Releases). The old `/download/app/*` routes needed a server that no longer exists; do not reintroduce them.
+ - `vendor/three.module.min.js` — bundled third-party library; avoid editing minified vendor code unless explicitly necessary.
+ - `.github/workflows/deploy-pages.yml` — GitHub Pages deployment.
+ - `.github/workflows/check-links.yml` — scheduled/manual link-check workflow.
+@@ -51,7 +54,7 @@ Replace `PATH` with the real path; preserve case. Prefer small, targeted file re
+ 1. Inspect the relevant current files before making changes; work against the latest `main` contents.
+ 2. Preserve the existing dark cinematic visual identity, project-specific features, data and responsive behavior unless the user explicitly asks for a redesign.
+ 3. Make targeted changes. Do not replace the site with a new scaffold or delete unrelated assets.
+-4. The repository is a static site with root-level GitHub Pages assets. Keep paths compatible with its deployment base.
++4. The repository is a static site served from a GitHub Pages **project URL** (`/StreamCloud/`). Never use root-absolute paths (`/vendor/…`, `/assets/…`); use relative paths, and note that CSS `url()` and JS `import` resolve relative to their own file.
+ 5. Do not invent ratings, live availability, test results, dates, or link-health statuses. The directory score and ad-level labels are editorial estimates unless real evidence says otherwise.
+ 6. Link-check results must treat temporary failures, rate limits and access restrictions as `unknown`, not automatically as a dead link.
+ 7. Keep third-party licenses. Do not edit `vendor/three.module.min.js` to make routine changes.
+diff --git a/README.md b/README.md
+index e23d7d9..9252f20 100644
+--- a/README.md
++++ b/README.md
+@@ -16,7 +16,7 @@ A curated movie and series directory by Mahi. This repository is public and the
+ | Path | Purpose |
+ |---|---|
+ | `index.html` | Main site, catalog UI, search, filters, sorting and listing detail dialog |
+-| `cinema/` | Cinematic scene, state, interaction, and choreography modules |
++| `cinema/` | Cinematic scene, state, interaction and choreography modules, plus the hero portal (`portal.js`) and preloader (`preloader.js`) |
+ | `assets/logos/` | Local SVG logos |
+ | `logo-manifest.js` | Domain-to-logo mapping |
+ | `manifest.webmanifest` | Installable web app metadata |
+diff --git a/cinema/choreography.js b/cinema/choreography.js
+index e325195..6158a6f 100644
+--- a/cinema/choreography.js
++++ b/cinema/choreography.js
+@@ -8,22 +8,35 @@ export function initChoreography({ invalidate }) {
+   let vh = innerHeight, queued = false;
+ 
+   // ---- reveals: add `.in` once when something first enters the viewport ----
+-  const reveal = els => {
+-    if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
+-    const io = new IntersectionObserver(entries => entries.forEach(en => {
+-      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+-    }), { rootMargin: '0px 0px -6% 0px', threshold: 0.05 });
+-    els.forEach(e => io.observe(e));
+-  };
+-  reveal([...document.querySelectorAll('.row-head, .card, .finale-in > *')]);
++  // The catalog re-renders (mode switch, filters, search), so new nodes are picked up by a MutationObserver.
++  const hasIO = 'IntersectionObserver' in window;
++  const revealIO = hasIO ? new IntersectionObserver(entries => entries.forEach(en => {
++    if (en.isIntersecting) { en.target.classList.add('in'); revealIO.unobserve(en.target); }
++  }), { rootMargin: '0px 0px -6% 0px', threshold: 0.05 }) : null;
+ 
+   // ---- per-column depth: cards drift slightly at different rates (desktop only) ----
+   const onScreen = new Set();
+-  const depthIO = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(en => {
++  const depthIO = hasIO ? new IntersectionObserver(es => es.forEach(en => {
+     en.isIntersecting ? onScreen.add(en.target) : (onScreen.delete(en.target), en.target.style.translate = '');
+     queue();                                  // recompute depth when the visible set changes
+   }), { rootMargin: '10% 0px' }) : null;
+-  document.querySelectorAll('.card').forEach(c => depthIO && depthIO.observe(c));
++
++  const seen = new WeakSet();
++  function watch(scope) {
++    scope.querySelectorAll('.row-head, .card, .finale-in > *').forEach(el => {
++      if (seen.has(el)) return; seen.add(el);
++      revealIO ? revealIO.observe(el) : el.classList.add('in');
++      if (depthIO && el.classList.contains('card')) depthIO.observe(el);
++    });
++  }
++  watch(document);
++  const main = document.querySelector('main');
++  if (main && 'MutationObserver' in window) {
++    new MutationObserver(muts => {
++      muts.forEach(m => m.removedNodes.forEach(n => { if (n.nodeType === 1) n.querySelectorAll?.('.card').forEach(c => { onScreen.delete(c); depthIO && depthIO.unobserve(c); }); }));
++      watch(main);
++    }).observe(main, { childList: true, subtree: true });
++  }
+   const lastShift = new WeakMap(), colIdx = new WeakMap();
+   const FACTOR = [0, -.55, -1.1];
+   function depth() {
+diff --git a/cinema/cinema.css b/cinema/cinema.css
+index b0a0933..7a2e012 100644
+--- a/cinema/cinema.css
++++ b/cinema/cinema.css
+@@ -18,7 +18,7 @@ html{background:var(--bg)}body{background:transparent}
+ 
+ /* ---------- intro: light sweeps through the M ---------- */
+ .intro .intro-logo{position:relative}
+-.intro .intro-logo:after{content:"";position:absolute;inset:0;-webkit-mask:url(/m-logo-v2.svg) center/contain no-repeat;mask:url(/m-logo-v2.svg) center/contain no-repeat;
++.intro .intro-logo:after{content:"";position:absolute;inset:0;-webkit-mask:url(../m-logo-v2.svg) center/contain no-repeat;mask:url(../m-logo-v2.svg) center/contain no-repeat;
+   background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.95) 50%,transparent 58%);background-size:300% 100%;background-position:130% 0;
+   animation:sweep 1s cubic-bezier(.65,0,.35,1) 1.05s forwards}
+ @keyframes sweep{to{background-position:-30% 0}}
+diff --git a/cinema/main.js b/cinema/main.js
+index f350a72..2fd0210 100644
+--- a/cinema/main.js
++++ b/cinema/main.js
+@@ -2,6 +2,8 @@
+ import { state } from './state.js';
+ import { initChoreography } from './choreography.js';
+ import { initInteractions } from './interactions.js';
++import { initPortal } from './portal.js';
++import { initPreloader } from './preloader.js';
+ 
+ const root = document.documentElement;
+ window.__cinema = true;                         // tells the head failsafe that we booted
+@@ -9,8 +11,13 @@ const releaseCinema = () => root.classList.remove('cin');
+ let scene = null;
+ const invalidate = () => scene && scene.invalidate();
+ 
+-const { refresh } = initChoreography({ invalidate });
+-initInteractions({ invalidate, refresh });
++// Each feature is isolated: if one throws, the catalog and the others keep working.
++const safe = (fn, ...a) => { try { return fn(...a); } catch (e) { console.warn('[cinema]', e); } };
++const choreo = safe(initChoreography, { invalidate });
++safe(initInteractions, { invalidate, refresh: choreo ? choreo.refresh : () => {} });
++safe(initPreloader);
++safe(initPortal);
++if (!choreo) releaseCinema();
+ 
+ function boot() {
+   import('./scene.js').then(m => {
+@@ -21,4 +28,4 @@ function boot() {
+     });
+   }).catch(() => { root.classList.add('no-webgl'); releaseCinema(); });
+ }
+-'requestIdleCallback' in window ? requestIdleCallback(boot, { timeout: 400 }) : setTimeout(boot, 80);
+\ No newline at end of file
++'requestIdleCallback' in window ? requestIdleCallback(boot, { timeout: 400 }) : setTimeout(boot, 80);
+diff --git a/cinema/portal.css b/cinema/portal.css
+new file mode 100644
+index 0000000..cbf34b2
+--- /dev/null
++++ b/cinema/portal.css
+@@ -0,0 +1,53 @@
++/* MahiFlix "Channel Jump" portal + preloader counter. Loaded after cinema.css. */
++
++/* ---------- portal (hidden entirely unless cinema/portal.js booted) ---------- */
++.portal-wrap{display:none;position:relative;width:min(210px,21svh,52vw);margin:14px auto 0;text-align:left}
++.portal-on .portal-wrap{display:block}
++.portal-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;font-size:13px;color:#c9c9ce;letter-spacing:.02em;opacity:0}
++.portal-heading strong{font-size:15px;margin-left:4px;color:#fff;font-weight:700}
++.portal-in .portal-heading{animation:portal-caption .85s var(--ease,cubic-bezier(.22,1,.36,1)) both}
++@keyframes portal-caption{from{opacity:0;filter:blur(7px);transform:translateY(22px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
++
++/* The real pixels live on #portal-canvas. This button is the hit target, sized by layout. */
++.portal{position:relative;display:block;width:100%;aspect-ratio:320/350;padding:0;border:0;border-radius:28%/26%;background:transparent;cursor:pointer;color:#fff;font:inherit}
++.portal:focus-visible{outline:2px solid #fff;outline-offset:8px}
++.portal-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none;display:block}
++
++/* No 2D canvas? Show a plain styled card instead so the control still exists and works. */
++.no-portal-gl .portal{background:linear-gradient(140deg,#4a0d12,#0d0d0d);border:1px solid rgba(255,255,255,.2);display:grid;place-items:center}
++.no-portal-gl .portal:after{content:attr(data-label);font:400 clamp(28px,5vw,40px)/1 "Bebas Neue",Impact,sans-serif;letter-spacing:.04em}
++.no-portal-gl .portal-heading{opacity:1;animation:none}
++
++/* make room: with the portal in the hero, size type by viewport height too so it stays above the fold */
++.portal-on .hero{padding:84px 4% 36px}
++.portal-on .hero h1{font-size:clamp(48px,min(10.5vw,15svh),138px);margin-bottom:14px}
++.portal-on .hero p{max-width:640px;margin-bottom:6px}
++.portal-on .hero-in .ig-link{margin:0 auto 2px}
++.portal-on .cue{display:none}   /* the portal is the primary "go browse" affordance */
++
++/* while travelling, the hero text steps aside (the nav stays, like a title sequence) */
++.hero-in>*{transition:opacity .45s var(--ease,ease),filter .45s var(--ease,ease)}
++.portal-travel .hero-in>:not(.portal-wrap),.portal-travel .cue,.portal-travel .portal-heading{opacity:0!important;filter:blur(8px)}
++.portal-travel .mode-wrap{opacity:0;transition:opacity .3s ease}
++
++/* ---------- preloader counter (inside the existing .intro overlay) ---------- */
++.intro-count{position:absolute;left:50%;bottom:clamp(54px,8vh,84px);display:flex;align-items:flex-end;gap:4px;transform:translateX(-50%);line-height:1;color:#fff;font-family:Inter,system-ui,sans-serif;opacity:0;animation:count-in .6s ease .25s forwards;pointer-events:none}
++.intro-count span{font-size:clamp(44px,8vw,64px);font-weight:200;letter-spacing:-.02em;font-variant-numeric:tabular-nums;min-width:1.2em;text-align:right}
++.intro-count i{font-style:normal;font-size:20px;padding-bottom:6px;opacity:.8}
++.intro-count.is-leaving{animation:count-out .75s var(--ease,cubic-bezier(.22,1,.36,1)) both}
++@keyframes count-in{to{opacity:1}}
++@keyframes count-out{from{opacity:1}to{opacity:0;filter:blur(7px);transform:translate(-50%,-34px)}}
++
++/* the logo that glides from screen centre into the nav slot */
++.fly-logo{position:fixed;z-index:101;background:url(../m-logo-v2.svg) center/contain no-repeat;transform-origin:0 0;pointer-events:none;will-change:transform,opacity}
++
++@media(max-width:640px){
++  .portal-wrap{width:min(190px,22svh,56vw);margin-top:14px}
++  .portal-on .hero h1{font-size:clamp(46px,min(16vw,11svh),84px)}
++  .portal-heading{font-size:12px}.portal-heading strong{font-size:14px}
++}
++@media(prefers-reduced-motion:reduce){
++  .portal-in .portal-heading{animation:none;opacity:1}
++  .hero-in>*{transition:none}
++  .intro-count{animation:none;opacity:1}
++}
+diff --git a/cinema/portal.js b/cinema/portal.js
+new file mode 100644
+index 0000000..e235864
+--- /dev/null
++++ b/cinema/portal.js
+@@ -0,0 +1,277 @@
++// "Channel Jump": a tilting canvas window in the hero shows a live reel of the OTHER collection.
++// Activating it expands the window to fill the screen, switches Websites <-> Apps through the
++// page's own mode buttons, then irises open onto the catalog.
++//
++// Technique adapted from the Planet Jumping reference: a screen-locked media layer seen through a
++// clipped, fake-perspective rounded rectangle. Here the "media" is generated from the catalog
++// itself (local logo marks, initials tiles), so there is no remote video to fail or wait for.
++import { state, clamp } from './state.js';
++
++const root = document.documentElement;
++const ease = t => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);   // easeInOutCubic
++const lerp = (a, b, t) => a + (b - a) * t;
++const LABEL = { sites: 'Websites', apps: 'Apps' };
++const FOCAL = 850;
++
++export function initPortal() {
++  const btn = document.getElementById('portal');
++  const canvas = document.getElementById('portal-canvas');
++  const wrap = document.querySelector('.portal-wrap');
++  const nameEl = document.getElementById('portalName');
++  const countEl = document.getElementById('portalCount');
++  if (!btn || !canvas || !wrap) return;
++
++  const modeNow = () => (document.querySelector('.mode.active') || {}).dataset?.mode || 'sites';
++  const otherMode = () => (modeNow() === 'sites' ? 'apps' : 'sites');
++  const catalog = m => (window.MAHIFLIX_CATALOG && window.MAHIFLIX_CATALOG[m]) || [];
++
++  root.classList.add('portal-on');
++  const ctx = canvas.getContext('2d');
++  let canvasOk = !!ctx;
++  if (!canvasOk) root.classList.add('no-portal-gl');
++
++  // ---------------------------------------------------------------- state
++  let iw = innerWidth, ih = innerHeight;
++  let rotX = 0, rotY = 0, tX = 0, tY = 0, hover = 0, hovering = false;
++  let expansion = 0, iris = 0, maskScale = 0, busy = false, lockReel = false;
++  let visible = false, raf = 0, last = 0;
++  let reelMode = otherMode(), tiles = [], tileSize = 96;
++  const imgs = new Map();
++
++  // ---------------------------------------------------------------- reel content
++  const hue = n => { let h = 0; for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) % 360; return h; };
++  const initials = n => n.replace(/[^a-z0-9 ]/gi, '').split(/\s+/).map(x => x[0] || '').join('').slice(0, 2).toUpperCase();
++  function imageFor(src) {
++    if (!src) return null;
++    if (!imgs.has(src)) {
++      const im = new Image(); im.decoding = 'async';
++      im.onload = () => kick();
++      im.src = src; imgs.set(src, im);
++    }
++    return imgs.get(src);
++  }
++  function buildReel(mode) {
++    reelMode = mode;
++    const items = catalog(mode);
++    tiles = (items.length ? items : [{ name: 'MahiFlix', domain: '' }]).map(it => ({
++      name: it.name, h: hue(it.name), ini: initials(it.name),
++      img: imageFor((window.MAHIFLIX_LOGOS || {})[it.domain]),
++    }));
++    kick();
++  }
++  function syncLabels() {
++    const next = otherMode(), n = catalog(next).length;
++    if (nameEl) nameEl.textContent = LABEL[next];
++    if (countEl) countEl.textContent = '[' + String(n).padStart(2, '0') + ']';
++    btn.setAttribute('aria-label', 'Jump to ' + LABEL[next]);
++    btn.dataset.label = LABEL[next];
++    if (!lockReel && reelMode !== next) buildReel(next);
++  }
++
++  // ---------------------------------------------------------------- canvas plumbing
++  function resize() {
++    iw = innerWidth; ih = innerHeight;
++    if (!canvasOk) return;
++    const d = Math.min(devicePixelRatio || 1, 2);
++    canvas.width = Math.round(iw * d); canvas.height = Math.round(ih * d);
++    canvas.style.width = iw + 'px'; canvas.style.height = ih + 'px';
++    ctx.setTransform(d, 0, 0, d, 0, 0);
++    kick();
++  }
++  function sizeTiles() {
++    const w = btn.getBoundingClientRect().width || 200;
++    tileSize = clamp(w * .46, 64, 150);
++  }
++
++  // ---------------------------------------------------------------- reel drawing
++  function drawTile(t, x, y, s) {
++    const r = s * .2;
++    if (t.img && t.img.complete && t.img.naturalWidth) {
++      ctx.drawImage(t.img, x, y, s, s);
++      return;
++    }
++    const g = ctx.createLinearGradient(x, y, x + s, y + s);
++    g.addColorStop(0, `hsl(${t.h} 55% 34%)`); g.addColorStop(1, '#0d0d0d');
++    ctx.fillStyle = g;
++    ctx.beginPath();
++    ctx.roundRect ? ctx.roundRect(x, y, s, s, r) : ctx.rect(x, y, s, s);
++    ctx.fill();
++    ctx.fillStyle = 'rgba(255,255,255,.92)';
++    ctx.font = `400 ${s * .42}px "Bebas Neue", Impact, sans-serif`;
++    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
++    ctx.fillText(t.ini, x + s / 2, y + s / 2 + s * .03);
++  }
++  // `box` = screen-space bounds worth painting (cull everything else)
++  function drawReel(time, zoom, box) {
++    const s = tileSize, gap = Math.max(8, s * .1), pitch = s + gap;
++    const cols = Math.ceil(iw / pitch) + 2, rows = Math.ceil(ih / pitch) + 3, span = rows * pitch;
++    const cx = iw / 2, cy = ih / 2, n = tiles.length, still = state.reduced;
++    const x0 = (iw - (cols - 2) * pitch) / 2;
++    for (let c = 0; c < cols; c++) {
++      const speed = still ? 0 : (c % 2 ? 1 : -1) * (12 + (c * 7) % 19);
++      const off = c * pitch * 1.7 + time / 1000 * speed;
++      const x = x0 + (c - 1) * pitch, sx = cx + (x - cx) * zoom;
++      if (sx + s * zoom < box.l || sx > box.r) continue;
++      for (let r = 0; r < rows; r++) {
++        const y = ((((r * pitch + off) % span) + span) % span) - pitch, sy = cy + (y - cy) * zoom;
++        if (sy + s * zoom < box.t || sy > box.b) continue;
++        drawTile(tiles[(c * 3 + r) % n], x, y, s);
++      }
++    }
++  }
++  function drawShade() {
++    const g = ctx.createLinearGradient(0, ih * .52, 0, ih);
++    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.88)');
++    ctx.fillStyle = g; ctx.fillRect(0, ih * .52, iw, ih * .48);
++  }
++
++  // ---------------------------------------------------------------- fake-3D rounded rectangle
++  function outline(w, h, r) {
++    r = Math.min(r, w / 2, h / 2);
++    const pts = [], arcs = [
++      [w / 2 - r, -h / 2 + r, -Math.PI / 2, 0], [w / 2 - r, h / 2 - r, 0, Math.PI / 2],
++      [-w / 2 + r, h / 2 - r, Math.PI / 2, Math.PI], [-w / 2 + r, -h / 2 + r, Math.PI, Math.PI * 1.5]];
++    for (const [ax, ay, a0, a1] of arcs)
++      for (let i = 0; i <= 10; i++) { const a = a0 + (a1 - a0) * i / 10; pts.push([ax + Math.cos(a) * r, ay + Math.sin(a) * r]); }
++    return pts;
++  }
++  function project(pts, cx, cy, rx, ry) {
++    const ax = rx * Math.PI / 180, ay = ry * Math.PI / 180, ca = Math.cos(ay), cb = Math.cos(ax), sa = Math.sin(ay), sb = Math.sin(ax);
++    return pts.map(([x, y]) => {
++      const xx = x * ca, yy = y * cb, z = x * sa - y * sb, p = FOCAL / (FOCAL + z);
++      return [cx + xx * p, cy + yy * p];
++    });
++  }
++
++  function draw(now) {
++    ctx.clearRect(0, 0, iw, ih);
++    if (maskScale <= 0 && !expansion && !iris) return;
++    const rect = btn.getBoundingClientRect();
++    if (!busy && (rect.bottom < 0 || rect.top > ih)) return;
++    const rcx = rect.left + rect.width / 2, rcy = rect.top + rect.height / 2;
++    let e = expansion, scale = e ? 1 : maskScale * (1 + hover * .04);
++    if (iris > 0) { e = 1; scale = 1 - iris; }
++    const cx = lerp(rcx, iw / 2, e), cy = lerp(rcy, ih / 2, e);
++    const w = lerp(rect.width, iw, e) * scale, h = lerp(rect.height, ih, e) * scale;
++    const baseR = Math.min(rect.width, rect.height) * .28;
++    const r = iris > 0 ? Math.min(w, h) / 2 * iris : baseR * (1 - e) * scale;
++    if (w <= 1 || h <= 1) return;
++
++    const heroAlpha = busy ? 1 : clamp(1 - state.hero * 1.2) * (1 - .84 * state.dim);
++    if (heroAlpha <= 0.01) return;
++    const pts = project(outline(w, h, r), cx, cy, rotX * (1 - e), rotY * (1 - e));
++    const zoom = 1 + e * .55 + (iris > 0 ? iris * .1 : 0);
++    const box = e || iris ? { l: -50, t: -50, r: iw + 50, b: ih + 50 }
++      : { l: cx - w / 2 - 40, r: cx + w / 2 + 40, t: cy - h / 2 - 40, b: cy + h / 2 + 40 };
++
++    ctx.save();
++    ctx.globalAlpha = heroAlpha;
++    ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath();
++    ctx.clip();
++    ctx.fillStyle = '#050505'; ctx.fillRect(0, 0, iw, ih);
++    ctx.save();
++    ctx.translate(iw / 2, ih / 2); ctx.scale(zoom, zoom); ctx.translate(-iw / 2, -ih / 2);
++    drawReel(now, zoom, box);
++    ctx.restore();
++    // vignette + a warm top glint, so the window reads as glass over a screen
++    const v = ctx.createRadialGradient(cx, cy, Math.min(w, h) * .2, cx, cy, Math.max(w, h) * .75);
++    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.62)');
++    ctx.fillStyle = v; ctx.fillRect(0, 0, iw, ih);
++    if (e > 0 || iris > 0) drawShade();
++    ctx.restore();
++    // hairline edge on the projected shape
++    ctx.save();
++    ctx.globalAlpha = heroAlpha * (1 - e) * .5; ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,.55)';
++    ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.stroke();
++    ctx.restore();
++  }
++
++  // ---------------------------------------------------------------- loop (runs only when needed)
++  const needRun = () => !document.hidden && (busy || (visible && !state.reduced));
++  function frame(now) {
++    raf = 0;
++    const dt = Math.min(40, now - (last || now)); last = now;
++    const k = Math.min(1, dt * .009);
++    rotX += (tX - rotX) * k; rotY += (tY - rotY) * k;
++    hover += ((hovering ? 1 : 0) - hover) * Math.min(1, dt * .012);
++    if (canvasOk) draw(now);
++    if (needRun()) raf = requestAnimationFrame(frame); else last = 0;
++  }
++  function kick() { if (!raf && canvasOk) raf = requestAnimationFrame(frame); }
++  function animate(set, ms) {
++    return new Promise(res => {
++      const t0 = performance.now();
++      const step = now => {
++        const t = clamp((now - t0) / ms); set(ease(t)); kick();
++        t < 1 ? requestAnimationFrame(step) : res();
++      };
++      requestAnimationFrame(step);
++    });
++  }
++  const revealMask = () => {
++    if (state.reduced || !canvasOk) { maskScale = 1; root.classList.add('portal-in'); kick(); return Promise.resolve(); }
++    maskScale = 0; root.classList.remove('portal-in'); void root.offsetWidth; root.classList.add('portal-in');
++    return animate(v => { maskScale = v; }, 1050);
++  };
++
++  // ---------------------------------------------------------------- travel
++  function commit(mode, byKeyboard) {
++    const b = document.querySelector('.mode[data-mode="' + mode + '"]');
++    if (b && !b.classList.contains('active')) b.click();
++    const hero = document.getElementById('top');
++    scrollTo({ top: Math.max(0, (hero ? hero.offsetHeight : 0) - 72), behavior: 'instant' });
++    if (byKeyboard) { const a = document.querySelector('.mode.active'); a && a.focus({ preventScroll: true }); }
++  }
++  async function travel(byKeyboard) {
++    if (busy) return;
++    const target = otherMode();
++    if (state.reduced || !canvasOk) { commit(target, byKeyboard); syncLabels(); return; }
++    busy = true; lockReel = true; if (reelMode !== target) buildReel(target);
++    canvas.style.pointerEvents = 'auto';               // block clicks reaching hidden cards mid-transition
++    tX = tY = 0; root.classList.add('portal-travel');
++    try {
++      await animate(v => { expansion = v; }, 1100);
++      commit(target, byKeyboard);
++      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));   // let the new catalog paint
++      await animate(v => { iris = v; }, 800);
++    } catch (_) {
++      try { commit(target, byKeyboard); } catch (__) { /* nothing more to do */ }
++    } finally {
++      expansion = 0; iris = 0; maskScale = 0;
++      if (canvasOk) ctx.clearRect(0, 0, iw, ih);       // never leave a stale frame behind if the next paint is late
++      canvas.style.pointerEvents = ''; root.classList.remove('portal-travel');
++      busy = false; lockReel = false; syncLabels();
++      revealMask();
++    }
++  }
++
++  // ---------------------------------------------------------------- wiring
++  btn.addEventListener('click', e => travel(e.detail === 0));
++  btn.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') { hovering = true; kick(); } });
++  btn.addEventListener('pointerleave', () => { hovering = false; kick(); });
++  btn.addEventListener('focus', () => { hovering = true; kick(); });
++  btn.addEventListener('blur', () => { hovering = false; kick(); });
++  addEventListener('pointermove', e => {
++    if (busy || state.reduced || e.pointerType !== 'mouse' || !visible) return;
++    tY = (e.clientX / iw - .5) * 37.4; tX = (e.clientY / ih - .5) * -33; kick();
++  }, { passive: true });
++  document.addEventListener('pointerleave', () => { tX = tY = 0; kick(); });
++  addEventListener('scroll', kick, { passive: true });
++  addEventListener('resize', () => { resize(); sizeTiles(); }, { passive: true });
++  document.addEventListener('visibilitychange', kick);
++  if ('IntersectionObserver' in window)
++    new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; kick(); }, { rootMargin: '40px' }).observe(btn);
++  else visible = true;
++
++  // keep the label/reel honest when the user switches collection by any other route
++  document.querySelectorAll('.mode').forEach(m => m.addEventListener('click', () => setTimeout(syncLabels, 0)));
++  const sw = document.querySelector('.mode-switch');
++  if (sw && 'MutationObserver' in window)
++    new MutationObserver(() => { if (!busy) syncLabels(); }).observe(sw, { attributes: true, attributeFilter: ['class'], subtree: true });
++
++  // ---------------------------------------------------------------- boot
++  resize(); sizeTiles(); buildReel(otherMode()); syncLabels();
++  const start = () => setTimeout(revealMask, 500);
++  root.classList.contains('intro-on') ? document.addEventListener('mahiflix:intro-end', start, { once: true }) : start();
++  return { travel };
++}
+diff --git a/cinema/preloader.js b/cinema/preloader.js
+new file mode 100644
+index 0000000..dd030cf
+--- /dev/null
++++ b/cinema/preloader.js
+@@ -0,0 +1,66 @@
++// Preloader: the existing intro overlay gains a REAL progress counter. Progress is the share of
++// things that actually finished loading (fonts, window load, local logo marks the portal paints,
++// the WebGL scene). It never waits on remote media: every task has a timeout and the inline
++// failsafe in index.html ends the intro regardless. When done, the logo glides into the nav slot.
++const root = document.documentElement;
++
++export function initPreloader() {
++  const intro = document.getElementById('intro');
++  if (!intro || !root.classList.contains('intro-on')) return;
++  const valEl = document.getElementById('introVal'), countEl = document.getElementById('introCount');
++  if (!valEl || !countEl) return;
++
++  const t0 = performance.now(), MIN = 1700, MAX = 4000;
++  const parts = { fonts: 0, load: 0, logos: 0, scene: 0 };
++  const W = { fonts: .2, load: .3, logos: .3, scene: .2 };
++  const settle = k => { parts[k] = 1; };
++
++  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => settle('fonts'), () => settle('fonts'));
++  document.readyState === 'complete' ? settle('load') : addEventListener('load', () => settle('load'), { once: true });
++
++  const logos = [...new Set(Object.values(window.MAHIFLIX_LOGOS || {}))];
++  if (!logos.length) settle('logos');
++  else {
++    let n = 0; const one = () => { if (++n >= logos.length) settle('logos'); else parts.logos = n / logos.length; };
++    logos.forEach(src => { const im = new Image(); im.onload = im.onerror = one; im.src = src; });
++  }
++  const sceneDone = () => root.classList.contains('gl-ready') || root.classList.contains('no-webgl');
++
++  let shown = 0, finished = false;
++  function fly() {
++    const logo = intro.querySelector('.intro-logo'), dest = document.querySelector('nav .logo img');
++    if (!logo || !dest || !logo.animate) return;
++    const a = logo.getBoundingClientRect(), b = dest.getBoundingClientRect();
++    if (!a.width || !b.width) return;
++    const el = document.createElement('div');
++    el.className = 'fly-logo';
++    Object.assign(el.style, { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px' });
++    document.body.appendChild(el);
++    logo.style.visibility = 'hidden';
++    const end = `translate(${b.left - a.left}px,${b.top - a.top}px) scale(${b.width / a.width},${b.height / a.height})`;
++    const anim = el.animate(
++      [{ transform: 'none', opacity: 1 }, { opacity: 1, offset: .82 }, { transform: end, opacity: 0 }],
++      { duration: 1100, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'forwards' });
++    const clean = () => el.remove();
++    anim.finished.then(clean, clean);
++  }
++  function finish() {
++    if (finished) return; finished = true;
++    valEl.textContent = '100';
++    countEl.classList.add('is-leaving');
++    try { fly(); } catch (_) { /* decorative */ }
++    setTimeout(() => window.__introEnd && window.__introEnd(), 140);
++  }
++  (function tick(now) {
++    if (finished || !root.classList.contains('intro-on')) return;
++    if (sceneDone()) settle('scene');
++    const elapsed = now - t0;
++    let real = 0; for (const k in parts) real += parts[k] * W[k];
++    if (elapsed > MAX) real = 1;
++    const goal = Math.min(real, elapsed / MIN);
++    shown += (goal - shown) * .14;
++    valEl.textContent = String(Math.min(99, Math.round(shown * 100)));
++    if (shown > .985 && real >= 1) return finish();
++    requestAnimationFrame(tick);
++  })(t0);
++}
+diff --git a/cinema/scene.js b/cinema/scene.js
+index 2e1e703..f2d725f 100644
+--- a/cinema/scene.js
++++ b/cinema/scene.js
+@@ -1,6 +1,6 @@
+ // MahiFlix cinema scene: a projector beam, dust lit inside it, and drifting film ribbons.
+ // Original work. No external assets; everything is generated in shaders.
+-import * as THREE from '/vendor/three.module.min.js';
++import * as THREE from '../vendor/three.module.min.js';
+ import { clamp, smooth } from './state.js';
+ 
+ // ---- shared GLSL: one definition of the beam so background, dust and film all agree ----
+diff --git a/index.html b/index.html
+index ab9915a..c28f17a 100644
+--- a/index.html
++++ b/index.html
+@@ -28,6 +28,10 @@
+ <script>
+ try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches&&!sessionStorage.getItem("nf-intro"))document.documentElement.classList.add("intro-on")}catch(e){}
+ </script>
++<script>
++document.documentElement.classList.add("cin");setTimeout(function(){if(!window.__cinema)document.documentElement.classList.remove("cin")},1500);
++</script>
++<script src="./logo-manifest.js"></script>
+ <style>
+ :root{--bg:#141414;--panel:#181818;--card:#242424;--text:#fff;--dim:#a7a7a7;--muted:#707070;--red:#e50914;--green:#46d369;--yellow:#f5c518;--border:#343434}
+ *{box-sizing:border-box}html{background:var(--bg);scroll-behavior:smooth;scroll-padding-top:80px}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@@ -126,9 +130,15 @@ footer .links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin
+ .install-app{border:1px solid #e50914;background:#e50914;color:#fff;border-radius:8px;padding:10px 13px;font-size:11px;font-weight:800}
+ .install-app:hover{background:#b80710}
+ .install-app[hidden]{display:none!important}
+-</style></head>
++</style>
++<link rel="stylesheet" href="./cinema/cinema.css">
++<link rel="stylesheet" href="./cinema/portal.css">
++</head>
+ <body>
+-<div class="intro" id="intro" aria-hidden="true"><div class="intro-logo" aria-label="MahiFlix"></div></div>
++<div class="cinema-fallback" aria-hidden="true"></div>
++<canvas id="cinema" aria-hidden="true"></canvas>
++<canvas id="portal-canvas" class="portal-canvas" aria-hidden="true"></canvas>
++<div class="intro" id="intro" aria-hidden="true"><div class="intro-logo" aria-label="MahiFlix"></div><div class="intro-count" id="introCount"><span id="introVal">0</span><i>%</i></div></div>
+ 
+ <nav id="nav">
+   <a class="logo" href="#top" aria-label="MahiFlix"><img src="./m-logo-v2.svg" alt="MahiFlix"></a>
+@@ -142,9 +152,15 @@ footer .links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin
+ 
+ <header class="hero" id="top">
+   <div class="hero-in">
+-    <p id="heroDesc">A curated collection of the best movie &amp; web-series websites and apps.</p>
++    <h1><span class="hero-line sm">Unlocking the Universe of</span><span class="hero-line big">Movies &amp; Web Series</span></h1>
++    <p id="heroDesc" class="hero-line">A curated collection of the best movie &amp; web-series websites and apps.</p>
+     <a class="ig-link" href="https://www.instagram.com/mahimahfud/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><radialGradient id="igBgHero" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="6" fill="url(#igBgHero)"/><rect x="6.3" y="6.3" width="11.4" height="11.4" rx="3.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="2.7" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="16.35" cy="7.65" r="1.05" fill="#fff"/></svg></a>
++    <section class="portal-wrap" aria-label="Jump to the other collection">
++      <div class="portal-heading"><span>Next:</span><span><span id="portalCount">[00]</span> <strong id="portalName">Apps</strong></span></div>
++      <button class="portal" id="portal" type="button" aria-label="Jump to Apps"></button>
++    </section>
+   </div>
++  <a class="cue" href="#browse" aria-label="Browse websites and apps"><span>Browse</span><i></i></a>
+ </header>
+ 
+ <div class="mode-wrap" id="browse">
+@@ -200,6 +216,15 @@ footer .links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin
+   </section>
+ </div>
+ 
++<section class="finale" id="finale" aria-label="MahiFlix">
++  <div class="finale-in">
++    <img class="finale-logo" src="./m-logo-v2.svg" alt="" width="128" height="128">
++    <h2>MahiFlix</h2>
++    <p>A curated collection of the best movie &amp; web-series websites and apps.</p>
++    <div class="btns"><a class="btn play" href="#top">Back to top</a><a class="btn info" href="https://www.instagram.com/mahimahfud/" target="_blank" rel="noopener noreferrer">Instagram</a></div>
++  </div>
++</section>
++
+ <footer>
+   <div class="links"><a href="https://www.instagram.com/mahimahfud/" target="_blank" rel="noopener noreferrer">Contact Mahi</a><a href="#privacy" data-legal-toggle>Privacy</a><a href="#disclaimer" data-legal-toggle>Disclaimer</a></div>
+   <div>MahiFlix © <span id="yr"></span> · Directory updated October 18, 2026</div>
+@@ -229,18 +254,19 @@ const S=[
+ ];
+ 
+ const A=[
+-{name:"FilmTV",url:"/download/app/filmtv",domain:"filmtvapp.com",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"FilmTV Android app with direct APK download.",logoSources:["https://www.filmtvapp.com/favicon.ico","https://www.filmtvapp.com/favicon.png","https://www.filmtvapp.com/icon-192.png"]},
+-{name:"Nuvix",url:"/download/app/nuvix",domain:"nuvixapp.in",ads:0,pop:82,smooth:88,langs:86,new:true,desc:"Nuvix Android app with direct APK download.",logoSources:["https://www.nuvixapp.in/favicon.ico","https://www.nuvixapp.in/favicon.png","https://www.nuvixapp.in/icon-192.png"]},
+-{name:"Vega",url:"/download/app/vega",domain:"github.com",ads:0,pop:88,smooth:91,langs:92,new:true,desc:"Open-source Android media streaming app with ad-free streaming and downloads.",logoSources:["https://raw.githubusercontent.com/vega-org/vega-app/main/assets/adaptive_icon.png"]},
+-{name:"NetMirror",url:"/download/app/netmirror",domain:"netmirror.gg",ads:2,pop:90,smooth:66,langs:84,new:true,desc:"Android streaming app with movie and series sources.",logoSources:["https://netmirror.gg/favicon.ico","https://netmirror.gg/favicon.png","https://netmiirror.app/wp-content/uploads/2026/10/cropped-NetMirror-1-192x192.webp","https://netmiirror.app/wp-content/uploads/2026/10/cropped-NetMirror-1-180x180.webp"]},
+-{name:"CineHD",url:"/download/app/cinehd",domain:"cinehd.dev",ads:2,pop:86,smooth:60,langs:78,new:false,desc:"Android movie and series streaming app.",logoSources:["https://cinehd.vc/icon-192x192.png","https://cinehd.dev/images/favicon.ico"]},
+-{name:"Moviboxapk",url:"/download/app/moviboxapk",domain:"moviboxapk.com",ads:2,pop:77,smooth:63,langs:76,new:false,desc:"Android movie and series streaming app.",logoSources:["https://moviboxapk.com/wp-content/uploads/2026/06/cropped-cropped-moviebox-icon-192x192.webp","https://moviboxapk.com/wp-content/uploads/2026/06/cropped-cropped-moviebox-icon-180x180.webp","https://moviboxapk.com/favicon.ico","https://moviboxapk.com/favicon.png"]},
+-{name:"PvrPlay",url:"/download/app/pvrplay",domain:"pvrplay.online",ads:2,pop:75,smooth:64,langs:74,new:false,desc:"Android app for movies and web series.",logoSources:["https://pvrplay.online/favicon.ico","https://pvrplay.online/favicon.png"]},
+-{name:"Hdghartv",url:"/download/app/hdghartv",domain:"hdghartv.com.pk",ads:0,pop:72,smooth:86,langs:70,new:false,desc:"Free Android movies and TV app; its site advertises an ad-free experience.",logoSources:["https://hdghartv.com.pk/wp-content/uploads/2026/08/hdghartv-logo.png","https://hdghartv.com.pk/logo.png","https://hdghartv.com.pk/favicon.png","https://hdghartv.com.pk/favicon.ico"]},
+-{name:"Anivortex",url:"/download/app/anivortex",domain:"anivortex.in",ads:1,pop:70,smooth:72,langs:80,new:false,desc:"Anime-focused streaming app.",logoSources:["https://anivortex.in/images/anivortex_logo.webp","https://anivortex.in/images/anivortex_logo_transparent.webp","https://anivortex.in/favicon.ico","https://anivortex.in/favicon.png"]},
+-{name:"Nxsha",url:"/download/app/nxsha",domain:"nxsha.app",ads:1,pop:74,smooth:84,langs:90,new:false,desc:"Movies, TV, anime and K-drama discovery app.",logoSources:["https://nxsha.app/favicon.ico","https://nxsha.app/favicon.png","https://nxsha.app/icon-192.png"]}
++{name:"FilmTV",url:"https://www.filmtvapp.com/",domain:"filmtvapp.com",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"FilmTV Android app with direct APK download.",logoSources:["https://www.filmtvapp.com/favicon.ico","https://www.filmtvapp.com/favicon.png","https://www.filmtvapp.com/icon-192.png"]},
++{name:"Nuvix",url:"https://www.nuvixapp.in/",domain:"nuvixapp.in",ads:0,pop:82,smooth:88,langs:86,new:true,desc:"Nuvix Android app with direct APK download.",logoSources:["https://www.nuvixapp.in/favicon.ico","https://www.nuvixapp.in/favicon.png","https://www.nuvixapp.in/icon-192.png"]},
++{name:"Vega",url:"https://github.com/vega-org/vega-app/releases/latest",domain:"github.com",ads:0,pop:88,smooth:91,langs:92,new:true,desc:"Open-source Android media streaming app with ad-free streaming and downloads.",logoSources:["https://raw.githubusercontent.com/vega-org/vega-app/main/assets/adaptive_icon.png"]},
++{name:"NetMirror",url:"https://netmirror.gg/10/en-us",domain:"netmirror.gg",ads:2,pop:90,smooth:66,langs:84,new:true,desc:"Android streaming app with movie and series sources.",logoSources:["https://netmirror.gg/favicon.ico","https://netmirror.gg/favicon.png","https://netmiirror.app/wp-content/uploads/2026/10/cropped-NetMirror-1-192x192.webp","https://netmiirror.app/wp-content/uploads/2026/10/cropped-NetMirror-1-180x180.webp"]},
++{name:"CineHD",url:"https://cinehd.dev/",domain:"cinehd.dev",ads:2,pop:86,smooth:60,langs:78,new:false,desc:"Android movie and series streaming app.",logoSources:["https://cinehd.vc/icon-192x192.png","https://cinehd.dev/images/favicon.ico"]},
++{name:"Moviboxapk",url:"https://moviboxapk.com/",domain:"moviboxapk.com",ads:2,pop:77,smooth:63,langs:76,new:false,desc:"Android movie and series streaming app.",logoSources:["https://moviboxapk.com/wp-content/uploads/2026/06/cropped-cropped-moviebox-icon-192x192.webp","https://moviboxapk.com/wp-content/uploads/2026/06/cropped-cropped-moviebox-icon-180x180.webp","https://moviboxapk.com/favicon.ico","https://moviboxapk.com/favicon.png"]},
++{name:"PvrPlay",url:"https://pvrplay.online/",domain:"pvrplay.online",ads:2,pop:75,smooth:64,langs:74,new:false,desc:"Android app for movies and web series.",logoSources:["https://pvrplay.online/favicon.ico","https://pvrplay.online/favicon.png"]},
++{name:"Hdghartv",url:"https://hdghartv.com.pk/apk/",domain:"hdghartv.com.pk",ads:0,pop:72,smooth:86,langs:70,new:false,desc:"Free Android movies and TV app; its site advertises an ad-free experience.",logoSources:["https://hdghartv.com.pk/wp-content/uploads/2026/08/hdghartv-logo.png","https://hdghartv.com.pk/logo.png","https://hdghartv.com.pk/favicon.png","https://hdghartv.com.pk/favicon.ico"]},
++{name:"Anivortex",url:"https://anivortex.in/",domain:"anivortex.in",ads:1,pop:70,smooth:72,langs:80,new:false,desc:"Anime-focused streaming app.",logoSources:["https://anivortex.in/images/anivortex_logo.webp","https://anivortex.in/images/anivortex_logo_transparent.webp","https://anivortex.in/favicon.ico","https://anivortex.in/favicon.png"]},
++{name:"Nxsha",url:"https://github.com/dev-alessiorizzo/nxsha-apk/releases/latest",domain:"nxsha.app",ads:1,pop:74,smooth:84,langs:90,new:false,desc:"Movies, TV, anime and K-drama discovery app.",logoSources:["https://nxsha.app/favicon.ico","https://nxsha.app/favicon.png","https://nxsha.app/icon-192.png"]}
+ ];
+ 
++window.MAHIFLIX_CATALOG={get sites(){return S},get apps(){return A}};
+ const adLabel=["No / minimal ads","Some ads","More / heavier ads"];
+ const adClass=["a0","a1","a2"];
+ 
+@@ -249,8 +275,10 @@ const initials=n=>n.replace(/[^a-z0-9 ]/gi,"").split(/\s+/).map(x=>x[0]||"").joi
+ const hue=n=>{let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h};
+ 
+ function logoHTML(it){
++  const local=(window.MAHIFLIX_LOGOS||{})[it.domain];
+   const sources=[
+     ...(it.logoSources||[]),
++    ...(local?[local]:[]),
+     "https://"+it.domain+"/favicon.ico",
+     "https://"+it.domain+"/favicon.png",
+     "https://"+it.domain+"/favicon.svg",
+@@ -391,8 +419,11 @@ document.getElementById("yr").textContent=new Date().getFullYear();
+   var d=document.documentElement;
+   if(!d.classList.contains("intro-on"))return;
+   var done=false;
+-  function end(){if(done)return;done=true;try{sessionStorage.setItem("nf-intro","1")}catch(e){}d.classList.add("intro-leave");setTimeout(function(){d.classList.remove("intro-on","intro-leave")},650)}
+-  document.getElementById("intro").addEventListener("click",end);setTimeout(end,2750)
++  function end(){if(done)return;done=true;try{sessionStorage.setItem("nf-intro","1")}catch(e){}d.classList.add("intro-leave");document.dispatchEvent(new Event("mahiflix:intro-end"));setTimeout(function(){d.classList.remove("intro-on","intro-leave")},650)}
++  window.__introEnd=end;
++  document.getElementById("intro").addEventListener("click",end);
++  /* cinema/preloader.js normally ends the intro when real loading finishes; this is the hard failsafe */
++  setTimeout(end,4500)
+ })();
+ </script>
+ <script>
+@@ -614,5 +645,6 @@ document.getElementById("yr").textContent=new Date().getFullYear();
+   }
+ })();
+ </script>
++<script type="module" src="./cinema/main.js"></script>
+ </body>
+ </html>
+\ No newline at end of file
+diff --git a/logo-manifest.js b/logo-manifest.js
+index a83c858..ba71f32 100644
+--- a/logo-manifest.js
++++ b/logo-manifest.js
+@@ -1,23 +1,23 @@
+ window.MAHIFLIX_LOGOS = {
+-  "freekz.to": "/assets/logos/freekz.svg",
+-  "bingr.one": "/assets/logos/bingr.svg",
+-  "cinegram.tv": "/assets/logos/cinegram.svg",
+-  "m4uhd.gold": "/assets/logos/m4uhd.svg",
+-  "cinehd.vc": "/assets/logos/cinehd.svg",
+-  "pvrplay.online": "/assets/logos/pvrplay.svg",
+-  "nightflix.vg": "/assets/logos/nightflix.svg",
+-  "watchott.org": "/assets/logos/watchott.svg",
+-  "1tube.org": "/assets/logos/1tube.svg",
+-  "cinejoy.to": "/assets/logos/cinejoy.svg",
+-  "7movies.ac": "/assets/logos/7movies.svg",
+-  "7reels.cc": "/assets/logos/7reel.svg",
+-  "filmtvapp.com": "/assets/logos/filmtv.svg",
+-  "nuvixapp.in": "/assets/logos/nuvix.svg",
+-  "github.com": "/assets/logos/vega.svg",
+-  "netmirror.gg": "/assets/logos/netmirror.svg",
+-  "cinehd.dev": "/assets/logos/cinehd.svg",
+-  "moviboxapk.com": "/assets/logos/moviboxapk.svg",
+-  "hdghartv.com.pk": "/assets/logos/hdghartv.svg",
+-  "anivortex.in": "/assets/logos/anivortex.svg",
+-  "nxsha.app": "/assets/logos/nxsha.svg"
++  "freekz.to": "assets/logos/freekz.svg",
++  "bingr.one": "assets/logos/bingr.svg",
++  "cinegram.tv": "assets/logos/cinegram.svg",
++  "m4uhd.gold": "assets/logos/m4uhd.svg",
++  "cinehd.vc": "assets/logos/cinehd.svg",
++  "pvrplay.online": "assets/logos/pvrplay.svg",
++  "nightflix.vg": "assets/logos/nightflix.svg",
++  "watchott.org": "assets/logos/watchott.svg",
++  "1tube.org": "assets/logos/1tube.svg",
++  "cinejoy.to": "assets/logos/cinejoy.svg",
++  "7movies.ac": "assets/logos/7movies.svg",
++  "7reels.cc": "assets/logos/7reel.svg",
++  "filmtvapp.com": "assets/logos/filmtv.svg",
++  "nuvixapp.in": "assets/logos/nuvix.svg",
++  "github.com": "assets/logos/vega.svg",
++  "netmirror.gg": "assets/logos/netmirror.svg",
++  "cinehd.dev": "assets/logos/cinehd.svg",
++  "moviboxapk.com": "assets/logos/moviboxapk.svg",
++  "hdghartv.com.pk": "assets/logos/hdghartv.svg",
++  "anivortex.in": "assets/logos/anivortex.svg",
++  "nxsha.app": "assets/logos/nxsha.svg"
+ };
+diff --git a/sw.js b/sw.js
+index e104453..035a496 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,13 +1,43 @@
+-const CACHE_NAME = "mahiflix-shell-v1";
++const CACHE_NAME = "mahiflix-shell-v2";
++
++// Everything the page needs to render offline, including the cinematic layer and local logo marks.
++const SHELL_PATHS = [
++  "./", "./index.html", "./m-logo-v2.svg", "./manifest.webmanifest", "./link-status.json",
++  "./logo-manifest.js",
++  "./cinema/cinema.css",
++  "./cinema/portal.css",
++  "./cinema/main.js",
++  "./cinema/state.js",
++  "./cinema/choreography.js",
++  "./cinema/interactions.js",
++  "./cinema/portal.js",
++  "./cinema/preloader.js",
++  "./cinema/scene.js",
++  "./vendor/three.module.min.js",
++  "./assets/logos/1tube.svg",
++  "./assets/logos/7movies.svg",
++  "./assets/logos/7reel.svg",
++  "./assets/logos/anivortex.svg",
++  "./assets/logos/bingr.svg",
++  "./assets/logos/cinegram.svg",
++  "./assets/logos/cinehd.svg",
++  "./assets/logos/cinejoy.svg",
++  "./assets/logos/filmtv.svg",
++  "./assets/logos/freekz.svg",
++  "./assets/logos/hdghartv.svg",
++  "./assets/logos/m4uhd.svg",
++  "./assets/logos/moviboxapk.svg",
++  "./assets/logos/netmirror.svg",
++  "./assets/logos/nightflix.svg",
++  "./assets/logos/nuvix.svg",
++  "./assets/logos/nxsha.svg",
++  "./assets/logos/pvrplay.svg",
++  "./assets/logos/vega.svg",
++  "./assets/logos/watchott.svg"
++];
+ 
+ function shellUrls() {
+-  return [
+-    new URL("./", self.registration.scope).href,
+-    new URL("./index.html", self.registration.scope).href,
+-    new URL("./m-logo-v2.svg", self.registration.scope).href,
+-    new URL("./manifest.webmanifest", self.registration.scope).href,
+-    new URL("./link-status.json", self.registration.scope).href
+-  ];
++  return SHELL_PATHS.map(path => new URL(path, self.registration.scope).href);
+ }
+ 
+ self.addEventListener("install", event => {
+-- 
+2.43.0
+
