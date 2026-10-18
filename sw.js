@@ -1,11 +1,13 @@
-const CACHE_NAME = "streamcloud-shell-v6";
+const CACHE_NAME = "streamcloud-shell-v7";
 
-// Everything the page needs to render offline, including the cinematic layer and local logo marks.
+// Keep the existing offline shell and cache the two category/motion modules as part of it.
 const SHELL_PATHS = [
   "./", "./index.html", "./s-logo-v1.svg", "./manifest.webmanifest", "./link-status.json",
   "./logo-manifest.js",
   "./cinema/cinema.css",
   "./cinema/portal.css",
+  "./cinema/premium.css",
+  "./cinema/categories.js",
   "./cinema/main.js",
   "./cinema/state.js",
   "./cinema/choreography.js",
@@ -58,8 +60,9 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(key => key.startsWith("mahiflix-shell-") && key !== CACHE_NAME)
-      .map(key => caches.delete(key)));
+    await Promise.all(keys.filter(key =>
+      (key.startsWith("streamcloud-shell-") || key.startsWith("mahiflix-shell-")) && key !== CACHE_NAME
+    ).map(key => caches.delete(key)));
     await self.clients.claim();
   })());
 });
