@@ -1,4 +1,4 @@
-const CACHE_NAME = "streamcloud-shell-v5";
+const CACHE_NAME = "streamcloud-shell-v6";
 
 // Everything the page needs to render offline, including the cinematic layer and local logo marks.
 const SHELL_PATHS = [
