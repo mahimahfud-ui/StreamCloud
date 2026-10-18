@@ -39,7 +39,7 @@
 @keyframes count-out{from{opacity:1}to{opacity:0;filter:blur(7px);transform:translate(-50%,-34px)}}
 
 /* the logo that glides from screen centre into the nav slot */
-.fly-logo{position:fixed;z-index:101;background:url(../m-logo-v2.svg) center/contain no-repeat;transform-origin:0 0;pointer-events:none;will-change:transform,opacity}
+.fly-logo{position:fixed;z-index:101;background:url(../s-logo-v1.svg) center/contain no-repeat;transform-origin:0 0;pointer-events:none;will-change:transform,opacity}
 
 @media(max-width:640px){
   .portal-wrap{width:min(158px,18svh,46vw);margin-top:8px}
