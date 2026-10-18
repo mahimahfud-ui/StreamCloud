@@ -55,7 +55,11 @@ export function initPortal() {
     const items = catalog(mode);
     tiles = (items.length ? items : [{ name: 'MahiFlix', domain: '' }]).map(it => ({
       name: it.name, h: hue(it.name), ini: initials(it.name),
-      img: imageFor((window.MAHIFLIX_LOGOS || {})[it.domain]),
+      img: imageFor(
+      it.appType === 'music'
+        ? ((it.logoSources || [])[0] || '')
+        : ((window.MAHIFLIX_LOGOS || {})[it.domain] || ((it.logoSources || [])[0] || ''))
+    ),
     }));
     kick();
   }
