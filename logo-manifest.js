@@ -22,4 +22,18 @@ window.MAHIFLIX_LOGOS = {
   "nxsha.app": "assets/logos/nxsha.svg"
 };
 
-window.STREAMCLOUD_ITEM_LOGOS = {};
+window.STREAMCLOUD_ITEM_LOGOS = {
+  "site:cineyz.com": "assets/logos/site-bcine.webp",
+  "site:7reels.cc": "assets/logos/site-7reel.webp",
+  "site:plex.tv": "assets/logos/site-plex.webp",
+  "site:m4uhd.gold": "assets/logos/site-m4uhd.webp",
+  "site:cinehd.vc": "assets/logos/site-cinehd.webp",
+  "site:nightflix.vg": "assets/logos/site-nightflix-vg.webp",
+  "site:pvrplay.online": "assets/logos/site-pvrplay.webp",
+  "site:nightflix.to": "assets/logos/site-nightflix-to.webp",
+  "site:bingr.one": "assets/logos/site-bingr.webp",
+  "site:cinejoy.to": "assets/logos/site-cinejoy.webp",
+  "site:cinegram.tv": "assets/logos/site-cinegram.webp",
+  "site:watchott.org": "assets/logos/site-watchott.webp",
+  "site:1tube.org": "assets/logos/site-1tube.webp"
+};

@@ -10,7 +10,8 @@ import { state, clamp } from './state.js';
 const root = document.documentElement;
 const ease = t => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);   // easeInOutCubic
 const lerp = (a, b, t) => a + (b - a) * t;
-const LABEL = { sites: 'Websites', apps: 'Apps' };
+const LABEL = { sites: 'Websites', movie: 'Movie Apps', music: 'Music Apps' };
+const NEXT = { sites: 'movie', movie: 'music', music: 'sites' };
 const FOCAL = 850;
 
 export function initPortal() {
@@ -21,9 +22,21 @@ export function initPortal() {
   const countEl = document.getElementById('portalCount');
   if (!btn || !canvas || !wrap) return;
 
-  const modeNow = () => (document.querySelector('.mode.active') || {}).dataset?.mode || 'sites';
-  const otherMode = () => (modeNow() === 'sites' ? 'apps' : 'sites');
-  const catalog = m => (window.MAHIFLIX_CATALOG && window.MAHIFLIX_CATALOG[m]) || [];
+  const modeNow = () => {
+    if (window.STREAMCLOUD_ACTIVE_CATEGORY) return window.STREAMCLOUD_ACTIVE_CATEGORY;
+    const raw = (document.querySelector('.mode.active') || {}).dataset?.mode || 'sites';
+    return raw === 'apps' ? 'movie' : raw === 'music' ? 'music' : 'sites';
+  };
+  const otherMode = () => NEXT[modeNow()] || 'movie';
+  const catalog = category => {
+    const available = window.STREAMCLOUD_CATALOGS || {};
+    if (Array.isArray(available[category])) return available[category];
+    const legacy = window.MAHIFLIX_CATALOG || {};
+    const items = category === 'sites' ? (legacy.sites || []) : (legacy.apps || []);
+    return Array.from(items).filter(item => category === 'sites'
+      ? !item.appType
+      : category === 'music' ? item.appType === 'music' : item.appType === 'movie');
+  };
 
   root.classList.add('portal-on');
   const ctx = canvas.getContext('2d');
@@ -56,6 +69,9 @@ export function initPortal() {
     tiles = (items.length ? items : [{ name: 'MahiFlix', domain: '' }]).map(it => ({
       name: it.name, h: hue(it.name), ini: initials(it.name),
       img: imageFor(
+        ((window.STREAMCLOUD_ITEM_LOGOS || {})[
+          (it.appType || 'site') + ':' + String(it.domain || '').toLowerCase()
+        ]) ||
         ((window.STREAMCLOUD_ITEM_LOGOS || {})[
           (it.appType || 'site') + ':' + it.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
         ]) ||
@@ -221,7 +237,8 @@ export function initPortal() {
   };
 
   // ---------------------------------------------------------------- travel
-  function commit(mode, byKeyboard) {
+  function commit(category, byKeyboard) {
+    const mode = category === 'movie' ? 'apps' : category;
     const b = document.querySelector('.mode[data-mode="' + mode + '"]');
     if (b && !b.classList.contains('active')) b.click();
     const hero = document.getElementById('top');
