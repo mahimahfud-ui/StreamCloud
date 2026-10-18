@@ -9,7 +9,12 @@
 <meta property="og:title" content="MahiFlix — Movie &amp; Series Directory">
 <meta property="og:description" content="Hand-picked by Mahi. Compare streaming directories and apps using transparent editorial estimates.">
 <meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://raw.githubusercontent.com/mahimahfud-ui/StreamCloud/main/og-image.svg">
+<meta property="og:image:type" content="image/svg+xml">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/mahimahfud-ui/StreamCloud/main/og-image.svg">
 <meta name="theme-color" content="#141414">
 <link rel="icon" type="image/svg+xml" href="./m-logo-v2.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,6 +84,7 @@ footer{text-align:center;color:#666;padding:30px 4% 44px;font-size:12px}footer .
 .rating-stars{display:flex;gap:5px}
 .rating-stars button{border:0;background:transparent;color:#626262;font-size:27px;line-height:1;padding:2px}
 .rating-stars button.selected{color:#f5c518}
+.status-flag{position:absolute;top:34px;left:8px;z-index:9;background:#7f1d1d;color:#fff;padding:3px 6px;border-radius:3px;font-size:9px;font-weight:900;box-shadow:0 2px 9px #0008}
 .rating-message{display:block;margin-top:7px;color:#898989;font-size:10px}
 .modal-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
 .modal-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #555;border-radius:7px;background:#303030;color:#fff;padding:11px 16px;font-size:12px;font-weight:800}
@@ -173,7 +179,7 @@ footer .links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin
     <div class="detail-metrics">
       <div class="metric"><span>Directory score</span><strong id="detailScore"></strong></div>
       <div class="metric"><span>Ad-level listing</span><strong id="detailAds"></strong></div>
-      <div class="metric"><span>Link status</span><strong>Not live-verified</strong></div>
+      <div class="metric"><span>Link status</span><strong id="detailLinkStatus">Not checked yet</strong></div>
     </div>
     <p class="review-caveat" id="detailUpdated"></p>
     <div class="rating-widget"><label>Your personal rating · saved on this device only</label>
@@ -386,7 +392,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   const search=document.getElementById("q");
   const adFilter=document.getElementById("adFilter");
   const sortSelect=document.getElementById("sortSelect");
-  let mode="sites",filter="all",sort="score",current=null,currentList="sites",lastFocus=null;
+  let mode="sites",filter="all",sort="score",current=null,currentList="sites",lastFocus=null,statusEntries={};
   const allData=()=>mode==="apps"?A:S;
   const slug=name=>name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   const ratingKey=item=>"mahiflix-rating:"+slug(item.name);
@@ -409,7 +415,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     document.getElementById("detailDescription").textContent=item.desc||"Description not provided.";
     document.getElementById("detailScore").textContent=Math.round(qualityScore(item))+"/100";
     document.getElementById("detailAds").textContent=item.ads===0?"Listed as no/minimal ads":item.ads===1?"Listed as less ads":"Listed as more ads";
-    document.getElementById("detailUpdated").textContent="Directory entry updated October 18, 2026. Availability and link health have not been automatically verified. Scores and ad levels are editorial estimates, not live or independent tests.";
+    updateDetailStatus();
     document.getElementById("detailTags").innerHTML=[
       item.new?"New entry":"",
       currentList==="apps"?"Android app":"Website",
@@ -460,6 +466,37 @@ document.getElementById("yr").textContent=new Date().getFullYear();
       const fav=c.querySelector(".fav"),item=typed.find(x=>x.name.toLowerCase()===c.dataset.name);
       if(fav&&item&&isFav(item)){fav.dataset.on="1";fav.setAttribute("aria-pressed","true");fav.innerHTML="<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M5 12l5 5 9-10'/></svg>"}
     });
+    paintStatusBadges();
+  }
+  function statusFor(item,type){
+    return statusEntries[(type==="apps"?"app":"site")+":"+slug(item.name)]||null;
+  }
+  function updateDetailStatus(){
+    const state=current?statusFor(current,currentList):null;
+    const el=document.getElementById("detailLinkStatus");
+    if(!state){
+      el.textContent="Not checked yet";
+      document.getElementById("detailUpdated").textContent="No automated result is available yet. Catalogue scores and ad levels are editorial estimates, not live or independent tests.";
+      return;
+    }
+    if(state.status==="up")el.textContent="Responding";
+    else if(state.status==="down")el.textContent="Down · HTTP "+state.http_status;
+    else el.textContent="Unable to verify";
+    let when="date not available";
+    try{when=new Date(state.checked_at).toLocaleString()}catch(e){}
+    document.getElementById("detailUpdated").textContent="Last checked "+when+" · "+state.reason+". 403, rate limits and temporary network failures are treated as unverified rather than down.";
+  }
+  function paintStatusBadges(){
+    const target=document.getElementById(mode==="apps"?"appsView":"sitesView");
+    target.querySelectorAll(".card").forEach(card=>{
+      const item=allData().find(x=>x.name.toLowerCase()===card.dataset.name);
+      const state=item?statusFor(item,mode):null;
+      let badge=card.querySelector(".status-flag");
+      if(state&&state.status==="down"){
+        if(!badge){badge=document.createElement("span");badge.className="status-flag";badge.textContent="DOWN";card.appendChild(badge)}
+      }else if(badge)badge.remove();
+    });
+    if(current)updateDetailStatus();
   }
   document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{
     mode=b.dataset.mode;filter="all";adFilter.value="all";search.value="";render();
@@ -467,6 +504,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   document.querySelectorAll(".filter-chip").forEach(b=>b.addEventListener("click",()=>{
     filter=b.dataset.filter;
     if(filter==="download"){mode="apps";filter="all"}
+    else if(filter==="anime"&&!S.some(item=>/anime/i.test(item.name+" "+item.desc)))mode="apps";
     render();
   }));
   search.addEventListener("input",render);adFilter.addEventListener("change",render);
@@ -520,6 +558,10 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     }catch(e){}
   });
   render();
+  fetch("./link-status.json",{cache:"no-store"}).then(response=>{if(!response.ok)throw new Error("Status file unavailable");return response.json()}).then(payload=>{
+    statusEntries=payload.entries||{};
+    paintStatusBadges();
+  }).catch(()=>{});
   const initial=(location.hash||"").slice(1).toLowerCase();
   if(initial){
     const item=S.concat(A).find(x=>slug(x.name)===initial);
