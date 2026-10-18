@@ -1,6 +1,6 @@
 # Claude Guide — MahiFlix / StreamCloud
 
-This is the public GitHub repository for MahiFlix, a static movie and series directory hosted from the repository root.
+This is the public GitHub repository for MahiFlix, a static directory of movie and web-series websites, streaming apps, and music apps hosted from the repository root.
 
 - Repository: https://github.com/mahimahfud-ui/StreamCloud
 - Default branch: `main`
@@ -38,7 +38,7 @@ Replace `PATH` with the real path; preserve case. Prefer small, targeted file re
   - `preloader.js` — real-progress counter inside the existing `#intro` overlay; logo glides into the nav slot. `index.html` keeps a 4.5 s hard failsafe.
 - `assets/logos/` — locally stored SVG marks for catalog entries.
 - `logo-manifest.js` — mapping of site domains to local logo assets.
-- `m-logo-v2.svg`, `m-logo.svg` — MahiFlix brand marks.
+- `s-logo-v1.svg` — primary cinematic S lettermark used across the site.
 - `manifest.webmanifest`, `sw.js` — installable web-app manifest and offline shell.
 - `link-status.json` — output consumed by the UI for the most recent scheduled external-link checks.
 - `scripts/check_links.py` — conservative external-link health checker.
