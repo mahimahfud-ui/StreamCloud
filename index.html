@@ -13,9 +13,13 @@
 <meta property="og:image:type" content="image/svg+xml">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="MahiFlix — Movie and Series Directory, hand-picked by Mahi">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/mahimahfud-ui/StreamCloud/main/og-image.svg">
 <meta name="theme-color" content="#141414">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MahiFlix">
 <link rel="icon" type="image/svg+xml" href="./m-logo-v2.svg">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -578,12 +582,22 @@ document.getElementById("yr").textContent=new Date().getFullYear();
 (function(){
   var installButton=document.getElementById("installApp");
   var installPrompt=null;
+  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+  if(isIOS&&!navigator.standalone){
+    installButton.hidden=false;
+    installButton.textContent="How to Install";
+    installButton.dataset.iosInstall="true";
+  }
   window.addEventListener("beforeinstallprompt",function(event){
     event.preventDefault();
     installPrompt=event;
     installButton.hidden=false;
   });
   installButton.addEventListener("click",async function(){
+    if(installButton.dataset.iosInstall==="true"){
+      window.alert("To install MahiFlix on iPhone: open this site in Safari, tap Share, then choose Add to Home Screen.");
+      return;
+    }
     if(!installPrompt)return;
     try{
       await installPrompt.prompt();
