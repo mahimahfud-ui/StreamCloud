@@ -1,10 +1,10 @@
 /* MahiFlix "Channel Jump" portal + preloader counter. Loaded after cinema.css. */
 
 /* ---------- portal (hidden entirely unless cinema/portal.js booted) ---------- */
-.portal-wrap{display:none;position:relative;width:min(210px,21svh,52vw);margin:14px auto 0;text-align:left}
+.portal-wrap{display:none;position:relative;width:min(190px,19svh,48vw);margin:10px auto 0;text-align:center}
 .portal-on .portal-wrap{display:block}
-.portal-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;font-size:13px;color:#c9c9ce;letter-spacing:.02em;opacity:0}
-.portal-heading strong{font-size:15px;margin-left:4px;color:#fff;font-weight:700}
+.portal-heading{display:flex;justify-content:center;align-items:center;gap:0;margin-bottom:7px;font-size:13px;color:#c9c9ce;letter-spacing:.02em;text-align:center;opacity:0}
+.portal-heading strong{font-size:16px;margin-left:0;color:#fff;font-weight:700}
 .portal-in .portal-heading{animation:portal-caption .85s var(--ease,cubic-bezier(.22,1,.36,1)) both}
 @keyframes portal-caption{from{opacity:0;filter:blur(7px);transform:translateY(22px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
 
@@ -42,7 +42,7 @@
 .fly-logo{position:fixed;z-index:101;background:url(../m-logo-v2.svg) center/contain no-repeat;transform-origin:0 0;pointer-events:none;will-change:transform,opacity}
 
 @media(max-width:640px){
-  .portal-wrap{width:min(190px,22svh,56vw);margin-top:14px}
+  .portal-wrap{width:min(170px,20svh,50vw);margin-top:10px}
   .portal-on .hero h1{font-size:clamp(46px,min(16vw,11svh),84px)}
   .portal-heading{font-size:12px}.portal-heading strong{font-size:14px}
 }
