@@ -1,8 +1,8 @@
-const CACHE_NAME = "mahiflix-shell-v2";
+const CACHE_NAME = "mahiflix-shell-v3";
 
 // Everything the page needs to render offline, including the cinematic layer and local logo marks.
 const SHELL_PATHS = [
-  "./", "./index.html", "./m-logo-v2.svg", "./manifest.webmanifest", "./link-status.json",
+  "./", "./index.html", "./s-logo-v1.svg", "./manifest.webmanifest", "./link-status.json",
   "./logo-manifest.js",
   "./cinema/cinema.css",
   "./cinema/portal.css",
