@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "MahiFlix — Movies, Series & Music",
-  "short_name": "MahiFlix",
+  "name": "StreamCloud — Movies, Series & Music",
+  "short_name": "StreamCloud",
   "description": "Curated movie and web-series websites, streaming apps, and music apps by Mahi.",
   "start_url": "./",
   "scope": "./",
