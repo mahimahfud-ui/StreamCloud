@@ -320,7 +320,8 @@ function logoHTML(it,preferLocal){
     ...(!it.appType&&local?[local]:[])
   ];
   const unique=Array.from(new Set(sources.filter(Boolean)));
-  return "<img loading='lazy' decoding='async' width='240' height='240' alt='"+clean(it.name)+" logo' referrerpolicy='no-referrer' src='"+unique[0]+"' data-logo-sources='"+clean(JSON.stringify(unique))+"' data-logo-index='0' onerror='nextLogo(this)'>";
+  const whiteMark=(it.name==="Bingr"||it.name==="Cinejoy");
+  return "<img class='"+(whiteMark?"white-mark":"")+"' loading='lazy' decoding='async' width='240' height='240' alt='"+clean(it.name)+" logo' referrerpolicy='no-referrer' src='"+unique[0]+"' data-logo-sources='"+clean(JSON.stringify(unique))+"' data-logo-index='0' onerror='nextLogo(this)'>";
 }
 function nextLogo(img){
   try{
