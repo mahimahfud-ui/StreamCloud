@@ -16,7 +16,7 @@ A curated movie and series directory by Mahi. This repository is public and the 
 | Path | Purpose |
 |---|---|
 | `index.html` | Main site, catalog UI, search, filters, sorting and listing detail dialog |
-| `cinema/` | Cinematic scene, state, interaction, and choreography modules |
+| `cinema/` | Cinematic scene, state, interaction and choreography modules, plus the hero portal (`portal.js`) and preloader (`preloader.js`) |
 | `assets/logos/` | Local SVG logos |
 | `logo-manifest.js` | Domain-to-logo mapping |
 | `manifest.webmanifest` | Installable web app metadata |

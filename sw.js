@@ -1,13 +1,43 @@
-const CACHE_NAME = "mahiflix-shell-v1";
+const CACHE_NAME = "mahiflix-shell-v2";
+
+// Everything the page needs to render offline, including the cinematic layer and local logo marks.
+const SHELL_PATHS = [
+  "./", "./index.html", "./m-logo-v2.svg", "./manifest.webmanifest", "./link-status.json",
+  "./logo-manifest.js",
+  "./cinema/cinema.css",
+  "./cinema/portal.css",
+  "./cinema/main.js",
+  "./cinema/state.js",
+  "./cinema/choreography.js",
+  "./cinema/interactions.js",
+  "./cinema/portal.js",
+  "./cinema/preloader.js",
+  "./cinema/scene.js",
+  "./vendor/three.module.min.js",
+  "./assets/logos/1tube.svg",
+  "./assets/logos/7movies.svg",
+  "./assets/logos/7reel.svg",
+  "./assets/logos/anivortex.svg",
+  "./assets/logos/bingr.svg",
+  "./assets/logos/cinegram.svg",
+  "./assets/logos/cinehd.svg",
+  "./assets/logos/cinejoy.svg",
+  "./assets/logos/filmtv.svg",
+  "./assets/logos/freekz.svg",
+  "./assets/logos/hdghartv.svg",
+  "./assets/logos/m4uhd.svg",
+  "./assets/logos/moviboxapk.svg",
+  "./assets/logos/netmirror.svg",
+  "./assets/logos/nightflix.svg",
+  "./assets/logos/nuvix.svg",
+  "./assets/logos/nxsha.svg",
+  "./assets/logos/pvrplay.svg",
+  "./assets/logos/vega.svg",
+  "./assets/logos/watchott.svg"
+];
 
 function shellUrls() {
-  return [
-    new URL("./", self.registration.scope).href,
-    new URL("./index.html", self.registration.scope).href,
-    new URL("./m-logo-v2.svg", self.registration.scope).href,
-    new URL("./manifest.webmanifest", self.registration.scope).href,
-    new URL("./link-status.json", self.registration.scope).href
-  ];
+  return SHELL_PATHS.map(path => new URL(path, self.registration.scope).href);
 }
 
 self.addEventListener("install", event => {

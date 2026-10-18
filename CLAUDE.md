@@ -34,6 +34,8 @@ Replace `PATH` with the real path; preserve case. Prefer small, targeted file re
   - `interactions.js`
   - `choreography.js`
   - `cinema.css`
+  - `portal.js` / `portal.css` — the hero "Channel Jump" portal: a tilting canvas window showing a reel of the *other* collection; activating it expands to full screen, switches Websites/Apps through the page's own `.mode` buttons, then irises open onto the catalog. Generated from the catalog + local logos only (no remote media). Reduced-motion users get an instant jump.
+  - `preloader.js` — real-progress counter inside the existing `#intro` overlay; logo glides into the nav slot. `index.html` keeps a 4.5 s hard failsafe.
 - `assets/logos/` — locally stored SVG marks for catalog entries.
 - `logo-manifest.js` — mapping of site domains to local logo assets.
 - `m-logo-v2.svg`, `m-logo.svg` — MahiFlix brand marks.
@@ -41,6 +43,7 @@ Replace `PATH` with the real path; preserve case. Prefer small, targeted file re
 - `link-status.json` — output consumed by the UI for the most recent scheduled external-link checks.
 - `scripts/check_links.py` — conservative external-link health checker.
 - `scripts/fetch-logos.mjs` — helper for fetching/refreshing logo assets.
+- App "Download" buttons link to each app's official page (or GitHub Releases). The old `/download/app/*` routes needed a server that no longer exists; do not reintroduce them.
 - `vendor/three.module.min.js` — bundled third-party library; avoid editing minified vendor code unless explicitly necessary.
 - `.github/workflows/deploy-pages.yml` — GitHub Pages deployment.
 - `.github/workflows/check-links.yml` — scheduled/manual link-check workflow.
@@ -51,7 +54,7 @@ Replace `PATH` with the real path; preserve case. Prefer small, targeted file re
 1. Inspect the relevant current files before making changes; work against the latest `main` contents.
 2. Preserve the existing dark cinematic visual identity, project-specific features, data and responsive behavior unless the user explicitly asks for a redesign.
 3. Make targeted changes. Do not replace the site with a new scaffold or delete unrelated assets.
-4. The repository is a static site with root-level GitHub Pages assets. Keep paths compatible with its deployment base.
+4. The repository is a static site served from a GitHub Pages **project URL** (`/StreamCloud/`). Never use root-absolute paths (`/vendor/…`, `/assets/…`); use relative paths, and note that CSS `url()` and JS `import` resolve relative to their own file.
 5. Do not invent ratings, live availability, test results, dates, or link-health statuses. The directory score and ad-level labels are editorial estimates unless real evidence says otherwise.
 6. Link-check results must treat temporary failures, rate limits and access restrictions as `unknown`, not automatically as a dead link.
 7. Keep third-party licenses. Do not edit `vendor/three.module.min.js` to make routine changes.

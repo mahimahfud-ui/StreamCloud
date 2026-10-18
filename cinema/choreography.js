@@ -8,22 +8,35 @@ export function initChoreography({ invalidate }) {
   let vh = innerHeight, queued = false;
 
   // ---- reveals: add `.in` once when something first enters the viewport ----
-  const reveal = els => {
-    if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
-    const io = new IntersectionObserver(entries => entries.forEach(en => {
-      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-    }), { rootMargin: '0px 0px -6% 0px', threshold: 0.05 });
-    els.forEach(e => io.observe(e));
-  };
-  reveal([...document.querySelectorAll('.row-head, .card, .finale-in > *')]);
+  // The catalog re-renders (mode switch, filters, search), so new nodes are picked up by a MutationObserver.
+  const hasIO = 'IntersectionObserver' in window;
+  const revealIO = hasIO ? new IntersectionObserver(entries => entries.forEach(en => {
+    if (en.isIntersecting) { en.target.classList.add('in'); revealIO.unobserve(en.target); }
+  }), { rootMargin: '0px 0px -6% 0px', threshold: 0.05 }) : null;
 
   // ---- per-column depth: cards drift slightly at different rates (desktop only) ----
   const onScreen = new Set();
-  const depthIO = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(en => {
+  const depthIO = hasIO ? new IntersectionObserver(es => es.forEach(en => {
     en.isIntersecting ? onScreen.add(en.target) : (onScreen.delete(en.target), en.target.style.translate = '');
     queue();                                  // recompute depth when the visible set changes
   }), { rootMargin: '10% 0px' }) : null;
-  document.querySelectorAll('.card').forEach(c => depthIO && depthIO.observe(c));
+
+  const seen = new WeakSet();
+  function watch(scope) {
+    scope.querySelectorAll('.row-head, .card, .finale-in > *').forEach(el => {
+      if (seen.has(el)) return; seen.add(el);
+      revealIO ? revealIO.observe(el) : el.classList.add('in');
+      if (depthIO && el.classList.contains('card')) depthIO.observe(el);
+    });
+  }
+  watch(document);
+  const main = document.querySelector('main');
+  if (main && 'MutationObserver' in window) {
+    new MutationObserver(muts => {
+      muts.forEach(m => m.removedNodes.forEach(n => { if (n.nodeType === 1) n.querySelectorAll?.('.card').forEach(c => { onScreen.delete(c); depthIO && depthIO.unobserve(c); }); }));
+      watch(main);
+    }).observe(main, { childList: true, subtree: true });
+  }
   const lastShift = new WeakMap(), colIdx = new WeakMap();
   const FACTOR = [0, -.55, -1.1];
   function depth() {
