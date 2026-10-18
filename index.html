@@ -55,6 +55,12 @@ footer{text-align:center;color:#666;padding:30px 4% 44px;font-size:12px}footer .
 @media(min-width:761px){.card.live{transform-origin:center center}.card.live:hover,.card.live:focus-within{transform:translate3d(0,-10px,0) scale(1.065)}}
 @media(max-width:760px){nav{gap:12px;padding:12px 4%}nav .logo{font-size:31px}nav ul{display:none}.search.open input{width:145px}.hero{min-height:0;padding:78px 4% 6px}.hero h1{font-size:70px}.mode-wrap{margin:4px 4% 14px}.mode{padding:11px 15px}.arrow{display:none}.card.live:hover,.card.live:focus-within{transform:translateY(-4px) scale(1.035)}.card .more{display:none}.card .cap{display:block!important}.row h2{font-size:17px}.row-note{display:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Keep white brand marks visible on a dark tile. */
+.logo-card:has(img.white-mark) .logo-wrap,
+.logo-card:has(img.white-mark) .logo,
+.logo-card:has(img.white-mark) .poster { background:#050505 !important; }
+.logo-card img.white-mark { background:#050505; object-fit:contain; padding:18%; border-radius:14px; filter:brightness(0) invert(1); }
 </style>
 <style>
 .search{border-color:rgba(255,255,255,.22);background:rgba(0,0,0,.56);border-radius:8px;backdrop-filter:blur(8px)}
@@ -238,14 +244,14 @@ footer .links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin
 
 <script>
 const S=[
-{name:"bCine",url:"https://cineyz.com/",domain:"cineyz.com",ads:1,pop:82,smooth:84,langs:86,new:true,desc:"Movie and TV streaming website.",logoSources:["https://cineyz.com/favicon.ico","https://cineyz.com/favicon.png","https://cineyz.com/icon-192.png"]},
+{name:"Freekz",url:"https://freekz.to/",domain:"freekz.to",ads:1,pop:82,smooth:84,langs:86,new:true,desc:"Freekz movie and TV homepage.",logoSources:["https://a.favicon.im/freekz.to?larger=true","https://freekz.to/favicon.ico","https://freekz.to/favicon.png"]},
 {name:"7reel",url:"https://7reels.cc/",domain:"7reels.cc",ads:2,pop:74,smooth:62,langs:72,new:true,desc:"Free movie and series streaming directory.",logoSources:["https://7reels.cc/favicon-96x96.png","https://7reels.cc/favicon.ico","https://7reels.cc/favicon.png"]},
 {name:"Plex",url:"https://watch.plex.tv/",domain:"plex.tv",ads:1,pop:96,smooth:94,langs:88,new:false,desc:"Free ad-supported movies, shows and live TV with premium options.",logoSources:["https://watch.plex.tv/favicon.ico","https://plex.tv/favicon.ico","https://www.plex.tv/favicon.ico"]},
-{name:"M4UHD",url:"https://m4uhd.gold/",domain:"m4uhd.gold",ads:2,pop:94,smooth:60,langs:76,new:false,desc:"Large movie and TV streaming catalogue.",logoSources:["https://m4uhd.gold/logo.png","https://m4uhd.gold/favicon.png","https://m4uhd.gold/favicon.ico"]},
+{name:"M4UHD",url:"https://m4uhd.gold/",domain:"m4uhd.gold",ads:2,pop:94,smooth:60,langs:76,new:false,desc:"Large movie and TV streaming catalogue.",logoSources:["https://a.favicon.im/m4uhd.gold?larger=true","https://m4uhd.gold/favicon.png","https://m4uhd.gold/favicon.ico"]},
 {name:"CineHD",url:"https://cinehd.vc/",domain:"cinehd.vc",ads:2,pop:92,smooth:61,langs:78,new:false,desc:"Movies and series with a large free-streaming catalogue.",logoSources:["https://cinehd.vc/icon-192x192.png","https://cinehd.vc/favicon.ico","https://cinehd.dev/images/favicon.ico"]},
 {name:"NightFlix",url:"https://nightflix.vg/",domain:"nightflix.vg",ads:2,pop:86,smooth:62,langs:78,new:false,desc:"Free movies and TV streaming site.",logoSources:["https://nightflix.vg/favicon.ico","https://nightflix.vg/favicon.png","https://nightflix.vg/favicon-192x192.png"]},
 {name:"Pvrplay",url:"https://pvrplay.online/",domain:"pvrplay.online",ads:2,pop:82,smooth:65,langs:74,new:false,desc:"Free movies and web-series streaming platform.",logoSources:["https://pvrplay.online/favicon.ico","https://pvrplay.online/favicon.png"]},
-{name:"Nightflix",url:"https://nightflix.to/",domain:"nightflix.to",ads:2,pop:79,smooth:63,langs:78,new:false,desc:"Free movies and TV streaming platform.",logoSources:["https://nightflix.to/favicon.ico","https://nightflix.to/favicon.png","https://nightflix.to/favicon-192x192.png"]},
+,
 {name:"Bingr",url:"https://bingr.one/",domain:"bingr.one",ads:2,pop:73,smooth:56,langs:70,new:false,desc:"Movie and TV discovery/streaming platform.",logoSources:["https://bingr.one/favicon.svg","https://bingr.one/icons/favicon-96x96.png","https://bingr.one/favicon.ico"]},
 {name:"Cinejoy",url:"https://cinejoy.to/",domain:"cinejoy.to",ads:2,pop:68,smooth:52,langs:66,new:false,desc:"Movies, TV and short-drama streaming platform.",logoSources:["https://cinejoy.to/favicon.svg","https://cinejoy.to/brand/logomark-white.svg","https://cinejoy.to/favicon.png","https://cinejoy.to/favicon.ico"]},
 {name:"Cinegram",url:"https://cinegram.tv/",domain:"cinegram.tv",ads:1,pop:77,smooth:75,langs:76,new:false,desc:"Movies and series streaming platform.",logoSources:["https://cinegram.tv/sizes/fav-192.png","https://cinegram.tv/favicon.ico","https://cinegram.tv/favicon.png"]},
@@ -311,7 +317,8 @@ function logoHTML(it,preferLocal){
   ];
   const unique=Array.from(new Set(sources.filter(Boolean)));
   const json=JSON.stringify(unique);
-  return "<img loading='lazy' fetchpriority='auto' decoding='async' width='240' height='240' alt='"+clean(it.name)+" logo' src='"+unique[0]+"' data-logo-sources='"+clean(json)+"' data-logo-index='0' onerror='nextLogo(this)'>";
+  const whiteMark=(it.name==="Bingr"||it.name==="Cinejoy");
+  return "<img class='"+(whiteMark?"white-mark":"")+"' loading='lazy' fetchpriority='auto' decoding='async' width='240' height='240' alt='"+clean(it.name)+" logo' src='"+unique[0]+"' data-logo-sources='"+clean(json)+"' data-logo-index='0' onerror='nextLogo(this)'>";
 }
 function nextLogo(img){
   try{
@@ -349,7 +356,7 @@ function card(it,i,isTop){
   return "<div class='card logo-card live' tabindex='0' role='button' style='--c1:"+c1+";--c2:"+c2+"' data-name='"+clean(it.name.toLowerCase())+"'>"+
     num+logoHTML(it)+nw+ad+
     "<div class='cap'>"+clean(it.name)+(it.kind==="app"?" · App":"")+"</div>"+
-    "<div class='more'><div class='actions'><a class='round go' href='"+url+"' target='_blank' rel='noopener noreferrer' aria-label='Open "+clean(it.name)+"'>"+svgPlay()+"</a><button class='round fav' aria-label='Add to My List'>"+svgPlus()+"</button></div>"+
+    "<div class='more'><div class='actions'><a class='round go' href='"+url+"' aria-label='Open "+clean(it.name)+"'>"+svgPlay()+"</a><button class='round fav' aria-label='Add to My List'>"+svgPlus()+"</button></div>"+
     "<b>"+clean(it.name)+"</b><p>"+clean(it.desc)+"</p><p class='lang'>Mahi score · "+Math.round(qualityScore(it))+"/100</p></div></div>";
 }
 function appCard(it,i){
@@ -429,6 +436,11 @@ document.addEventListener("click",function(e){
     return;
   }
   var cardEl=e.target.closest(".card");
+  if(cardEl && document.querySelector(".view.active")===document.getElementById("sitesView") && !e.target.closest(".fav")){
+    var siteName=cardEl.dataset.name||"";
+    var siteItem=S.find(function(x){return x.name.toLowerCase()===siteName;});
+    if(siteItem&&siteItem.url){e.preventDefault();window.location.href=siteItem.url;return;}
+  }
   if(cardEl && !e.target.closest("a,button")){
     var name=cardEl.dataset.name||"";
     var current=(document.querySelector(".view.active")===document.getElementById("appsView"))?A:S;
