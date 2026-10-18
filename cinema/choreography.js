@@ -17,7 +17,12 @@ export function initChoreography({ invalidate }) {
   // ---- per-column depth: cards drift slightly at different rates (desktop only) ----
   const onScreen = new Set();
   const depthIO = hasIO ? new IntersectionObserver(es => es.forEach(en => {
-    en.isIntersecting ? onScreen.add(en.target) : (onScreen.delete(en.target), en.target.style.translate = '');
+    if (en.isIntersecting) onScreen.add(en.target);
+    else {
+      onScreen.delete(en.target);
+      en.target.style.translate = '';
+      lastShift.set(en.target, 0);
+    }
     queue();                                  // recompute depth when the visible set changes
   }), { rootMargin: '10% 0px' }) : null;
 
@@ -54,7 +59,12 @@ export function initChoreography({ invalidate }) {
       const norm = clamp(((r.top + r.height / 2 - prev) - vh / 2) / vh, -1, 1);
       reads.push([c, norm * FACTOR[idx] * 34]);
     });
-    reads.forEach(([c, y]) => { lastShift.set(c, y); c.style.translate = `0 ${y.toFixed(1)}px`; });
+    reads.forEach(([c, y]) => {
+      const prev = lastShift.get(c) || 0;
+      if (Math.abs(y - prev) < .75) return;  // avoid tiny per-frame style writes that cause scroll jank
+      lastShift.set(c, y);
+      c.style.translate = `0 ${y.toFixed(1)}px`;
+    });
   }
 
   // ---- main scroll step (rAF-throttled, passive) ----
