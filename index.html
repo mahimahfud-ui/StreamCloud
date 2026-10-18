@@ -172,7 +172,8 @@ footer .links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin
 <div class="mode-wrap" id="browse">
   <div class="mode-switch" role="tablist" aria-label="StreamCloud categories">
     <button class="mode active" data-mode="sites" role="tab" aria-selected="true">WEBSITES</button>
-    <button class="mode" data-mode="apps" role="tab" aria-selected="false">APPS</button>
+    <button class="mode" data-mode="apps" role="tab" aria-selected="false">MOVIE APPS</button>
+    <button class="mode" data-mode="music" role="tab" aria-selected="false">MUSIC APPS</button>
   </div>
 </div>
 
@@ -416,7 +417,7 @@ document.querySelectorAll(".mode").forEach(function(btn){
     btn.classList.add("active");btn.setAttribute("aria-selected","true");
     var mode=btn.dataset.mode;
     document.getElementById("sitesView").classList.toggle("active",mode==="sites");
-    document.getElementById("appsView").classList.toggle("active",mode==="apps");
+    document.getElementById("appsView").classList.toggle("active",mode!=="sites");
     document.getElementById("q").value="";
     document.getElementById("empty").style.display="none";
       });
@@ -493,7 +494,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   const adFilter=document.getElementById("adFilter");
   const sortSelect=document.getElementById("sortSelect");
   let mode="sites",filter="all",sort="score",current=null,currentList="sites",lastFocus=null,statusEntries={};
-  const allData=()=>mode==="apps"?A.concat(M):S;
+  const allData=()=>mode==="sites"?S:A.concat(M);
   const slug=name=>name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   const ratingKey=item=>"mahiflix-rating:"+slug(item.name);
   const favKey=item=>"mahiflix-favorite:"+slug(item.name);
@@ -547,20 +548,19 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     return true;
   }
   function render(){
-    const data=allData().filter(matches);
+    const data=allData().filter(matches).filter(item=>mode==="sites"?!item.appType:mode==="apps"?item.appType==="movie":item.appType==="music");
     if(sort==="popular")data.sort((a,b)=>b.pop-a.pop);
     else if(sort==="newest")data.sort((a,b)=>Number(b.new)-Number(a.new)||qualityScore(b)-qualityScore(a));
     else if(sort==="name")data.sort((a,b)=>a.name.localeCompare(b.name));
     else data.sort((a,b)=>qualityScore(b)-qualityScore(a));
-    const typed=data.map(item=>Object.assign({},item,{kind:mode==="apps"?"app":"site"}));
-    const target=document.getElementById(mode==="apps"?"appsView":"sitesView");
-    if(mode==="apps"){
-      const movies=typed.filter(item=>item.appType==="movie");
-      const music=typed.filter(item=>item.appType==="music");
-      target.innerHTML=(movies.length?rowHTML("Movie Apps",movies,{kind:"app",note:"Direct APK links · Scores are estimates"}):"")+
-        (music.length?rowHTML("Music Apps",music,{kind:"app",note:"Direct app downloads"}):"");
-    }else{
+    const typed=data.map(item=>Object.assign({},item,{kind:mode==="sites"?"site":"app"}));
+    const target=document.getElementById(mode==="sites"?"sitesView":"appsView");
+    if(mode==="sites"){
       target.innerHTML=typed.length?rowHTML("Movie Websites",typed,{kind:"site",note:"Hand-picked by Mahi · Scores are estimates"}):"";
+    }else if(mode==="apps"){
+      target.innerHTML=typed.length?rowHTML("Movie Apps",typed,{kind:"app",note:"Direct APK links · Scores are estimates"}):"";
+    }else{
+      target.innerHTML=typed.length?rowHTML("Music Apps",typed,{kind:"app",note:"Direct app downloads"}):"";
     }
     document.getElementById("empty").style.display=typed.length?"none":"block";
     document.getElementById("empty").textContent=search.value?"No listings matched your search. Try another name or filter.":"No listings match these filters.";
@@ -576,7 +576,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     paintStatusBadges();
   }
   function statusFor(item,type){
-    return statusEntries[(type==="apps"?"app":"site")+":"+slug(item.name)]||null;
+    return statusEntries[(type==="sites"?"site":"app")+":"+slug(item.name)]||null;
   }
   function updateDetailStatus(){
     const state=current?statusFor(current,currentList):null;
@@ -594,7 +594,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     document.getElementById("detailUpdated").textContent="Last checked "+when+" · "+state.reason+". 403, rate limits and temporary network failures are treated as unverified rather than down.";
   }
   function paintStatusBadges(){
-    const target=document.getElementById(mode==="apps"?"appsView":"sitesView");
+    const target=document.getElementById(mode==="sites"?"sitesView":"appsView");
     target.querySelectorAll(".card").forEach(card=>{
       const item=allData().find(x=>x.name.toLowerCase()===card.dataset.name);
       const state=item?statusFor(item,mode):null;
@@ -672,7 +672,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   const initial=(location.hash||"").slice(1).toLowerCase();
   if(initial){
     const item=S.concat(A,M).find(x=>slug(x.name)===initial);
-    if(item){mode=(A.includes(item)||M.includes(item))?"apps":"sites";render();openDetail(item,mode)}
+    if(item){mode=M.includes(item)?"music":(A.includes(item)?"apps":"sites");render();openDetail(item,mode)}
   }
 })();
 </script>
