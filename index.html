@@ -141,6 +141,44 @@ footer .links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin
 </style>
 <link rel="stylesheet" href="./cinema/cinema.css">
 <link rel="stylesheet" href="./cinema/portal.css">
+
+<style id="homepage-preview-fit-fix">
+/* Make website homepage previews fill the complete logo tile edge-to-edge. */
+.card.logo-card{overflow:hidden}
+.card.logo-card img.homepage-preview{
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-width:100%!important;
+  min-height:100%!important;
+  max-width:none!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#111!important;
+  box-shadow:none!important;
+}
+.detail-logo img.homepage-preview{
+  display:block!important;width:100%!important;height:100%!important;
+  max-width:none!important;max-height:none!important;object-fit:cover!important;
+  object-position:center center!important;padding:0!important;margin:0!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+@media(max-width:760px){
+  .card.logo-card img.homepage-preview{
+    position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+    aspect-ratio:auto!important;max-height:none!important;object-fit:cover!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="cinema-fallback" aria-hidden="true"></div>
