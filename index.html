@@ -289,11 +289,15 @@ const initials=n=>n.replace(/[^a-z0-9 ]/gi,"").split(/\s+/).map(x=>x[0]||"").joi
 const hue=n=>{let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h};
 
 function logoHTML(it,preferLocal){
+  const slug=String(it.name||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+  const key=(it.appType||"site")+":"+slug;
+  const localItem=(window.STREAMCLOUD_ITEM_LOGOS||{})[key];
   let local=(window.MAHIFLIX_LOGOS||{})[it.domain];
   if(it.appType==="music"&&it.domain==="github.com")local="";
   const sources=[
-    ...(preferLocal&&local?[local]:[]),
+    ...(localItem?[localItem]:[]),
     ...(it.logoSources||[]),
+    ...(preferLocal&&local?[local]:[]),
     ...(!preferLocal&&local?[local]:[]),
     "https://"+it.domain+"/favicon.ico",
     "https://"+it.domain+"/favicon.png",
@@ -303,7 +307,7 @@ function logoHTML(it,preferLocal){
   ];
   const unique=Array.from(new Set(sources.filter(Boolean)));
   const json=JSON.stringify(unique);
-  return "<img loading='lazy' fetchpriority='auto' decoding='async' alt='"+clean(it.name)+" logo' src='"+unique[0]+"' data-logo-sources='"+clean(json)+"' data-logo-index='0' onerror='nextLogo(this)'>";
+  return "<img loading='eager' fetchpriority='auto' decoding='async' alt='"+clean(it.name)+" logo' src='"+unique[0]+"' data-logo-sources='"+clean(json)+"' data-logo-index='0' onerror='nextLogo(this)'>";
 }
 function nextLogo(img){
   try{
