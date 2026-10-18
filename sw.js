@@ -1,4 +1,4 @@
-const CACHE_NAME = "mahiflix-shell-v3";
+const CACHE_NAME = "streamcloud-shell-v4";
 
 // Everything the page needs to render offline, including the cinematic layer and local logo marks.
 const SHELL_PATHS = [
@@ -83,7 +83,7 @@ self.addEventListener("fetch", event => {
         const cached = await caches.match(request) ||
           await caches.match(new URL("./", self.registration.scope).href) ||
           await caches.match(new URL("./index.html", self.registration.scope).href);
-        return cached || new Response("MahiFlix is offline. Open the site once while connected to cache the directory.", {
+        return cached || new Response("StreamCloud is offline. Open the site once while connected to cache the directory.", {
           status: 503,
           headers: { "Content-Type": "text/plain; charset=utf-8" }
         });
