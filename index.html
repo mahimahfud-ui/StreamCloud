@@ -519,13 +519,13 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     updateDetailStatus();
     document.getElementById("detailTags").innerHTML=[
       item.new?"New entry":"",
-      currentList==="apps"?"Android app":"Website",
+      currentList!=="sites"?"Android app":"Website",
       /anime/i.test(item.name+" "+item.desc)?"Anime":""
     ].filter(Boolean).map(t=>"<span class='detail-tag'>"+clean(t)+"</span>").join("");
     document.getElementById("detailLogo").innerHTML=logoHTML(item);
     const visit=document.getElementById("detailVisit");visit.href=item.url;
-    visit.target=currentList==="apps"?"_self":"_blank";visit.rel="noopener noreferrer";
-    visit.textContent=currentList==="apps"?"Open App Page":"Visit Site";
+    visit.target=currentList!=="sites"?"_self":"_blank";visit.rel="noopener noreferrer";
+    visit.textContent=currentList!=="sites"?"Open App Page":"Visit Site";
     setRating(savedRating(item));updateFav();
     modal.classList.add("open");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
     document.querySelector(".detail-panel").focus();
@@ -565,7 +565,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     document.getElementById("empty").style.display=typed.length?"none":"block";
     document.getElementById("empty").textContent=search.value?"No listings matched your search. Try another name or filter.":"No listings match these filters.";
     document.getElementById("sitesView").classList.toggle("active",mode==="sites");
-    document.getElementById("appsView").classList.toggle("active",mode==="apps");
+    document.getElementById("appsView").classList.toggle("active",mode!=="sites");
     document.querySelectorAll(".mode").forEach(b=>{const on=b.dataset.mode===mode;b.classList.toggle("active",on);b.setAttribute("aria-selected",String(on))});
     document.querySelectorAll(".filter-chip").forEach(b=>{const on=b.dataset.filter===filter;b.classList.toggle("active",on);b.setAttribute("aria-pressed",String(on))});
     target.querySelectorAll(".card").forEach((c,i)=>{
