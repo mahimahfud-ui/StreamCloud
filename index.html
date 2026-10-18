@@ -17,6 +17,7 @@
 <meta name="twitter:image" content="https://raw.githubusercontent.com/mahimahfud-ui/StreamCloud/main/og-image.svg">
 <meta name="theme-color" content="#141414">
 <link rel="icon" type="image/svg+xml" href="./m-logo-v2.svg">
+<link rel="manifest" href="./manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -118,6 +119,9 @@ footer .links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin
  .metric{padding:9px 7px}.metric span{font-size:9px}.metric strong{font-size:11px}
  .legal-copy{grid-template-columns:1fr}
 }
+.install-app{border:1px solid #e50914;background:#e50914;color:#fff;border-radius:8px;padding:10px 13px;font-size:11px;font-weight:800}
+.install-app:hover{background:#b80710}
+.install-app[hidden]{display:none!important}
 </style></head>
 <body>
 <div class="intro" id="intro" aria-hidden="true"><div class="intro-logo" aria-label="MahiFlix"></div></div>
@@ -160,6 +164,7 @@ footer .links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin
     <label for="sortSelect">Sort by
       <select id="sortSelect"><option value="score">Mahi score</option><option value="popular">Popularity index</option><option value="newest">Newest first</option><option value="name">Name A–Z</option></select>
     </label>
+    <button id="installApp" class="install-app" type="button" hidden>Install MahiFlix</button>
   </div>
 </section>
 
@@ -566,6 +571,32 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   if(initial){
     const item=S.concat(A).find(x=>slug(x.name)===initial);
     if(item){mode=A.includes(item)?"apps":"sites";render();openDetail(item,mode)}
+  }
+})();
+</script>
+<script>
+(function(){
+  var installButton=document.getElementById("installApp");
+  var installPrompt=null;
+  window.addEventListener("beforeinstallprompt",function(event){
+    event.preventDefault();
+    installPrompt=event;
+    installButton.hidden=false;
+  });
+  installButton.addEventListener("click",async function(){
+    if(!installPrompt)return;
+    try{
+      await installPrompt.prompt();
+      await installPrompt.userChoice;
+    }catch(e){}
+    installPrompt=null;
+    installButton.hidden=true;
+  });
+  window.addEventListener("appinstalled",function(){installButton.hidden=true;installPrompt=null});
+  if("serviceWorker" in navigator && location.protocol!=="file:"){
+    window.addEventListener("load",function(){
+      navigator.serviceWorker.register("./sw.js").catch(function(){});
+    });
   }
 })();
 </script>
