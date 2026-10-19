@@ -346,24 +346,22 @@ function logoHTML(it,preferLocal){
   const local=(window.MAHIFLIX_LOGOS||{})[domain];
   /* Always try the site's own published logo first. Older cached/local assets
      were mismatched for several entries, so they must never override branding. */
+  const isWebsite=!it.appType;
+  const keepFreekz=isWebsite && String(it.name||"").toLowerCase()==="freekz";
   const sources=[
+    /* Cached official page logos are instant for websites. Freekz keeps its exact existing source order. */
+    ...(!it.appType&&localItem&&!keepFreekz?[localItem]:[]),
     ...(it.logoSources||[]),
     "https://"+domain+"/favicon.ico",
     "https://"+domain+"/favicon.png",
     "https://"+domain+"/favicon.svg",
     "https://www.google.com/s2/favicons?sz=256&domain="+encodeURIComponent(domain),
     "https://icons.duckduckgo.com/ip3/"+encodeURIComponent(domain)+".ico",
-    /* Local legacy artwork is only a final fallback for website cards.
-       Some old app SVGs are generic placeholders, not original brand logos. */
-    ...(!it.appType&&localItem?[localItem]:[]),
+    ...(!it.appType&&localItem&&keepFreekz?[localItem]:[]),
     ...(!it.appType&&local?[local]:[])
   ];
-  /* Website cards look better with a real homepage preview, like Freekz.
-     Keep the original site logo/favicon sources as automatic fallbacks. */
-  const isWebsite=!it.appType;
-  const homepagePreview=isWebsite && String(it.name||"").toLowerCase()!=="freekz"
-    ? "https://image.thum.io/get/noanimate/width/600/crop/600/"+(it.url||("https://"+domain+"/"))
-    : null;
+  /* Website cards use the website's own logo; Freekz remains unchanged. */
+  const homepagePreview=null;
   const unique=Array.from(new Set([homepagePreview,...sources].filter(Boolean)));
   return "<img class='"+(homepagePreview?"homepage-preview":"")+"' loading='lazy' decoding='async' width='240' height='240' alt='"+clean(it.name)+(homepagePreview?" homepage preview":" logo")+"' referrerpolicy='no-referrer' src='"+unique[0]+"' data-logo-sources='"+clean(JSON.stringify(unique))+"' data-logo-index='0' onerror='nextLogo(this)'>";
 }
