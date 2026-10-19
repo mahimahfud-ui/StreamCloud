@@ -770,6 +770,16 @@ document.getElementById("yr").textContent=new Date().getFullYear();
       else{const t=document.createElement("textarea");t.value=url;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();this.textContent="Link copied"}
     }catch(e){}
   });
+  // Shared mode setter for the dynamically-created Music Apps tab in cinema/categories.js.
+  // Keep mode, filters, active tabs and rendered data in sync through the original renderer.
+  window.STREAMCLOUD_SET_MODE = function(nextMode){
+    if(!["sites","apps","music"].includes(nextMode)) return;
+    mode=nextMode;
+    filter="all";
+    adFilter.value="all";
+    search.value="";
+    render();
+  };
   render();
   fetch("./link-status.json",{cache:"no-store"}).then(response=>{if(!response.ok)throw new Error("Status file unavailable");return response.json()}).then(payload=>{
     statusEntries=payload.entries||{};
