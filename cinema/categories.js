@@ -139,9 +139,17 @@ export function initCategories() {
     if (button === musicButton) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      selectCategory('music');
-      switchingInternally = true;
-      try { movieButton.click(); } finally { switchingInternally = false; }
+
+      // Use the original catalogue renderer's explicit music mode. Previously this
+      // clicked the Movie Apps tab as a workaround, which rendered movie entries
+      // into appsView while the UI label showed Music Apps.
+      if (typeof window.STREAMCLOUD_SET_MODE === 'function') {
+        window.STREAMCLOUD_SET_MODE('music');
+      } else {
+        // Compatibility fallback for older cached index.html versions.
+        switchingInternally = true;
+        try { movieButton.click(); } finally { switchingInternally = false; }
+      }
       selectCategory('music');
       return;
     }
