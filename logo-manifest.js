@@ -21,7 +21,6 @@ window.MAHIFLIX_LOGOS = {
   "anivortex.in": "assets/logos/anivortex.svg",
   "nxsha.app": "assets/logos/nxsha.svg"
 };
-
 window.STREAMCLOUD_ITEM_LOGOS = {
   "site:cineyz.com": "assets/logos/site-bcine.webp",
   "site:7reels.cc": "assets/logos/site-7reel.webp",
@@ -35,5 +34,15 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "site:cinejoy.to": "assets/logos/site-cinejoy.webp",
   "site:cinegram.tv": "assets/logos/site-cinegram.webp",
   "site:watchott.org": "assets/logos/site-watchott.webp",
-  "site:1tube.org": "assets/logos/site-1tube.webp"
+  "site:1tube.org": "assets/logos/site-1tube.webp",
+  "site:7reel": "./assets/logos/sites/7reel.png",
+  "site:the-og-pirate-bot": "./assets/logos/sites/the-og-pirate-bot.ico",
+  "site:cinehd": "./assets/logos/sites/cinehd.png",
+  "site:nightflix": "./assets/logos/sites/nightflix.png",
+  "site:cinegram": "./assets/logos/sites/cinegram.png",
+  "site:cinejoy": "./assets/logos/sites/cinejoy.ico",
+  "site:bingr": "./assets/logos/sites/bingr.ico",
+  "site:1tube": "./assets/logos/sites/1tube.png",
+  "site:watchott": "./assets/logos/sites/watchott.webp",
+  "site:m4uhd": "./assets/logos/sites/m4uhd.png"
 };
