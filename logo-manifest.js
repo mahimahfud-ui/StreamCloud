@@ -27,7 +27,6 @@ window.MAHIFLIX_LOGOS = {
   "demusapp.com": "assets/logos/sites/demus-hd.png",
   "spotube.cc": "assets/logos/sites/spotube.png"
 };
-
 window.STREAMCLOUD_ITEM_LOGOS = {
   "site:freekz.to": "assets/logos/sites/freekz.png",
   "site:freekz": "assets/logos/sites/freekz.png",
