@@ -62,11 +62,10 @@ function extractEntries(arrayName, kind) {
   return result;
 }
 
-const entries = [
-  ...extractEntries("S", "site"),
-  ...extractEntries("A", "movie"),
-  ...extractEntries("M", "music"),
-];
+/* This pass is deliberately limited to website logos. Apps and music catalogs stay untouched.
+   Freekz is intentionally excluded so its existing logo remains exactly as-is. */
+const entries = extractEntries("S", "site")
+  .filter(item => String(item.domain || "").toLowerCase() !== "freekz.to");
 const uniqueEntries = [...new Map(entries.map(item => [item.key, item])).values()];
 if (!uniqueEntries.length) throw new Error("No StreamCloud catalog entries were found in index.html.");
 
