@@ -232,6 +232,595 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
 .wl-empty{text-align:center;color:var(--pu-muted);padding:26px 8px}
 @media(max-width:640px){.wl-form{grid-template-columns:1fr 1fr}.wl-form input[name=title],.wl-form button{grid-column:1/-1}.wl-form button{padding:12px}.wl-panel{padding:18px}.wl-list li{grid-template-columns:1fr}.wl-act{justify-content:flex-start}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+<style id="streamcloud-admin-ai">
+/* ================= StreamCloud Admin + Gemini AI Styles ================= */
+.portal-admin-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  position: relative;
+  z-index: 45;
+}
+.portal-add-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 42px;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(20, 21, 26, 0.88);
+  border: 1px solid rgba(229, 9, 20, 0.5);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6), 0 0 12px rgba(229, 9, 20, 0.25);
+  backdrop-filter: blur(10px);
+}
+.portal-add-icon-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  border-color: #ff3344;
+  background: rgba(229, 9, 20, 0.22);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 20px rgba(229, 9, 20, 0.5);
+}
+.portal-add-icon-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+.portal-add-icon-btn:hover svg {
+  transform: rotate(90deg);
+}
+
+/* Admin Add Modal */
+.admin-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.admin-modal.open {
+  display: flex;
+}
+.admin-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 9, 12, 0.82);
+  backdrop-filter: blur(8px);
+}
+.admin-panel {
+  position: relative;
+  width: min(520px, 94vw);
+  background: #14151a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 28px 24px;
+  color: #f3f4f7;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 30px rgba(229, 9, 20, 0.18);
+  animation: adminModalIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes adminModalIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.admin-close {
+  position: absolute;
+  right: 16px;
+  top: 14px;
+  background: none;
+  border: 0;
+  color: #a3a7b3;
+  font-size: 26px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: color 0.15s, background 0.15s;
+}
+.admin-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.admin-header {
+  margin-bottom: 20px;
+}
+.admin-eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #e50914;
+  margin-bottom: 4px;
+}
+.admin-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+.admin-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #a3a7b3;
+}
+.admin-steps-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 8px 12px;
+  background: #1b1d24;
+  border-radius: 12px;
+  font-size: 12px;
+}
+.step-dot {
+  color: #717582;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+.step-dot.active {
+  color: #e50914;
+}
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 8px;
+}
+.admin-step-view {
+  display: none;
+}
+.admin-step-view.active {
+  display: block;
+  animation: adminFade 0.2s ease;
+}
+@keyframes adminFade {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.admin-field-label {
+  display: block;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 4px;
+  color: #fff;
+}
+.admin-hint {
+  font-size: 13px;
+  color: #a3a7b3;
+  margin: 0 0 14px;
+}
+.admin-input-group {
+  margin-bottom: 12px;
+}
+.admin-input {
+  width: 100%;
+  background: #0d0e12;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.admin-input:focus {
+  border-color: #e50914;
+  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.25);
+}
+.admin-input.shake {
+  animation: adminShake 0.4s ease;
+  border-color: #ff4d4f;
+}
+@keyframes adminShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+.admin-error-msg {
+  color: #ff6b6b;
+  font-size: 13px;
+  min-height: 18px;
+  margin-bottom: 14px;
+}
+.admin-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+.admin-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.admin-btn.secondary {
+  background: #1b1d24;
+  color: #c9c9ce;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.admin-btn.secondary:hover {
+  background: #252833;
+  color: #fff;
+}
+.admin-btn.primary {
+  background: linear-gradient(135deg, #e50914, #ff3344);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(229, 9, 20, 0.35);
+}
+.admin-btn.primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 18px rgba(229, 9, 20, 0.5);
+}
+.admin-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.admin-category-selector {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.category-choice {
+  display: flex;
+  cursor: pointer;
+}
+.category-choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.choice-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: #1b1d24;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+.category-choice:hover .choice-card {
+  background: #222530;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.category-choice.active .choice-card,
+.category-choice input:checked + .choice-card {
+  background: rgba(229, 9, 20, 0.12);
+  border-color: #e50914;
+  box-shadow: 0 0 0 1px #e50914;
+}
+.choice-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.choice-text strong {
+  display: block;
+  font-size: 14px;
+  color: #fff;
+}
+.choice-text small {
+  display: block;
+  font-size: 12px;
+  color: #a3a7b3;
+  margin-top: 2px;
+}
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btnSpin 0.8s linear infinite;
+  display: inline-block;
+}
+@keyframes btnSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ================= Gemini Chatbot Styles ================= */
+.gemini-chatbot-container {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 9990;
+  font-family: inherit;
+}
+.gemini-chat-fab {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #1f2129, #14151a);
+  border: 1.5px solid rgba(229, 9, 20, 0.55);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65), 0 0 16px rgba(229, 9, 20, 0.3);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s;
+}
+.gemini-chat-fab:hover {
+  transform: scale(1.08);
+  border-color: #ff3344;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.8), 0 0 24px rgba(229, 9, 20, 0.6);
+}
+.gemini-chat-fab .fab-icon svg {
+  color: #ff3344;
+  filter: drop-shadow(0 0 4px rgba(229, 9, 20, 0.6));
+}
+.fab-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #e50914;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 6px;
+  border: 1.5px solid #14151a;
+  letter-spacing: 0.04em;
+}
+.fab-pulse-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(229, 9, 20, 0.35);
+  animation: fabPulse 2.4s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  pointer-events: none;
+}
+@keyframes fabPulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.22); opacity: 0; }
+  100% { transform: scale(1.22); opacity: 0; }
+}
+
+.gemini-chat-drawer {
+  position: fixed;
+  right: 22px;
+  bottom: 88px;
+  width: min(390px, 94vw);
+  height: min(540px, 78vh);
+  background: #15161c;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(229, 9, 20, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  transform-origin: bottom right;
+  opacity: 0;
+  transform: scale(0.9) translateY(20px);
+  pointer-events: none;
+  transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1), transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.gemini-chat-drawer.open {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+.chat-drawer-header {
+  padding: 14px 16px;
+  background: #1b1d24;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.chat-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(229, 9, 20, 0.15);
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(229, 9, 20, 0.3);
+}
+.chat-header-info h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+.chat-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #a3a7b3;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.chat-hdr-btn {
+  background: none;
+  border: none;
+  color: #a3a7b3;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+.chat-hdr-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.chat-bubble {
+  max-width: 86%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  word-break: break-word;
+}
+.chat-bubble p {
+  margin: 0;
+}
+.chat-bubble p + p {
+  margin-top: 6px;
+}
+.chat-bubble ul, .chat-bubble ol {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+.chat-bubble a {
+  color: #ff6b6b;
+  text-decoration: underline;
+}
+.chat-bubble.user-bubble {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #b31018, #e50914);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.25);
+}
+.chat-bubble.model-bubble {
+  align-self: flex-start;
+  background: #1d1f27;
+  color: #e4e6eb;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom-left-radius: 4px;
+}
+.chat-bubble.typing-bubble {
+  align-self: flex-start;
+  background: #1d1f27;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e50914;
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+  40% { transform: translateY(-5px); opacity: 1; }
+}
+
+.chat-suggestions {
+  display: flex;
+  gap: 6px;
+  padding: 8px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: #171820;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.chat-suggestions::-webkit-scrollbar { display: none; }
+.chat-chip {
+  flex-shrink: 0;
+  background: #20222b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #c9c9ce;
+  font-size: 11.5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.chat-chip:hover {
+  background: rgba(229, 9, 20, 0.2);
+  border-color: #e50914;
+  color: #fff;
+}
+
+.chat-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #14151a;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.chat-input-bar input {
+  flex: 1;
+  background: #0d0e12;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input-bar input:focus {
+  border-color: #e50914;
+}
+.chat-input-bar button {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #e50914;
+  border: none;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.15s;
+}
+.chat-input-bar button:hover {
+  background: #ff2a38;
+  transform: scale(1.05);
+}
+.chat-input-bar button:active {
+  transform: scale(0.95);
+}
 </style>
 <link rel="stylesheet" href="./premium.css" data-streamcloud-premium>
 
@@ -260,6 +849,12 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
     <section class="portal-wrap" aria-label="Jump to the other collection">
       <div class="portal-heading"><strong id="portalName">Apps</strong></div>
       <button class="portal" id="portal" type="button" aria-label="Jump to Apps"></button>
+      <div class="portal-admin-slot">
+        <button id="portalAddBtn" class="portal-add-icon-btn" type="button" aria-label="Add new listing" title="Add new listing (Password: 6993)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Add Listing</span>
+        </button>
+      </div>
     </section>
   </div>
   <a class="cue" href="#browse" aria-label="Browse websites and apps"><span>Browse</span><i></i></a>
@@ -319,6 +914,172 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
   </section>
 </div>
 
+<!-- Admin Add Listing Multi-Step Modal -->
+<div class="admin-modal" id="adminModal" aria-hidden="true">
+  <div class="admin-scrim" data-admin-close></div>
+  <section class="admin-panel" role="dialog" aria-modal="true" aria-labelledby="adminTitle" tabindex="-1">
+    <button class="admin-close" type="button" data-admin-close aria-label="Close dialog">&times;</button>
+    
+    <div class="admin-header">
+      <span class="admin-eyebrow">StreamCloud Directory Admin</span>
+      <h2 id="adminTitle">Add New Listing</h2>
+      <p class="admin-subtitle">Live real-time addition to StreamCloud catalog</p>
+    </div>
+
+    <div class="admin-steps-indicator">
+      <span class="step-dot active" id="dotStep1">1. PIN</span>
+      <span class="step-line"></span>
+      <span class="step-dot" id="dotStep2">2. Category</span>
+      <span class="step-line"></span>
+      <span class="step-dot" id="dotStep3">3. URL</span>
+      <span class="step-line"></span>
+      <span class="step-dot" id="dotStep4">4. Name</span>
+    </div>
+
+    <!-- Step 1: Security PIN -->
+    <div class="admin-step-view active" id="adminStep1">
+      <label class="admin-field-label" for="adminPinInput">Enter Admin PIN Code</label>
+      <p class="admin-hint">This action is protected. Enter password (6993) to continue.</p>
+      <div class="admin-input-group">
+        <input type="password" id="adminPinInput" class="admin-input" placeholder="Enter password" maxlength="10" autocomplete="off">
+      </div>
+      <div class="admin-error-msg" id="adminPinError"></div>
+      <div class="admin-buttons">
+        <button type="button" class="admin-btn secondary" data-admin-close>Cancel</button>
+        <button type="button" class="admin-btn primary" id="adminPinNextBtn">Verify PIN &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Category Selection -->
+    <div class="admin-step-view" id="adminStep2">
+      <label class="admin-field-label">Select Target Category</label>
+      <p class="admin-hint">Choose where this listing will be placed:</p>
+      <div class="admin-category-selector">
+        <label class="category-choice active" id="choiceSites">
+          <input type="radio" name="adminCategory" value="sites" checked>
+          <div class="choice-card">
+            <span class="choice-icon">🌐</span>
+            <div class="choice-text">
+              <strong>Movie Websites</strong>
+              <small>Streaming websites, web-series portals</small>
+            </div>
+          </div>
+        </label>
+        <label class="category-choice" id="choiceMovie">
+          <input type="radio" name="adminCategory" value="movie">
+          <div class="choice-card">
+            <span class="choice-icon">📱</span>
+            <div class="choice-text">
+              <strong>Movie Apps</strong>
+              <small>Android APKs, movie &amp; series players</small>
+            </div>
+          </div>
+        </label>
+        <label class="category-choice" id="choiceMusic">
+          <input type="radio" name="adminCategory" value="music">
+          <div class="choice-card">
+            <span class="choice-icon">🎵</span>
+            <div class="choice-text">
+              <strong>Music Apps</strong>
+              <small>Music players, YouTube Music clients, audio apps</small>
+            </div>
+          </div>
+        </label>
+      </div>
+      <div class="admin-buttons">
+        <button type="button" class="admin-btn secondary" id="adminCatBackBtn">&larr; Back</button>
+        <button type="button" class="admin-btn primary" id="adminCatNextBtn">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 3: URL Input -->
+    <div class="admin-step-view" id="adminStep3">
+      <label class="admin-field-label" for="adminUrlInput">Website / App Public URL</label>
+      <p class="admin-hint">Paste the full public address (e.g. https://domain.com/)</p>
+      <div class="admin-input-group">
+        <input type="url" id="adminUrlInput" class="admin-input" placeholder="https://example.com/" autocomplete="off">
+      </div>
+      <div class="admin-error-msg" id="adminUrlError"></div>
+      <div class="admin-buttons">
+        <button type="button" class="admin-btn secondary" id="adminUrlBackBtn">&larr; Back</button>
+        <button type="button" class="admin-btn primary" id="adminUrlNextBtn">Next &rarr;</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Name Input & Submit -->
+    <div class="admin-step-view" id="adminStep4">
+      <label class="admin-field-label" for="adminNameInput">Listing Display Name</label>
+      <p class="admin-hint">Give the display name for this movie website or app</p>
+      <div class="admin-input-group">
+        <input type="text" id="adminNameInput" class="admin-input" placeholder="e.g. Cinema Hub" maxlength="50" autocomplete="off">
+      </div>
+      <div class="admin-error-msg" id="adminNameError"></div>
+      <div class="admin-buttons">
+        <button type="button" class="admin-btn secondary" id="adminNameBackBtn">&larr; Back</button>
+        <button type="button" class="admin-btn primary" id="adminSubmitBtn">
+          <span class="btn-text">Add to Directory Live</span>
+          <span class="btn-spinner" id="adminSpinner" style="display:none;"></span>
+        </button>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<!-- Floating Gemini AI Chatbot Widget -->
+<div class="gemini-chatbot-container" id="geminiChatContainer">
+  <button class="gemini-chat-fab" id="geminiChatFab" type="button" aria-label="Open StreamCloud AI Assistant" title="StreamCloud AI Assistant">
+    <span class="fab-pulse-ring"></span>
+    <span class="fab-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        <path d="M12 7v4M10 9h4" stroke-width="2"></path>
+      </svg>
+    </span>
+    <span class="fab-badge">AI</span>
+  </button>
+
+  <div class="gemini-chat-drawer" id="geminiChatDrawer" aria-hidden="true" role="dialog" aria-labelledby="chatHeaderTitle">
+    <header class="chat-drawer-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#e50914"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+        </div>
+        <div>
+          <h3 id="chatHeaderTitle">StreamCloud AI</h3>
+          <span class="chat-status"><span class="status-dot"></span> Gemini 3.8 Flash · Cinema Curator</span>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="chat-hdr-btn" id="chatClearBtn" type="button" title="Clear chat history" aria-label="Clear chat">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+        <button class="chat-hdr-btn" id="chatCloseBtn" type="button" title="Close chat" aria-label="Close chat">&times;</button>
+      </div>
+    </header>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-bubble model-bubble">
+        <p>Hello! I am your StreamCloud AI curator. Ask me for movie site recommendations, safe Android streaming APKs, ad-free music apps, or anything in our directory!</p>
+      </div>
+    </div>
+
+    <div class="chat-suggestions" id="chatSuggestions">
+      <button class="chat-chip" type="button" data-prompt="What are the best movie streaming websites here?">🎬 Best movie sites</button>
+      <button class="chat-chip" type="button" data-prompt="Which movie apps have the least ads and best quality?">📱 Low-ad apps</button>
+      <button class="chat-chip" type="button" data-prompt="Recommend an open-source ad-free music app.">🎵 Best music app</button>
+      <button class="chat-chip" type="button" data-prompt="Which sites or apps have anime and Asian drama?">🎌 Anime &amp; drama</button>
+    </div>
+
+    <form class="chat-input-bar" id="chatForm">
+      <input type="text" id="chatInput" placeholder="Ask StreamCloud AI..." autocomplete="off">
+      <button type="submit" id="chatSendBtn" aria-label="Send message">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </form>
+  </div>
+</div>
+
 <section class="finale" id="finale" aria-label="StreamCloud">
   <div class="finale-in">
     <img class="finale-logo" src="./s-logo-v1.svg" alt="" width="128" height="128">
@@ -341,46 +1102,44 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
 
 <script>
 const S=[
-{name:"Freekz",url:"https://freekz.to/",domain:"freekz.to",ads:1,pop:82,smooth:84,langs:86,new:true,desc:"Freekz movie and TV homepage.",logoSources:["https://freekz.to/banner.png","https://freekz.to/05BB1581-39C9-4B10-AA10-7957B2994AE4.png","https://freekz.to/favicon.ico"]},
-{name:"7reel",url:"https://7reels.cc/",domain:"7reels.cc",ads:2,pop:74,smooth:62,langs:72,new:true,desc:"Free movie and series streaming directory.",logoSources:["https://7reels.cc/favicon-96x96.png","https://7reels.cc/favicon.ico","https://7reels.cc/favicon.png"]},
-{name:"M4UHD",url:"https://m4uhd.gold/",domain:"m4uhd.gold",ads:2,pop:94,smooth:60,langs:76,new:false,desc:"Large movie and TV streaming catalogue.",logoSources:["https://m4uhd.gold/images/m4uhd-logo.png","https://m4uhd.gold/images/m4uhd-icon.png","https://m4uhd.gold/favicon.ico"]},
-{name:"CineHD",url:"https://cinehd.vc/",domain:"cinehd.vc",ads:2,pop:92,smooth:61,langs:78,new:false,desc:"Movies and series with a large free-streaming catalogue.",logoSources:["https://cinehd.vc/icon-192x192.png","https://cinehd.vc/favicon.ico","https://cinehd.dev/images/favicon.ico"]},
-{name:"NightFlix",url:"https://nightflix.vg/",domain:"nightflix.vg",ads:2,pop:86,smooth:62,langs:78,new:false,desc:"Free movies and TV streaming site.",logoSources:["https://nightflix.vg/favicon.ico","https://nightflix.vg/favicon.png","https://nightflix.vg/favicon-192x192.png"]},
- {name:"The OG Pirate Bot",url:"https://theogpiratebot.online/",domain:"theogpiratebot.online",ads:0,pop:70,smooth:70,langs:70,new:true,desc:"The OG Pirate Bot website.",logoSources:["https://theogpiratebot.online/favicon.ico","https://theogpiratebot.online/favicon.png"]},
-{name:"Cinevito",url:"https://cinevito.net/",domain:"cinevito.net",ads:0,pop:70,smooth:70,langs:70,new:true,desc:"Cinevito website.",logoSources:["https://cinevito.net/favicon.ico","https://cinevito.net/favicon.png"]},
-{name:"Bingr",url:"https://bingr.one/",domain:"bingr.one",ads:2,pop:73,smooth:56,langs:70,new:false,desc:"Movie and TV discovery/streaming platform.",logoSources:["https://bingr.in/images/site/bingr-logo-pink.png","https://bingr.in/favicon.ico?v=1"]},
-{name:"Cinejoy",url:"https://cinejoy.to/",domain:"cinejoy.to",ads:2,pop:68,smooth:52,langs:66,new:false,desc:"Movies, TV and short-drama streaming platform.",logoSources:["https://cinejoy.to/brand/logomark-white.svg","https://cinejoy.to/favicon.svg","https://cinejoy.to/favicon.ico"]},
-{name:"Cinegram",url:"https://cinegram.tv/",domain:"cinegram.tv",ads:1,pop:77,smooth:75,langs:76,new:false,desc:"Movies and series streaming platform.",logoSources:["https://cinegram.tv/sizes/fav-192.png","https://cinegram.tv/favicon.ico","https://cinegram.tv/favicon.png"]},
-{name:"Watchott",url:"https://watchott.org/",domain:"watchott.org",ads:1,pop:58,smooth:58,langs:65,new:false,desc:"Movie and TV streaming website.",logoSources:["https://watchott.org/favicon.svg","https://watchott.org/favicon.ico","https://watchott.org/favicon.png"]},
-{name:"1tube",url:"https://www.1tube.org/",domain:"1tube.org",ads:2,pop:84,smooth:66,langs:82,new:false,desc:"Movies, TV and other streaming content.",logoSources:["https://www.1tube.org/logo.png","https://www.1tube.org/favicon.ico","https://www.1tube.org/favicon.png"]}
+{name:"Freekz",url:"https://freekz.to/",domain:"freekz.to",ads:1,pop:82,smooth:84,langs:86,new:true,desc:"Freekz movie and TV homepage.",logoSources:["assets/logos/sites/freekz.png","https://freekz.to/05BB1581-39C9-4B10-AA10-7957B2994AE4.png","https://freekz.to/banner.png","https://freekz.to/favicon.ico"]},
+{name:"7reel",url:"https://7reels.cc/",domain:"7reels.cc",ads:2,pop:74,smooth:62,langs:72,new:true,desc:"Free movie and series streaming directory.",logoSources:["assets/logos/sites/7reel.png","https://7reels.cc/favicon-96x96.png","https://7reels.cc/favicon.ico","https://7reels.cc/favicon.png"]},
+{name:"M4UHD",url:"https://m4uhd.gold/",domain:"m4uhd.gold",ads:2,pop:94,smooth:60,langs:76,new:false,desc:"Large movie and TV streaming catalogue.",logoSources:["assets/logos/sites/m4uhd.png","https://m4uhd.gold/images/m4uhd-logo.png","https://m4uhd.gold/images/m4uhd-icon.png","https://m4uhd.gold/favicon.ico"]},
+{name:"CineHD",url:"https://cinehd.vc/",domain:"cinehd.vc",ads:2,pop:92,smooth:61,langs:78,new:false,desc:"Movies and series with a large free-streaming catalogue.",logoSources:["assets/logos/sites/cinehd.png","https://cinehd.vc/icon-192x192.png","https://cinehd.vc/favicon.ico","https://cinehd.dev/images/favicon.ico"]},
+{name:"NightFlix",url:"https://nightflix.vg/",domain:"nightflix.vg",ads:2,pop:86,smooth:62,langs:78,new:false,desc:"Free movies and TV streaming site.",logoSources:["assets/logos/sites/nightflix.png","https://nightflix.vg/favicon.ico","https://nightflix.vg/favicon.png","https://nightflix.vg/favicon-192x192.png"]},
+{name:"The OG Pirate Bot",url:"https://theogpiratebot.online/",domain:"theogpiratebot.online",ads:0,pop:70,smooth:70,langs:70,new:true,desc:"The OG Pirate Bot website.",logoSources:["assets/logos/sites/the-og-pirate-bot.ico","https://theogpiratebot.online/favicon.ico","https://theogpiratebot.online/favicon.png"]},
+{name:"Cinevito",url:"https://cinevito.net/",domain:"cinevito.net",ads:0,pop:70,smooth:70,langs:70,new:true,desc:"Cinevito website.",logoSources:["assets/logos/sites/cinevito.png","assets/logos/sites/cinevito.ico","https://cinevito.net/favicon.ico","https://cinevito.net/favicon.png"]},
+{name:"Bingr",url:"https://bingr.one/",domain:"bingr.one",ads:2,pop:73,smooth:56,langs:70,new:false,desc:"Movie and TV discovery/streaming platform.",logoSources:["assets/logos/sites/bingr.ico","https://bingr.in/images/site/bingr-logo-pink.png","https://bingr.in/favicon.ico?v=1"]},
+{name:"Cinejoy",url:"https://cinejoy.to/",domain:"cinejoy.to",ads:2,pop:68,smooth:52,langs:66,new:false,desc:"Movies, TV and short-drama streaming platform.",logoSources:["assets/logos/sites/cinejoy.ico","https://cinejoy.to/brand/logomark-white.svg","https://cinejoy.to/favicon.svg","https://cinejoy.to/favicon.ico"]},
+{name:"Cinegram",url:"https://cinegram.tv/",domain:"cinegram.tv",ads:1,pop:77,smooth:75,langs:76,new:false,desc:"Movies and series streaming platform.",logoSources:["assets/logos/sites/cinegram.png","https://cinegram.tv/sizes/fav-192.png","https://cinegram.tv/favicon.ico","https://cinegram.tv/favicon.png"]},
+{name:"Watchott",url:"https://watchott.org/",domain:"watchott.org",ads:1,pop:58,smooth:58,langs:65,new:false,desc:"Movie and TV streaming website.",logoSources:["assets/logos/sites/watchott.webp","https://watchott.org/favicon.svg","https://watchott.org/favicon.ico","https://watchott.org/favicon.png"]},
+{name:"1tube",url:"https://www.1tube.org/",domain:"1tube.org",ads:2,pop:84,smooth:66,langs:82,new:false,desc:"Movies, TV and other streaming content.",logoSources:["assets/logos/sites/1tube.png","https://www.1tube.org/logo.png","https://www.1tube.org/favicon.ico","https://www.1tube.org/favicon.png"]}
 ];
 
 const A=[
-{appType:"movie",name:"FilmTV",url:"https://www.filmtvapp.com/",downloadUrl:"https://www.filmtvapp.com/#download",downloadDirect:false,domain:"filmtvapp.com",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"FilmTV Android app. Use the official site download section.",logoSources:["https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo-transparent.png","https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo.jpg","https://www.filmtvapp.com/wp-content/uploads/2026/08/cropped-Untitled-design-3-32x32.png"]},
-{appType:"movie",name:"Nuvix",url:"https://www.nuvixapp.in/",downloadUrl:"https://www.nuvixapp.in/#download-apk",downloadDirect:false,domain:"nuvixapp.in",ads:0,pop:82,smooth:88,langs:86,new:true,desc:"Nuvix Android app. Use the official site download section.",logoSources:["https://www.nuvixapp.in/img/nuvix-logo.webp","https://www.nuvixapp.in/favicon.ico?favicon.0dc47d6d.ico"]},
-{appType:"movie",name:"Vega",url:"https://vega.zendax.me/",downloadUrl:"https://vega.zendax.me/",downloadDirect:false,domain:"vega.zendax.me",ads:0,pop:88,smooth:91,langs:92,new:true,desc:"Android media player with ad-free streaming and downloads.",logoSources:["https://vega.zendax.me/cdn-cgi/image/onerror=redirect,width=96,height=96,quality=80,format=webp/_astro/logo.D0gpMGRY.png","https://vega.zendax.me/favicon.ico"]},
-{appType:"movie",name:"NetMirror",url:"https://netmirror.gg/",downloadUrl:"https://netmirror.gg/",downloadDirect:false,domain:"netmirror.gg",ads:2,pop:90,smooth:66,langs:84,new:true,desc:"Android streaming app with movie and series sources.",logoSources:["https://netmirror.gg/img/nf2/icon_x192.png","https://netmirror.gg/favicon.ico"]},
-{appType:"movie",name:"CineHD",url:"https://cinehd.dev/",downloadUrl:"https://cinehd.dev/",downloadDirect:false,domain:"cinehd.dev",ads:2,pop:86,smooth:60,langs:78,new:false,desc:"Android movie and series streaming app.",logoSources:["https://cinehd.dev/images/cinehd-logo.png","https://cinehd.dev/images/favicon.ico?v=1145"]},
-{appType:"movie",name:"Moviboxapk",url:"https://moviboxapk.com/",downloadUrl:"https://moviboxapk.com/",downloadDirect:false,domain:"moviboxapk.com",ads:2,pop:77,smooth:63,langs:76,new:false,desc:"Android movie and series streaming app.",logoSources:["https://moviboxapk.com/wp-content/uploads/2026/06/cropped-moviebox-icon.webp","https://moviboxapk.com/wp-content/uploads/2026/06/cropped-cropped-moviebox-icon-192x192.webp","https://moviboxapk.com/favicon.ico"]},
-{appType:"movie",name:"PvrPlay",url:"https://pvrplay.online/",downloadUrl:"https://pvrplay.online/",downloadDirect:false,domain:"pvrplay.online",ads:2,pop:75,smooth:64,langs:74,new:false,desc:"Android app for movies and web series.",logoSources:["https://pvrplay.online/favicon.ico","https://pvrplay.online/favicon.png"]},
-{appType:"movie",name:"Hdghartv",url:"https://watch.hdghartv.com.pk/",downloadUrl:"https://hdghartv.com.pk/apk/",downloadDirect:false,domain:"watch.hdghartv.com.pk",ads:0,pop:72,smooth:86,langs:70,new:false,desc:"HDGharTV Android app. Use the official download page if available.",logoSources:["https://hdghartv.com.pk/wp-content/uploads/2026/08/hdghartv-logo.png","https://watch.hdghartv.com.pk/favicon.ico","https://hdghartv.com.pk/favicon.ico"]},
-{appType:"movie",name:"Anivortex",url:"https://anivortex.in/",downloadUrl:"https://anivortex.in/",downloadDirect:false,domain:"anivortex.in",ads:1,pop:70,smooth:72,langs:80,new:false,desc:"Anime-focused streaming app.",logoSources:["https://anivortex.in/images/anivortex_logo_transparent.webp","https://anivortex.in/images/anivortex_logo.webp","https://anivortex.in/favicon.ico"]},
-{appType:"movie",name:"Nxsha",url:"https://nxsha.app/",downloadUrl:"https://nxsha.app/",downloadDirect:false,domain:"nxsha.app",ads:1,pop:74,smooth:84,langs:90,new:false,desc:"Movies, TV, anime and K-drama discovery app.",logoSources:["https://nxsha.app/favicon.ico","https://nxsha.app/og.jpg"]},
-{appType:"movie",name:"Freekz",url:"https://freekz.to/",downloadUrl:"https://freekz.to/",downloadDirect:false,domain:"freekz.to",ads:1,pop:75,smooth:78,langs:78,new:true,desc:"Freekz Android app with a direct APK download.",logoSources:["https://freekz.to/banner.png","https://freekz.to/favicon.ico"]}
+{appType:"movie",name:"FilmTV",url:"https://www.filmtvapp.com/",downloadUrl:"https://www.filmtvapp.com/#download",downloadDirect:false,domain:"filmtvapp.com",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"FilmTV Android app. Use the official site download section.",logoSources:["assets/logos/sites/filmtv.png","https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo-transparent.png","https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo.jpg"]},
+{appType:"movie",name:"Nuvix",url:"https://www.nuvixapp.in/",downloadUrl:"https://www.nuvixapp.in/#download-apk",downloadDirect:false,domain:"nuvixapp.in",ads:0,pop:82,smooth:88,langs:86,new:true,desc:"Nuvix Android app. Use the official site download section.",logoSources:["assets/logos/sites/nuvix.webp","https://www.nuvixapp.in/img/nuvix-logo.webp","https://www.nuvixapp.in/favicon.ico?favicon.0dc47d6d.ico"]},
+{appType:"movie",name:"Vega",url:"https://vega.zendax.me/",downloadUrl:"https://vega.zendax.me/",downloadDirect:false,domain:"vega.zendax.me",ads:0,pop:88,smooth:91,langs:92,new:true,desc:"Android media player with ad-free streaming and downloads.",logoSources:["assets/logos/sites/vega.png","https://vega.zendax.me/cdn-cgi/image/onerror=redirect,width=96,height=96,quality=80,format=webp/_astro/logo.D0gpMGRY.png","https://vega.zendax.me/favicon.ico"]},
+{appType:"movie",name:"NetMirror",url:"https://netmirror.gg/",downloadUrl:"https://netmirror.gg/",downloadDirect:false,domain:"netmirror.gg",ads:2,pop:90,smooth:66,langs:84,new:true,desc:"Android streaming app with movie and series sources.",logoSources:["assets/logos/sites/netmirror.png","https://netmirror.gg/img/nf2/icon_x192.png","https://netmirror.gg/favicon.ico"]},
+{appType:"movie",name:"CineHD",url:"https://cinehd.dev/",downloadUrl:"https://cinehd.dev/",downloadDirect:false,domain:"cinehd.dev",ads:2,pop:86,smooth:60,langs:78,new:false,desc:"Android movie and series streaming app.",logoSources:["assets/logos/sites/cinehd-app.png","https://cinehd.dev/images/cinehd-logo.png","https://cinehd.dev/images/favicon.ico?v=1145"]},
+{appType:"movie",name:"Moviboxapk",url:"https://moviboxapk.com/",downloadUrl:"https://moviboxapk.com/",downloadDirect:false,domain:"moviboxapk.com",ads:2,pop:77,smooth:63,langs:76,new:false,desc:"Android movie and series streaming app.",logoSources:["assets/logos/sites/moviboxapk.webp","https://moviboxapk.com/wp-content/uploads/2026/06/cropped-moviebox-icon.webp","https://moviboxapk.com/favicon.ico"]},
+{appType:"movie",name:"PvrPlay",url:"https://pvrplay.online/",downloadUrl:"https://pvrplay.online/",downloadDirect:false,domain:"pvrplay.online",ads:2,pop:75,smooth:64,langs:74,new:false,desc:"Android app for movies and web series.",logoSources:["assets/logos/sites/pvrplay.png","assets/logos/site-pvrplay.webp","https://pvrplay.online/favicon.ico","https://pvrplay.online/favicon.png"]},
+{appType:"movie",name:"Hdghartv",url:"https://watch.hdghartv.com.pk/",downloadUrl:"https://hdghartv.com.pk/apk/",downloadDirect:false,domain:"watch.hdghartv.com.pk",ads:0,pop:72,smooth:86,langs:70,new:false,desc:"HDGharTV Android app. Use the official download page if available.",logoSources:["assets/logos/sites/hdghartv.png","https://hdghartv.com.pk/wp-content/uploads/2026/08/hdghartv-logo.png","https://watch.hdghartv.com.pk/favicon.ico"]},
+{appType:"movie",name:"Anivortex",url:"https://anivortex.in/",downloadUrl:"https://anivortex.in/",downloadDirect:false,domain:"anivortex.in",ads:1,pop:70,smooth:72,langs:80,new:false,desc:"Anime-focused streaming app.",logoSources:["assets/logos/sites/anivortex.webp","https://anivortex.in/images/anivortex_logo_transparent.webp","https://anivortex.in/images/anivortex_logo.webp"]},
+{appType:"movie",name:"Nxsha",url:"https://nxsha.app/",downloadUrl:"https://nxsha.app/",downloadDirect:false,domain:"nxsha.app",ads:1,pop:74,smooth:84,langs:90,new:false,desc:"Movies, TV, anime and K-drama discovery app.",logoSources:["assets/logos/sites/nxsha.png","nxsha_icon.png","https://nxsha.app/favicon.ico","https://nxsha.app/og.jpg"]},
+{appType:"movie",name:"Freekz",url:"https://freekz.to/",downloadUrl:"https://freekz.to/",downloadDirect:false,domain:"freekz.to",ads:1,pop:75,smooth:78,langs:78,new:true,desc:"Freekz Android app with a direct APK download.",logoSources:["assets/logos/sites/freekz.png","https://freekz.to/05BB1581-39C9-4B10-AA10-7957B2994AE4.png","https://freekz.to/banner.png","https://freekz.to/favicon.ico"]}
 ];
 
 const M=[
-
-
-{appType:"music",name:"Demus",kind:"app",url:"https://en.softonic.com/download/demus/android/post-download?dt=internalDownload",downloadUrl:"https://en.softonic.com/download/demus/android/post-download?dt=internalDownload",domain:"demus.en.softonic.com",ads:1,pop:76,smooth:82,langs:86,new:true,desc:"Demus music app for Android.",logoSources:["https://images.sftcdn.net/images/t_app-icon-s/p/2b0597be-ed36-477e-990e-7fd7e34cc5c1/1880695670/demus-download-Demus.jpg","https://demus.en.softonic.com/favicon.ico","https://en.softonic.com/favicon.ico"]},
-{appType:"music",name:"Youtify",kind:"app",url:"https://d.apkpure.net/b/XAPK/com.youtify.music?version=latest",downloadUrl:"https://d.apkpure.net/b/XAPK/com.youtify.music?version=latest",domain:"play.google.com",ads:1,pop:72,smooth:78,langs:82,new:true,desc:"Youtify music app — latest XAPK download.",logoSources:["https://image.winudf.com/v2/image1/Y29tLnlvdXRpZnkubXVzaWNfaWNvbl8xNzg4NjgxOTcxXzA4Nw/icon.webp?fakeurl=1&type=.webp&w=512","https://image.winudf.com/v2/image1/Y29tLnlvdXRpZnkubXVzaWNfaWNvbl8xNzg4NjgxOTcxXzA4Nw/icon.webp?fakeurl=1&type=.webp&w=256"]},
-{appType:"music",name:"BitChord",kind:"app",url:"https://github.com/search?q=BitChord+android&type=repositories",downloadUrl:"https://github.com/search?q=BitChord+android&type=repositories",downloadDirect:false,domain:"github.com",ads:0,pop:72,smooth:84,langs:80,new:true,desc:"BitChord Android music app — direct APK download.",logoSources:["https://raw.githubusercontent.com/kushagrasinghx/BitChord/main/app/src/main/ic_launcher-playstore.png","https://raw.githubusercontent.com/kushagrasinghx/BitChord/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp","https://github.com/favicon.ico"]},
-{appType:"music",name:"Echo Music",kind:"app",url:"https://github.com/EchoMusicApp/Echo-Music/releases/latest/download/EchoMusic.apk",downloadUrl:"https://github.com/EchoMusicApp/Echo-Music/releases/latest/download/EchoMusic.apk",domain:"github.com",ads:0,pop:78,smooth:86,langs:82,new:true,desc:"Echo Music Android app — direct APK download.",logoSources:["https://raw.githubusercontent.com/EchoMusicApp/Echo-Music/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png","https://raw.githubusercontent.com/EchoMusicApp/Echo-Music/main/app/src/main/res/echo_cat_icon-web.png","https://github.com/favicon.ico"]},
-{appType:"music",name:"Echo Nightly",kind:"app",url:"https://github.com/itsmechinmoy/echo-nightly/releases/latest/download/app-release.apk",downloadUrl:"https://github.com/itsmechinmoy/echo-nightly/releases/latest/download/app-release.apk",domain:"github.com",ads:0,pop:76,smooth:86,langs:80,new:true,desc:"Echo Nightly Android music player — direct APK download.",logoSources:["https://raw.githubusercontent.com/itsmechinmoy/echo-nightly/main/app/src/nightly/res/mipmap-xxxhdpi/ic_launcher.webp","https://raw.githubusercontent.com/itsmechinmoy/echo-nightly/main/app/src/nightly/ic_launcher-playstore.png","https://raw.githubusercontent.com/itsmechinmoy/echo-nightly/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp","https://github.com/favicon.ico"]},
-{appType:"music",name:"Spotube",kind:"app",url:"https://spotube.cc/downloads/redirect/?platform=Android&filetype=apk&p=latest%2Fdownload%2FSpotube-android-all-arch.apk",downloadUrl:"https://spotube.cc/downloads/redirect/?platform=Android&filetype=apk&p=latest%2Fdownload%2FSpotube-android-all-arch.apk",domain:"spotube.cc",ads:0,pop:88,smooth:90,langs:84,new:true,desc:"Spotube — music player with universal Android APK download.",logoSources:["https://raw.githubusercontent.com/team-spotube/spotube/master/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png","https://raw.githubusercontent.com/team-spotube/spotube/master/assets/branding/spotube-logo.png","https://raw.githubusercontent.com/team-spotube/spotube/master/assets/branding/spotube-logo-light.png","https://github.com/favicon.ico"]},
-{appType:"music",name:"OuterTune",kind:"app",url:"https://github.com/OuterTune/OuterTune/releases/latest",downloadUrl:"https://github.com/OuterTune/OuterTune/releases/latest",downloadDirect:false,domain:"github.com",ads:0,pop:78,smooth:88,langs:86,new:true,desc:"OuterTune Android music app — direct APK download.",logoSources:["https://raw.githubusercontent.com/OuterTune/OuterTune/lite/fastlane/metadata/android/en-US/images/icon.png","https://raw.githubusercontent.com/OuterTune/OuterTune/lite/app/src/main/ic_launcher-playstore.png","https://github.com/favicon.ico"]},
-{appType:"music",name:"LastWave",kind:"app",url:"https://github.com/Clash-Projects/LastWave-Native/releases/latest",downloadUrl:"https://github.com/Clash-Projects/LastWave-Native/releases/latest",downloadDirect:false,domain:"github.com",ads:0,pop:75,smooth:84,langs:82,new:true,desc:"LastWave Native music app — direct universal APK download.",logoSources:["https://raw.githubusercontent.com/Clash-Projects/LastWave-Native/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png","https://raw.githubusercontent.com/Clash-Projects/LastWave-Native/main/lastwave_logo.png","https://github.com/favicon.ico"]},
-{appType:"music",name:"Meld",kind:"app",url:"https://github.com/FrancescoGrazioso/Meld/releases/download/v0.7.2/Meld-izzy.apk",downloadUrl:"https://github.com/FrancescoGrazioso/Meld/releases/download/v0.7.2/Meld-izzy.apk",domain:"github.com/FrancescoGrazioso/Meld",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"Meld is an Android music player combining YouTube Music playback with Spotify-powered search, playlists and recommendations. Version 0.7.2 APK.",logoSources:["https://play-lh.googleusercontent.com/F7sFbp7vJzYkjk16fJJINv003mwK6XoXIZKpJ9LhOPaN-vt7efBqCLBQ0KBjiKmNHbKmNYyNSjxkjQ78WdUgYg=w240-h480"]}
+{appType:"music",name:"Demus",kind:"app",url:"https://en.softonic.com/download/demus/android/post-download?dt=internalDownload",downloadUrl:"https://en.softonic.com/download/demus/android/post-download?dt=internalDownload",domain:"demus.en.softonic.com",ads:1,pop:76,smooth:82,langs:86,new:true,desc:"Demus music app for Android.",logoSources:["assets/logos/sites/demus-hd.png","assets/logos/sites/demus.ico","assets/logos/sites/demus.jpg","https://images.sftcdn.net/images/t_app-icon-s/p/2b0597be-ed36-477e-990e-7fd7e34cc5c1/1880695670/demus-download-Demus.jpg"]},
+{appType:"music",name:"Youtify",kind:"app",url:"https://d.apkpure.net/b/XAPK/com.youtify.music?version=latest",downloadUrl:"https://d.apkpure.net/b/XAPK/com.youtify.music?version=latest",domain:"play.google.com",ads:1,pop:72,smooth:78,langs:82,new:true,desc:"Youtify music app — latest XAPK download.",logoSources:["assets/logos/sites/youtify.webp","https://image.winudf.com/v2/image1/Y29tLnlvdXRpZnkubXVzaWNfaWNvbl8xNzg4NjgxOTcxXzA4Nw/icon.webp?fakeurl=1&type=.webp&w=512"]},
+{appType:"music",name:"BitChord",kind:"app",url:"https://github.com/search?q=BitChord+android&type=repositories",downloadUrl:"https://github.com/search?q=BitChord+android&type=repositories",downloadDirect:false,domain:"github.com",ads:0,pop:72,smooth:84,langs:80,new:true,desc:"BitChord Android music app — direct APK download.",logoSources:["assets/logos/sites/bitchord.png","https://raw.githubusercontent.com/kushagrasinghx/BitChord/main/app/src/main/ic_launcher-playstore.png","https://raw.githubusercontent.com/kushagrasinghx/BitChord/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp"]},
+{appType:"music",name:"Echo Music",kind:"app",url:"https://github.com/EchoMusicApp/Echo-Music/releases/latest/download/EchoMusic.apk",downloadUrl:"https://github.com/EchoMusicApp/Echo-Music/releases/latest/download/EchoMusic.apk",domain:"github.com",ads:0,pop:78,smooth:86,langs:82,new:true,desc:"Echo Music Android app — direct APK download.",logoSources:["assets/logos/sites/echo-music.png","https://raw.githubusercontent.com/EchoMusicApp/Echo-Music/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"]},
+{appType:"music",name:"Echo Nightly",kind:"app",url:"https://github.com/itsmechinmoy/echo-nightly/releases/latest/download/app-release.apk",downloadUrl:"https://github.com/itsmechinmoy/echo-nightly/releases/latest/download/app-release.apk",domain:"github.com",ads:0,pop:76,smooth:86,langs:80,new:true,desc:"Echo Nightly Android music player — direct APK download.",logoSources:["assets/logos/sites/echo-nightly.webp","https://raw.githubusercontent.com/itsmechinmoy/echo-nightly/main/app/src/nightly/res/mipmap-xxxhdpi/ic_launcher.webp"]},
+{appType:"music",name:"Spotube",kind:"app",url:"https://spotube.cc/downloads/redirect/?platform=Android&filetype=apk&p=latest%2Fdownload%2FSpotube-android-all-arch.apk",downloadUrl:"https://spotube.cc/downloads/redirect/?platform=Android&filetype=apk&p=latest%2Fdownload%2FSpotube-android-all-arch.apk",domain:"spotube.cc",ads:0,pop:88,smooth:90,langs:84,new:true,desc:"Spotube — music player with universal Android APK download.",logoSources:["assets/logos/sites/spotube.png","https://raw.githubusercontent.com/team-spotube/spotube/master/assets/branding/spotube-logo.png","https://raw.githubusercontent.com/team-spotube/spotube/master/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"]},
+{appType:"music",name:"OuterTune",kind:"app",url:"https://github.com/OuterTune/OuterTune/releases/latest",downloadUrl:"https://github.com/OuterTune/OuterTune/releases/latest",downloadDirect:false,domain:"github.com",ads:0,pop:78,smooth:88,langs:86,new:true,desc:"OuterTune Android music app — direct APK download.",logoSources:["assets/logos/sites/outertune.png","https://raw.githubusercontent.com/OuterTune/OuterTune/lite/app/src/main/ic_launcher-playstore.png","https://raw.githubusercontent.com/OuterTune/OuterTune/lite/fastlane/metadata/android/en-US/images/icon.png"]},
+{appType:"music",name:"LastWave",kind:"app",url:"https://github.com/Clash-Projects/LastWave-Native/releases/latest",downloadUrl:"https://github.com/Clash-Projects/LastWave-Native/releases/latest",downloadDirect:false,domain:"github.com",ads:0,pop:75,smooth:84,langs:82,new:true,desc:"LastWave Native music app — direct universal APK download.",logoSources:["assets/logos/sites/lastwave.png","https://raw.githubusercontent.com/Clash-Projects/LastWave-Native/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png","https://raw.githubusercontent.com/Clash-Projects/LastWave-Native/main/lastwave_logo.png"]},
+{appType:"music",name:"Meld",kind:"app",url:"https://github.com/FrancescoGrazioso/Meld/releases/download/v0.7.2/Meld-izzy.apk",downloadUrl:"https://github.com/FrancescoGrazioso/Meld/releases/download/v0.7.2/Meld-izzy.apk",domain:"github.com/FrancescoGrazioso/Meld",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"Meld is an Android music player combining YouTube Music playback with Spotify-powered search, playlists and recommendations. Version 0.7.2 APK.",logoSources:["assets/logos/sites/meld.png","https://play-lh.googleusercontent.com/F7sFbp7vJzYkjk16fJJINv003mwK6XoXIZKpJ9LhOPaN-vt7efBqCLBQ0KBjiKmNHbKmNYyNSjxkjQ78WdUgYg=w240-h480"]}
 ];
 
 window.MAHIFLIX_CATALOG={get sites(){return S},get apps(){return A.concat(M)}};
@@ -398,28 +1157,18 @@ function logoHTML(it,preferLocal){
   const domain=String(it.domain||"").toLowerCase();
   const domainKey=type+":"+domain;
   const nameKey=type+":"+slug;
-  const localItem=logoMap[domainKey]||logoMap[nameKey];
-  const local=(window.MAHIFLIX_LOGOS||{})[domain];
-  /* Always try the site's own published logo first. Older cached/local assets
-     were mismatched for several entries, so they must never override branding. */
-  const isWebsite=!it.appType;
-  const keepFreekz=isWebsite && String(it.name||"").toLowerCase()==="freekz";
+  const localItem=logoMap[domainKey]||logoMap[nameKey]||(window.MAHIFLIX_LOGOS||{})[domain];
   const sources=[
-    /* Cached official page logos are instant for websites. Freekz keeps its exact existing source order. */
-    ...(!it.appType&&localItem&&!keepFreekz?[localItem]:[]),
+    ...(localItem?[localItem]:[]),
     ...(it.logoSources||[]),
     "https://"+domain+"/favicon.ico",
     "https://"+domain+"/favicon.png",
     "https://"+domain+"/favicon.svg",
     "https://www.google.com/s2/favicons?sz=256&domain="+encodeURIComponent(domain),
-    "https://icons.duckduckgo.com/ip3/"+encodeURIComponent(domain)+".ico",
-    ...(!it.appType&&localItem&&keepFreekz?[localItem]:[]),
-    ...(!it.appType&&local?[local]:[])
+    "https://icons.duckduckgo.com/ip3/"+encodeURIComponent(domain)+".ico"
   ];
-  /* Website cards use the website's own logo; Freekz remains unchanged. */
-  const homepagePreview=null;
-  const unique=Array.from(new Set([homepagePreview,...sources].filter(Boolean)));
-  return "<img class='"+(homepagePreview?"homepage-preview":"")+"' loading='lazy' decoding='async' width='240' height='240' alt='"+clean(it.name)+(homepagePreview?" homepage preview":" logo")+"' referrerpolicy='no-referrer' src='"+unique[0]+"' data-logo-sources='"+clean(JSON.stringify(unique))+"' data-logo-index='0' onerror='nextLogo(this)'>";
+  const unique=Array.from(new Set(sources.filter(Boolean)));
+  return "<img loading='lazy' decoding='async' width='240' height='240' alt='"+clean(it.name)+" logo' referrerpolicy='no-referrer' src='"+unique[0]+"' data-logo-sources='"+clean(JSON.stringify(unique))+"' data-logo-index='0' onerror='nextLogo(this)'>";
 }
 function nextLogo(img){
   try{
@@ -487,13 +1236,12 @@ function rowHTML(title,items,opts){
 
 function renderView(type){
   const el=document.getElementById(type==="sites"?"sitesView":"appsView");
-  const data=type==="sites"?S:A.concat(M);
+  const data=type==="sites"?S:A;
   const sorted=data.slice().sort((a,b)=>qualityScore(b)-qualityScore(a));
   if(type==="sites"){
     el.innerHTML=rowHTML("Movie Websites",sorted,{kind:"site",note:"Your curated StreamCloud collection"});
   }else{
-    el.innerHTML=rowHTML("Movie Apps",sorted.filter(x=>x.appType==="movie"),{kind:"app",note:"Direct APK links and app information"})+
-      rowHTML("Music Apps",sorted.filter(x=>x.appType==="music"),{kind:"app",note:"Direct app downloads"});
+    el.innerHTML=rowHTML("Movie Apps",sorted,{kind:"app",note:"Direct APK links and app information"});
   }
 }
 
@@ -705,6 +1453,9 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     });
     if(current)updateDetailStatus();
   }
+  window.STREAMCLOUD_SET_MODE = function(nextMode){
+    mode = nextMode; filter = "all"; adFilter.value = "all"; search.value = ""; render();
+  };
   document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{
     mode=b.dataset.mode;filter="all";adFilter.value="all";search.value="";render();
   }));
@@ -789,6 +1540,391 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   if(initial){
     const item=S.concat(A,M).find(x=>slug(x.name)===initial);
     if(item){mode=M.includes(item)?"music":(A.includes(item)?"apps":"sites");render();openDetail(item,mode)}
+  }
+
+  // ================= ADMIN ADD LISTING LOGIC =================
+  const adminModal = document.getElementById("adminModal");
+  const portalAddBtn = document.getElementById("portalAddBtn");
+  const adminPinInput = document.getElementById("adminPinInput");
+  const adminPinError = document.getElementById("adminPinError");
+  const adminPinNextBtn = document.getElementById("adminPinNextBtn");
+  const adminCatNextBtn = document.getElementById("adminCatNextBtn");
+  const adminCatBackBtn = document.getElementById("adminCatBackBtn");
+  const adminUrlInput = document.getElementById("adminUrlInput");
+  const adminUrlError = document.getElementById("adminUrlError");
+  const adminUrlNextBtn = document.getElementById("adminUrlNextBtn");
+  const adminUrlBackBtn = document.getElementById("adminUrlBackBtn");
+  const adminNameInput = document.getElementById("adminNameInput");
+  const adminNameError = document.getElementById("adminNameError");
+  const adminNameBackBtn = document.getElementById("adminNameBackBtn");
+  const adminSubmitBtn = document.getElementById("adminSubmitBtn");
+  const adminSpinner = document.getElementById("adminSpinner");
+
+  let adminCategory = "sites";
+
+  function setAdminStep(stepNum) {
+    [1, 2, 3, 4].forEach(n => {
+      const v = document.getElementById("adminStep" + n);
+      const dot = document.getElementById("dotStep" + n);
+      if (v) v.classList.toggle("active", n === stepNum);
+      if (dot) dot.classList.toggle("active", n === stepNum);
+    });
+    if (stepNum === 1) {
+      adminPinInput.value = "";
+      adminPinError.textContent = "";
+      setTimeout(() => adminPinInput.focus(), 100);
+    } else if (stepNum === 3) {
+      adminUrlError.textContent = "";
+      setTimeout(() => adminUrlInput.focus(), 100);
+    } else if (stepNum === 4) {
+      adminNameError.textContent = "";
+      setTimeout(() => adminNameInput.focus(), 100);
+    }
+  }
+
+  function openAdminModal() {
+    setAdminStep(1);
+    adminModal.classList.add("open");
+    adminModal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeAdminModal() {
+    adminModal.classList.remove("open");
+    adminModal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  if (portalAddBtn) {
+    portalAddBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openAdminModal();
+    });
+  }
+
+  document.querySelectorAll("[data-admin-close]").forEach(el => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeAdminModal();
+    });
+  });
+
+  function verifyPin() {
+    const val = adminPinInput.value.trim();
+    if (val === "6993") {
+      adminPinError.textContent = "";
+      setAdminStep(2);
+    } else {
+      adminPinError.textContent = "Incorrect password. Enter 6993.";
+      adminPinInput.classList.add("shake");
+      setTimeout(() => adminPinInput.classList.remove("shake"), 400);
+      adminPinInput.select();
+    }
+  }
+
+  if (adminPinNextBtn) {
+    adminPinNextBtn.addEventListener("click", verifyPin);
+  }
+  if (adminPinInput) {
+    adminPinInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        verifyPin();
+      }
+    });
+  }
+
+  document.querySelectorAll("input[name='adminCategory']").forEach(radio => {
+    radio.addEventListener("change", () => {
+      document.querySelectorAll(".category-choice").forEach(c => c.classList.remove("active"));
+      const p = radio.closest(".category-choice");
+      if (p) p.classList.add("active");
+      adminCategory = radio.value;
+    });
+  });
+
+  if (adminCatNextBtn) {
+    adminCatNextBtn.addEventListener("click", () => {
+      const selected = document.querySelector("input[name='adminCategory']:checked");
+      adminCategory = selected ? selected.value : "sites";
+      setAdminStep(3);
+    });
+  }
+  if (adminCatBackBtn) {
+    adminCatBackBtn.addEventListener("click", () => setAdminStep(1));
+  }
+
+  function nextUrl() {
+    const raw = adminUrlInput.value.trim();
+    if (!raw) {
+      adminUrlError.textContent = "Please enter a valid website or app URL.";
+      adminUrlInput.classList.add("shake");
+      setTimeout(() => adminUrlInput.classList.remove("shake"), 400);
+      return;
+    }
+    adminUrlError.textContent = "";
+    try {
+      const u = new URL(/^https?:\/\//i.test(raw) ? raw : "https://" + raw);
+      const guessed = u.hostname.replace(/^www\./, "").split(".")[0];
+      if (!adminNameInput.value && guessed) {
+        adminNameInput.value = guessed.charAt(0).toUpperCase() + guessed.slice(1);
+      }
+    } catch (e) {}
+    setAdminStep(4);
+  }
+
+  if (adminUrlNextBtn) {
+    adminUrlNextBtn.addEventListener("click", nextUrl);
+  }
+  if (adminUrlInput) {
+    adminUrlInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        nextUrl();
+      }
+    });
+  }
+  if (adminUrlBackBtn) {
+    adminUrlBackBtn.addEventListener("click", () => setAdminStep(2));
+  }
+
+  async function submitListing() {
+    const nameVal = adminNameInput.value.trim();
+    const urlVal = adminUrlInput.value.trim();
+    if (!nameVal) {
+      adminNameError.textContent = "Please provide a name for this listing.";
+      adminNameInput.classList.add("shake");
+      setTimeout(() => adminNameInput.classList.remove("shake"), 400);
+      return;
+    }
+
+    adminNameError.textContent = "";
+    adminSubmitBtn.disabled = true;
+    if (adminSpinner) adminSpinner.style.display = "inline-block";
+    adminSubmitBtn.querySelector(".btn-text").textContent = "Adding...";
+
+    try {
+      const response = await fetch("/api/listings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: "6993",
+          category: adminCategory,
+          url: urlVal,
+          name: nameVal
+        })
+      });
+
+      const resData = await response.json();
+      if (!response.ok || !resData.success) {
+        throw new Error(resData.error || "Failed to add listing.");
+      }
+
+      const item = resData.item;
+      if (adminCategory === "sites") {
+        S.unshift(item);
+      } else if (adminCategory === "music") {
+        M.unshift(item);
+      } else {
+        A.unshift(item);
+      }
+
+      closeAdminModal();
+
+      const targetMode = adminCategory === "sites" ? "sites" : adminCategory === "music" ? "music" : "apps";
+      if (typeof window.STREAMCLOUD_SET_MODE === "function") {
+        window.STREAMCLOUD_SET_MODE(targetMode);
+      } else {
+        mode = targetMode;
+        render();
+      }
+
+      showToast(`Added "${item.name}" live to StreamCloud!`);
+    } catch (err) {
+      adminNameError.textContent = err.message || "An error occurred. Please try again.";
+    } finally {
+      adminSubmitBtn.disabled = false;
+      if (adminSpinner) adminSpinner.style.display = "none";
+      adminSubmitBtn.querySelector(".btn-text").textContent = "Add to Directory Live";
+    }
+  }
+
+  if (adminSubmitBtn) {
+    adminSubmitBtn.addEventListener("click", submitListing);
+  }
+  if (adminNameInput) {
+    adminNameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitListing();
+      }
+    });
+  }
+  if (adminNameBackBtn) {
+    adminNameBackBtn.addEventListener("click", () => setAdminStep(3));
+  }
+
+  function showToast(msg) {
+    let t = document.getElementById("toast");
+    if (!t) {
+      t = document.createElement("div");
+      t.id = "toast";
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 3500);
+  }
+
+  async function fetchServerListings() {
+    try {
+      const res = await fetch("/api/listings");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.success && Array.isArray(data.listings) && data.listings.length) {
+        for (const item of data.listings) {
+          const exists = S.concat(A, M).some(x => x.url === item.url && x.name.toLowerCase() === item.name.toLowerCase());
+          if (!exists) {
+            if (item.category === "sites" || (!item.appType && item.kind === "site")) {
+              S.unshift(item);
+            } else if (item.category === "music" || item.appType === "music") {
+              M.unshift(item);
+            } else {
+              A.unshift(item);
+            }
+          }
+        }
+        render();
+      }
+    } catch (e) {
+      console.warn("Could not load server listings:", e);
+    }
+  }
+  fetchServerListings();
+
+  // ================= GEMINI AI CHATBOT LOGIC =================
+  const chatFab = document.getElementById("geminiChatFab");
+  const chatDrawer = document.getElementById("geminiChatDrawer");
+  const chatCloseBtn = document.getElementById("chatCloseBtn");
+  const chatClearBtn = document.getElementById("chatClearBtn");
+  const chatMessages = document.getElementById("chatMessages");
+  const chatForm = document.getElementById("chatForm");
+  const chatInput = document.getElementById("chatInput");
+
+  let chatHistory = [];
+
+  function toggleChatDrawer() {
+    const isOpen = chatDrawer.classList.toggle("open");
+    chatDrawer.setAttribute("aria-hidden", String(!isOpen));
+    if (isOpen) {
+      chatInput.focus();
+    }
+  }
+
+  if (chatFab) {
+    chatFab.addEventListener("click", toggleChatDrawer);
+  }
+  if (chatCloseBtn) {
+    chatCloseBtn.addEventListener("click", () => {
+      chatDrawer.classList.remove("open");
+      chatDrawer.setAttribute("aria-hidden", "true");
+    });
+  }
+  if (chatClearBtn) {
+    chatClearBtn.addEventListener("click", () => {
+      chatHistory = [];
+      chatMessages.innerHTML = `
+        <div class="chat-bubble model-bubble">
+          <p>Chat cleared! How can I help you navigate StreamCloud movies, apps, or music?</p>
+        </div>
+      `;
+    });
+  }
+
+  document.querySelectorAll(".chat-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      const prompt = chip.dataset.prompt;
+      if (prompt) {
+        chatInput.value = prompt;
+        sendChatMessage(prompt);
+      }
+    });
+  });
+
+  function formatMarkdown(text) {
+    let raw = String(text || "");
+    raw = raw.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    raw = raw.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    const paras = raw.split(/\n\n+/).filter(Boolean).map(p => {
+      if (p.trim().startsWith("- ") || p.trim().startsWith("* ")) {
+        const items = p.split(/\n/).map(line => line.replace(/^[\s-*]+/, "").trim()).filter(Boolean);
+        return "<ul>" + items.map(li => `<li>${li}</li>`).join("") + "</ul>";
+      }
+      return `<p>${p.replace(/\n/g, "<br>")}</p>`;
+    });
+    return paras.join("") || "<p>" + clean(text) + "</p>";
+  }
+
+  async function sendChatMessage(query) {
+    const text = String(query || "").trim();
+    if (!text) return;
+
+    chatInput.value = "";
+
+    const userBubble = document.createElement("div");
+    userBubble.className = "chat-bubble user-bubble";
+    userBubble.innerHTML = `<p>${clean(text)}</p>`;
+    chatMessages.appendChild(userBubble);
+
+    const typingBubble = document.createElement("div");
+    typingBubble.className = "chat-bubble typing-bubble";
+    typingBubble.innerHTML = `
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+    `;
+    chatMessages.appendChild(typingBubble);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    chatHistory.push({ role: "user", text: text });
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, history: chatHistory.slice(-8) })
+      });
+
+      const data = await res.json();
+      typingBubble.remove();
+
+      const modelBubble = document.createElement("div");
+      modelBubble.className = "chat-bubble model-bubble";
+
+      if (res.ok && data.reply) {
+        modelBubble.innerHTML = formatMarkdown(data.reply);
+        chatHistory.push({ role: "model", text: data.reply });
+      } else {
+        modelBubble.innerHTML = `<p style="color:#ff6b6b">${clean(data.error || "Unable to get response from AI. Please try again.")}</p>`;
+      }
+      chatMessages.appendChild(modelBubble);
+    } catch (err) {
+      typingBubble.remove();
+      const modelBubble = document.createElement("div");
+      modelBubble.className = "chat-bubble model-bubble";
+      modelBubble.innerHTML = `<p style="color:#ff6b6b">Connection error: ${clean(err.message)}</p>`;
+      chatMessages.appendChild(modelBubble);
+    }
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  if (chatForm) {
+    chatForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      sendChatMessage(chatInput.value);
+    });
   }
 })();
 </script>

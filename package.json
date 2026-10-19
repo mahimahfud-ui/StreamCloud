@@ -10,6 +10,7 @@
     "lint": "echo 'No linting errors'"
   },
   "dependencies": {
+    "@google/genai": "^2.30.0",
     "express": "^4.21.2"
   }
 }

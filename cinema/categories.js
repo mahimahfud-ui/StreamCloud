@@ -32,21 +32,30 @@ export function initCategories() {
     : (movieButton.classList.contains('active') ? 'movie' : 'sites');
   let switchingInternally = false;
 
-  const musicButton = document.createElement('button');
-  musicButton.className = 'mode';
-  musicButton.type = 'button';
-  musicButton.dataset.mode = 'music';
-  musicButton.setAttribute('role', 'tab');
-  musicButton.setAttribute('aria-controls', 'appsView');
-  musicButton.setAttribute('aria-selected', 'false');
-  musicButton.tabIndex = -1;
-  musicButton.textContent = 'MUSIC APPS';
+  const existingMusicButtons = modeSwitch.querySelectorAll('.mode[data-mode="music"]');
+  let musicButton;
+  if (existingMusicButtons.length > 0) {
+    musicButton = existingMusicButtons[0];
+    for (let i = 1; i < existingMusicButtons.length; i++) {
+      existingMusicButtons[i].remove();
+    }
+  } else {
+    musicButton = document.createElement('button');
+    musicButton.className = 'mode';
+    musicButton.type = 'button';
+    musicButton.dataset.mode = 'music';
+    musicButton.setAttribute('role', 'tab');
+    musicButton.setAttribute('aria-controls', 'appsView');
+    musicButton.setAttribute('aria-selected', 'false');
+    musicButton.tabIndex = -1;
+    musicButton.textContent = 'MUSIC APPS';
+    modeSwitch.appendChild(musicButton);
+  }
 
   sitesButton.textContent = 'WEBSITES';
   movieButton.textContent = 'MOVIE APPS';
   sitesButton.setAttribute('aria-controls', 'sitesView');
   movieButton.setAttribute('aria-controls', 'appsView');
-  modeSwitch.appendChild(musicButton);
 
   let thumb = modeSwitch.querySelector('.mode-thumb');
   if (!thumb) {

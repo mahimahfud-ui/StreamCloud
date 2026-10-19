@@ -1,0 +1,173 @@
+import React, { useEffect, useState } from 'react';
+import { Search, Heart, Sparkles, X } from 'lucide-react';
+import { CategoryType } from '../types';
+
+interface NavbarProps {
+  activeCategory: CategoryType;
+  onSelectCategory: (cat: CategoryType) => void;
+  searchQuery: string;
+  onSearchChange: (q: string) => void;
+  favoritesCount: number;
+  onOpenFavorites: () => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({
+  activeCategory,
+  onSelectCategory,
+  searchQuery,
+  onSearchChange,
+  favoritesCount,
+  onOpenFavorites
+}) => {
+  const [isSolid, setIsSolid] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsSolid(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <nav
+      className={`fixed inset-x-0 top-0 z-50 flex items-center justify-between px-4 md:px-8 py-3.5 transition-all duration-500 ${
+        isSolid
+          ? 'bg-neutral-950/85 backdrop-blur-md shadow-2xl border-b border-white/5'
+          : 'bg-gradient-to-b from-black/90 to-transparent'
+      }`}
+    >
+      {/* Brand */}
+      <div className="flex items-center gap-6">
+        <a
+          href="#top"
+          onClick={(e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="flex items-center gap-2.5 group"
+        >
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center p-0.5 bg-neutral-900 border border-white/10 group-hover:border-red-500/50 transition-colors shadow-lg">
+            <img
+              src="/s-logo-v1.svg"
+              alt="StreamCloud"
+              className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(229,9,20,0.4)]"
+            />
+          </div>
+          <span className="font-['Bebas_Neue'] text-2xl tracking-wider text-white group-hover:text-red-500 transition-colors">
+            STREAMCLOUD
+          </span>
+        </a>
+
+        {/* Category Links for desktop */}
+        <div className="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-full border border-white/10">
+          <button
+            type="button"
+            onClick={() => onSelectCategory('sites')}
+            className={`px-3.5 py-1 text-xs font-bold rounded-full transition-all ${
+              activeCategory === 'sites'
+                ? 'bg-red-600 text-white shadow-md shadow-red-900/40'
+                : 'text-neutral-300 hover:text-white'
+            }`}
+          >
+            Websites
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectCategory('movie')}
+            className={`px-3.5 py-1 text-xs font-bold rounded-full transition-all ${
+              activeCategory === 'movie'
+                ? 'bg-red-600 text-white shadow-md shadow-red-900/40'
+                : 'text-neutral-300 hover:text-white'
+            }`}
+          >
+            Movie Apps
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectCategory('music')}
+            className={`px-3.5 py-1 text-xs font-bold rounded-full transition-all ${
+              activeCategory === 'music'
+                ? 'bg-red-600 text-white shadow-md shadow-red-900/40'
+                : 'text-neutral-300 hover:text-white'
+            }`}
+          >
+            Music Apps
+          </button>
+        </div>
+      </div>
+
+      {/* Nav Tools: Search, Favorites, Instagram */}
+      <div className="flex items-center gap-2.5">
+        {/* Search Bar */}
+        <div
+          className={`flex items-center rounded-full transition-all duration-300 border ${
+            isSearchOpen || searchQuery
+              ? 'bg-neutral-900/95 border-white/30 px-3 py-1 shadow-lg'
+              : 'border-transparent bg-transparent p-1'
+          }`}
+        >
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen((prev) => !prev)}
+            aria-label="Search directory"
+            className="text-neutral-300 hover:text-white transition-colors p-1"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+          <input
+            type="text"
+            placeholder="Search titles, URLs..."
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className={`bg-transparent text-sm text-white placeholder-neutral-500 focus:outline-none transition-all duration-300 ${
+              isSearchOpen || searchQuery ? 'w-32 sm:w-44 ml-2 opacity-100' : 'w-0 opacity-0 pointer-events-none'
+            }`}
+          />
+          {(isSearchOpen || searchQuery) && (
+            <button
+              type="button"
+              onClick={() => {
+                onSearchChange('');
+                setIsSearchOpen(false);
+              }}
+              className="text-neutral-500 hover:text-white ml-1"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Favourites Button */}
+        <button
+          type="button"
+          onClick={onOpenFavorites}
+          title="Open My Favourites"
+          className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-neutral-900/80 border border-white/10 hover:border-red-500/50 text-neutral-200 hover:text-white transition-all shadow"
+        >
+          <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500/40" />
+          <span className="hidden sm:inline">My List</span>
+          {favoritesCount > 0 && (
+            <span className="bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center">
+              {favoritesCount}
+            </span>
+          )}
+        </button>
+
+        {/* Instagram link */}
+        <a
+          href="https://www.instagram.com/mahimahfud/"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Contact Mahi on Instagram"
+          className="p-1.5 text-neutral-400 hover:text-pink-500 transition-colors"
+        >
+          <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+          </svg>
+        </a>
+      </div>
+    </nav>
+  );
+};
