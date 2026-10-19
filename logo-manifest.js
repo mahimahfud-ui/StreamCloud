@@ -44,5 +44,6 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "site:bingr": "./assets/logos/sites/bingr.ico",
   "site:1tube": "./assets/logos/sites/1tube.png",
   "site:watchott": "./assets/logos/sites/watchott.webp",
-  "site:m4uhd": "./assets/logos/sites/m4uhd.png"
+  "site:m4uhd": "./assets/logos/sites/m4uhd.png",
+  "site:cinevito": "./assets/logos/sites/cinevito.png"
 };
