@@ -494,6 +494,17 @@ function appCard(it,i){
     "<div class='card-footer'><small>"+(directUrl?"Direct file download · stays on this page":"Direct download link not verified")+"</small><div class='movie-card-actions'>"+downloadButton+"</div></div></article>";
 }
 
+function renderView(type){
+  const el=document.getElementById(type==="sites"?"sitesView":"appsView");
+  const data=type==="sites"?S:A;
+  const sorted=data.slice().sort((a,b)=>qualityScore(b)-qualityScore(a));
+  if(type==="sites"){
+    el.innerHTML=rowHTML("Movie Websites",sorted,{kind:"site",note:"Your curated StreamCloud collection"});
+  }else{
+    el.innerHTML=rowHTML("Movie Apps",sorted,{kind:"app",note:"Direct APK links and app information"});
+  }
+}
+
 renderView("sites");
 renderView("apps");
 document.querySelectorAll('.track').forEach(function(t){t.querySelectorAll('.card').forEach(function(card,i){card.style.animationDelay=(Math.min(i,8)*55)+'ms'})});
