@@ -381,9 +381,9 @@ const S=[
 
 const A=[
 {appType:"movie",name:"FilmTV",url:"https://www.filmtvapp.com/",downloadUrl:"",downloadDirect:false,domain:"filmtvapp.com",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"FilmTV Android app. Use the official site download section.",logoSources:["assets/logos/sites/filmtv.png","https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo-transparent.png","https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo.jpg"]},
-{appType:"movie",name:"Nuvix",url:"https://www.nuvixapp.in/",downloadUrl:"",downloadDirect:false,domain:"nuvixapp.in",ads:0,pop:82,smooth:88,langs:86,new:true,desc:"Nuvix Android app. Use the official site download section.",logoSources:["assets/logos/sites/nuvix.webp","https://www.nuvixapp.in/img/nuvix-logo.webp","https://www.nuvixapp.in/favicon.ico?favicon.0dc47d6d.ico"]},
+{appType:"movie",name:"Nuvix",url:"https://www.nuvixapp.in/",downloadUrl:"https://www.nuvixapp.in/#download-apk",downloadDirect:false,domain:"nuvixapp.in",ads:0,pop:82,smooth:88,langs:86,new:true,desc:"Nuvix Android app. Use the official site download section.",logoSources:["assets/logos/sites/nuvix.webp","https://www.nuvixapp.in/img/nuvix-logo.webp","https://www.nuvixapp.in/favicon.ico?favicon.0dc47d6d.ico"]},
 {appType:"movie",name:"Vega",url:"https://vega.zendax.me/",downloadUrl:"https://github.com/vega-org/vega-app/releases/download/v5.2.0/vega-v5.2.0.apk",downloadDirect:true,domain:"vega.zendax.me",ads:0,pop:88,smooth:91,langs:92,new:true,desc:"Android media player with ad-free streaming and downloads.",logoSources:["assets/logos/sites/vega.png","https://vega.zendax.me/cdn-cgi/image/onerror=redirect,width=96,height=96,quality=80,format=webp/_astro/logo.D0gpMGRY.png","https://vega.zendax.me/favicon.ico"]},
-{appType:"movie",name:"NetMirror",url:"https://netmirror.gg/",downloadUrl:"",downloadDirect:false,domain:"netmirror.gg",ads:2,pop:90,smooth:66,langs:84,new:true,desc:"Android streaming app with movie and series sources.",logoSources:["assets/logos/sites/netmirror.png","https://netmirror.gg/img/nf2/icon_x192.png","https://netmirror.gg/favicon.ico"]},
+{appType:"movie",name:"NetMirror",url:"https://netmirror.gg/",downloadUrl:"https://netmirror.gg/10/en-bd#:~:text=DOWNLOAD%20APK,STEP%202",downloadDirect:false,domain:"netmirror.gg",ads:2,pop:90,smooth:66,langs:84,new:true,desc:"Android streaming app with movie and series sources.",logoSources:["assets/logos/sites/netmirror.png","https://netmirror.gg/img/nf2/icon_x192.png","https://netmirror.gg/favicon.ico"]},
 {appType:"movie",name:"CineHD",url:"https://cinehd.dev/",downloadUrl:"https://cinehd.dev/download/global/CineHD-v1.1.4-%28Universal%29.apk",downloadDirect:true,domain:"cinehd.dev",ads:2,pop:86,smooth:60,langs:78,new:false,desc:"Android movie and series streaming app.",logoSources:["assets/logos/sites/cinehd-app.png","https://cinehd.dev/images/cinehd-logo.png","https://cinehd.dev/images/favicon.ico?v=1145"]},
 {appType:"movie",name:"Moviboxapk",url:"https://moviboxapk.com/",downloadUrl:"https://file.dxmaxapk.com/moviebox-4-0-03-0930-03.apk",downloadDirect:true,domain:"moviboxapk.com",ads:2,pop:77,smooth:63,langs:76,new:false,desc:"Android movie and series streaming app.",logoSources:["assets/logos/sites/moviboxapk.webp","https://moviboxapk.com/wp-content/uploads/2026/06/cropped-moviebox-icon.webp","https://moviboxapk.com/favicon.ico"]},
 {appType:"movie",name:"PvrPlay",url:"https://pvrplay.online/",downloadUrl:"",downloadDirect:false,domain:"pvrplay.online",ads:2,pop:75,smooth:64,langs:74,new:false,desc:"Android app for movies and web series.",logoSources:["assets/logos/sites/pvrplay.png","assets/logos/site-pvrplay.webp","https://pvrplay.online/favicon.ico","https://pvrplay.online/favicon.png"]},
@@ -481,17 +481,18 @@ function appCard(it,i){
   const adTag=it.ads===0?"<span class='ad-low'>No / minimal ads</span>":it.ads===1?"<span class='ad-mid'>Some ads</span>":"<span class='ad-high'>More / heavier ads</span>";
   const freshness=it.new?"<span class='fresh'>NEW</span>":"";
   const domain="<span>"+clean(it.domain||"app")+"</span>";
-  const directUrl=it.downloadDirect!==false&&/^https?:\/\//i.test(String(it.downloadUrl||""));
+  const hasDownloadUrl=/^https?:\/\//i.test(String(it.downloadUrl||""));
+  const directUrl=hasDownloadUrl&&it.downloadDirect!==false;
   const logo=logoHTML(it,!music);
   const favourite="<button class='fav movie-fav' type='button' data-on='' aria-pressed='false' aria-label='Add "+clean(it.name)+" to My List' title='Add to My List'>"+svgPlus()+"</button>";
-  const downloadButton=directUrl
-    ?"<a class='open-link download-link' data-direct-download='true' href='"+clean(it.downloadUrl)+"' rel='nofollow' aria-label='Download "+clean(it.name)+"'>Download <span aria-hidden='true'>↧</span></a>"
-    :"<button class='open-link download-link download-unavailable' type='button' disabled aria-disabled='true' title='A verified direct APK link is not available yet'>Download</button>";
-  const tags="<div class='movie-app-tags'>"+freshness+(music?(directUrl?"<span class='download-tag'>DIRECT DOWNLOAD</span>":"<span class='download-tag unavailable-tag'>DIRECT LINK UNAVAILABLE</span>"):adTag)+domain+"</div>";
+  const downloadButton=hasDownloadUrl
+    ?"<a class='open-link download-link' "+(directUrl?"data-direct-download='true'":"data-download-page='true'")+" href='"+clean(it.downloadUrl)+"' rel='nofollow' aria-label='Download "+clean(it.name)+"'>Download <span aria-hidden='true'>↧</span></a>"
+    :"<button class='open-link download-link download-unavailable' type='button' disabled aria-disabled='true' title='A verified download link is not available yet'>Download</button>";
+  const tags="<div class='movie-app-tags'>"+freshness+(music?(directUrl?"<span class='download-tag'>DIRECT DOWNLOAD</span>":hasDownloadUrl?"<span class='download-tag'>DOWNLOAD PAGE</span>":"<span class='download-tag unavailable-tag'>DIRECT LINK UNAVAILABLE</span>"):adTag)+domain+"</div>";
   return "<article class='card app-card movie-app-card live' tabindex='0' role='button' data-name='"+clean(it.name.toLowerCase())+"' data-category='"+(music?"music":"movie")+"' style='--accent:"+accent+";--accent2:"+accent2+";--accent-glow:"+accent+"30;animation-delay:"+Math.min(i,8)*42+"ms'>"+
     "<div class='card-top'><div class='app-icon movie-logo'>"+logo+"</div><span class='kind'>"+(music?"MUSIC APP":"MOVIE APP")+"</span></div>"+
     "<h3><span>"+clean(it.name)+"</span>"+favourite+"</h3><p>"+clean(it.desc||"")+"</p>"+tags+
-    "<div class='card-footer'><small>"+(directUrl?"Direct file download · stays on this page":"Direct download link not verified")+"</small><div class='movie-card-actions'>"+downloadButton+"</div></div></article>";
+    "<div class='card-footer'><small>"+(directUrl?"Direct file download · stays on this page":hasDownloadUrl?"Download section · same tab":"Direct download link not verified")+"</small><div class='movie-card-actions'>"+downloadButton+"</div></div></article>";
 }
 
 function renderView(type){
