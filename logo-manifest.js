@@ -42,7 +42,6 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "site:theogpiratebot.online": "assets/logos/sites/the-og-pirate-bot.ico",
   "site:the-og-pirate-bot": "assets/logos/sites/the-og-pirate-bot.ico",
   "site:cinevito.net": "https://cinevito.net/favicon.png",
-  "site:cinevito": "https://cinevito.net/favicon.png",
   "site:bingr.one": "assets/logos/sites/bingr.ico",
   "site:bingr": "assets/logos/sites/bingr.ico",
   "site:cinejoy.to": "assets/logos/sites/cinejoy.ico",
@@ -50,11 +49,8 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "site:cinegram.tv": "assets/logos/sites/cinegram.png",
   "site:cinegram": "assets/logos/sites/cinegram.png",
   "site:watchott.org": "https://watchott.org/favicon.svg",
-  "site:watchott": "https://watchott.org/favicon.svg",
   "site:1tube.org": "https://www.1tube.org/logo.png",
-  "site:1tube": "https://www.1tube.org/logo.png",
   "movie:filmtvapp.com": "https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo-transparent.png",
-  "movie:filmtv": "https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo-transparent.png",
   "movie:nuvixapp.in": "assets/logos/sites/nuvix.webp",
   "movie:nuvix": "assets/logos/sites/nuvix.webp",
   "movie:vega.zendax.me": "assets/logos/sites/vega.png",
@@ -97,5 +93,9 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "site:anivortex": "./assets/logos/sites/anivortex.webp",
   "site:filmtv": "./assets/logos/sites/filmtv.jpg",
   "site:movy.sx": "https://www.movy.sx/favicon.svg",
-  "site:movy": "https://www.movy.sx/favicon.svg"
+  "site:movy": "./assets/logos/sites/movy.webp",
+  "site:1tube": "./assets/logos/sites/1tube.png",
+  "site:watchott": "./assets/logos/sites/watchott.webp",
+  "site:cinevito": "./assets/logos/sites/cinevito.png",
+  "movie:filmtv": "./assets/logos/movie-apps/filmtv.png"
 };
