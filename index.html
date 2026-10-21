@@ -408,7 +408,7 @@ window.MAHIFLIX_CATALOG={get sites(){return S},get apps(){return A.concat(M)}};
 const adLabel=["No / minimal ads","Some ads","More / heavier ads"];
 const adClass=["a0","a1","a2"];
 
-const clean=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const clean=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const initials=n=>n.replace(/[^a-z0-9 ]/gi,"").split(/\s+/).map(x=>x[0]||"").join("").slice(0,2).toUpperCase();
 const hue=n=>{let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h};
 
@@ -677,7 +677,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
       target.innerHTML=typed.length?rowHTML("Music Apps",typed,{kind:"app",note:"Direct app downloads"}):"";
     }
     document.getElementById("empty").style.display=typed.length?"none":"block";
-    document.getElementById("empty").textContent=search.value?"No listings matched your search. Try another name or filter.":mode==="sites"&&!S.length?"No websites added yet. Send ChatGPT a message like Website - https://example.com to add one.":"No listings match these filters.";
+    document.getElementById("empty").textContent=search.value?"No listings matched your search. Try another name or filter.":mode==="sites"&&!S.length?"No websites are listed yet. Please check back soon.":"No listings match these filters.";
     document.getElementById("sitesView").classList.toggle("active",mode==="sites");
     document.getElementById("appsView").classList.toggle("active",mode!=="sites");
     document.querySelectorAll(".mode").forEach(b=>{const on=b.dataset.mode===mode;b.classList.toggle("active",on);b.setAttribute("aria-selected",String(on))});

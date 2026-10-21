@@ -80,7 +80,7 @@
     img.decoding = "async";
     img.loading = "lazy";
     img.referrerPolicy = "no-referrer";
-    if (typeof it.poster === "string" && /^\/[\w-]+\.(jpg|jpeg|png|webp)$/i.test(it.poster)) {
+    if (typeof it.poster === "string" && (/^\/[\w-]+\.(jpg|jpeg|png|webp)$/i.test(it.poster) || /^https:\/\/image\.tmdb\.org\/t\/p\//i.test(it.poster.trim()))) {
       img.srcset = poster(it.poster, "w185") + " 185w, " + poster(it.poster, "w342") + " 342w, " + poster(it.poster, "w500") + " 500w";
       img.sizes = sizes || "200px";
     }
@@ -115,12 +115,26 @@
       fragment.appendChild(card);
     });
     grid.appendChild(fragment);
-    msg.textContent = list.length ? "" : query ? "Nothing matched your search." : tab === "movie" ? "No movies yet. Add one to data/recommendations.json." : "No web series yet. Add one to data/recommendations.json.";
+    msg.textContent = "";
+    if (list.length) return;
+    if (!query) { msg.textContent = tab === "movie" ? "No movies here yet." : "No web series here yet."; return; }
+    var otherType = tab === "movie" ? "series" : "movie", otherLabel = otherType === "movie" ? "Movies" : "Web Series";
+    var more = items.filter(function (it) {
+      return it.type === otherType && norm([it.title, it.originalTitle, it.year, (it.genres || []).join(" ")].join(" ")).indexOf(query) !== -1;
+    }).length;
+    msg.appendChild(document.createTextNode("Nothing matched your search."));
+    if (more) {
+      var jump = el("button", "t-link", "Show " + more + " in " + otherLabel);
+      jump.type = "button";
+      jump.addEventListener("click", function () { setTab(otherType); });
+      msg.appendChild(jump);
+    }
   }
   function setTab(type) {
     tab = type;
     tabs.forEach(function (button) {
       button.setAttribute("aria-selected", String(button.dataset.type === type));
+      button.tabIndex = button.dataset.type === type ? 0 : -1;
     });
     render();
   }
@@ -128,6 +142,12 @@
     button.addEventListener("click", function () { setTab(button.dataset.type); });
   });
   input.addEventListener("input", render);
+  sec.querySelector(".t-tabs").addEventListener("keydown", function (event) {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    var next = tabs[(tabs.indexOf(document.activeElement) + (event.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+    if (!next) return;
+    event.preventDefault(); setTab(next.dataset.type); next.focus();
+  });
 
   function fill(it) {
     body.textContent = "";
@@ -227,7 +247,14 @@
     if (event.target.closest("[data-t-close]")) close();
   });
   document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape" && modal.classList.contains("open")) close();
+    if (!modal.classList.contains("open")) return;
+    if (event.key === "Escape") { close(); return; }
+    if (event.key !== "Tab") return;
+    var nodes = Array.prototype.slice.call(panel.querySelectorAll("a[href],button,summary")).filter(function (n) { return n.offsetParent !== null || n === document.activeElement; });
+    if (!nodes.length) { event.preventDefault(); panel.focus(); return; }
+    var first = nodes[0], last = nodes[nodes.length - 1], active = document.activeElement;
+    if (event.shiftKey && (active === first || active === panel)) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
   });
 
   fetch(SOURCE, { cache: "no-cache" }).then(function (response) {
@@ -244,10 +271,7 @@
     sec.hidden = false;
     if (navLink) navLink.hidden = false;
     tab = movies.length ? "movie" : "series";
-    tabs.forEach(function (button) {
-      button.setAttribute("aria-selected", String(button.dataset.type === tab));
-    });
-    render();
+    setTab(tab);
   }).catch(function () {
     sec.hidden = false;
     msg.textContent = "Recommendations could not be loaded. Please refresh the page.";
