@@ -39,3 +39,11 @@ For directories or the complete tree, use the GitHub API links above. Do not ask
 ## Development notes
 
 Keep the existing dark cinematic design and data. Prefer targeted changes, verify JavaScript syntax after edits, preserve the vendor license, and avoid claiming a deployment or live link check is complete until it has been verified.
+
+## Movies & Web Series recommendations
+
+Edit `data/recommendations.json` and push to `main`; the deploy workflow fetches metadata from TMDB and publishes it.
+
+- Each entry can be a title string or an object such as `{ "title": "Inception", "year": 2010, "tmdbId": 27205 }`. Use `tmdbId` to disambiguate similarly named titles.
+- Add repository secrets under Settings → Secrets and variables → Actions: `TMDB_API_KEY` or `TMDB_READ_ACCESS_TOKEN` is required; `OMDB_API_KEY` is optional and enables IMDb ratings.
+- Keys are only used in GitHub Actions. The public site loads generated `data/tmdb/*.json` files. If metadata fetching fails for a title, the previous generated entry is retained.
