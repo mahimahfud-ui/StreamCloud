@@ -647,6 +647,8 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     return true;
   }
   function render(){
+    const tools=document.querySelector(".catalog-tools");
+    if(tools) tools.hidden = mode==="sites" && S.length===0;
     const data=allData().filter(matches).filter(item=>mode==="sites"?!item.appType:mode==="apps"?item.appType==="movie":item.appType==="music");
     if(sort==="popular")data.sort((a,b)=>b.pop-a.pop);
     else if(sort==="newest")data.sort((a,b)=>Number(b.new)-Number(a.new)||qualityScore(b)-qualityScore(a));
