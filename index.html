@@ -363,20 +363,7 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
 </footer>
 
 <script>
-const S=[
-{name:"Freekz",url:"https://freekz.to/",domain:"freekz.to",ads:1,pop:82,smooth:84,langs:86,new:true,desc:"Freekz movie and TV homepage.",logoSources:["assets/logos/sites/freekz.png","https://freekz.to/05BB1581-39C9-4B10-AA10-7957B2994AE4.png","https://freekz.to/banner.png","https://freekz.to/favicon.ico"]},
-{name:"7reel",url:"https://7reels.cc/",domain:"7reels.cc",ads:2,pop:74,smooth:62,langs:72,new:true,desc:"Free movie and series streaming directory.",logoSources:["assets/logos/sites/7reel.png","https://7reels.cc/favicon-96x96.png","https://7reels.cc/favicon.ico","https://7reels.cc/favicon.png"]},
-{name:"M4UHD",url:"https://m4uhd.gold/",domain:"m4uhd.gold",ads:2,pop:94,smooth:60,langs:76,new:false,desc:"Large movie and TV streaming catalogue.",logoSources:["assets/logos/sites/m4uhd.png","https://m4uhd.gold/images/m4uhd-logo.png","https://m4uhd.gold/images/m4uhd-icon.png","https://m4uhd.gold/favicon.ico"]},
-{name:"CineHD",url:"https://cinehd.vc/",domain:"cinehd.vc",ads:2,pop:92,smooth:61,langs:78,new:false,desc:"Movies and series with a large free-streaming catalogue.",logoSources:["assets/logos/sites/cinehd.png","https://cinehd.vc/icon-192x192.png","https://cinehd.vc/favicon.ico","https://cinehd.dev/images/favicon.ico"]},
-{name:"NightFlix",url:"https://nightflix.vg/",domain:"nightflix.vg",ads:2,pop:86,smooth:62,langs:78,new:false,desc:"Free movies and TV streaming site.",logoSources:["assets/logos/sites/nightflix.png","https://nightflix.vg/favicon.ico","https://nightflix.vg/favicon.png","https://nightflix.vg/favicon-192x192.png"]},
-{name:"The OG Pirate Bot",url:"https://theogpiratebot.online/",domain:"theogpiratebot.online",ads:0,pop:70,smooth:70,langs:70,new:true,desc:"The OG Pirate Bot website.",logoSources:["assets/logos/sites/the-og-pirate-bot.ico","https://theogpiratebot.online/favicon.ico","https://theogpiratebot.online/favicon.png"]},
-{name:"Cinevito",url:"https://cinevito.net/",domain:"cinevito.net",ads:0,pop:70,smooth:70,langs:70,new:true,desc:"Cinevito website.",logoSources:["assets/logos/sites/cinevito.png","assets/logos/sites/cinevito.ico","https://cinevito.net/favicon.ico","https://cinevito.net/favicon.png"]},
-{name:"Bingr",url:"https://bingr.one/",domain:"bingr.one",ads:2,pop:73,smooth:56,langs:70,new:false,desc:"Movie and TV discovery/streaming platform.",logoSources:["assets/logos/sites/bingr.ico","https://bingr.in/images/site/bingr-logo-pink.png","https://bingr.in/favicon.ico?v=1"]},
-{name:"Cinejoy",url:"https://cinejoy.to/",domain:"cinejoy.to",ads:2,pop:68,smooth:52,langs:66,new:false,desc:"Movies, TV and short-drama streaming platform.",logoSources:["assets/logos/sites/cinejoy.ico","https://cinejoy.to/brand/logomark-white.svg","https://cinejoy.to/favicon.svg","https://cinejoy.to/favicon.ico"]},
-{name:"Cinegram",url:"https://cinegram.tv/",domain:"cinegram.tv",ads:1,pop:77,smooth:75,langs:76,new:false,desc:"Movies and series streaming platform.",logoSources:["assets/logos/sites/cinegram.png","https://cinegram.tv/sizes/fav-192.png","https://cinegram.tv/favicon.ico","https://cinegram.tv/favicon.png"]},
-{name:"Watchott",url:"https://watchott.org/",domain:"watchott.org",ads:1,pop:58,smooth:58,langs:65,new:false,desc:"Movie and TV streaming website.",logoSources:["assets/logos/sites/watchott.webp","https://watchott.org/favicon.svg","https://watchott.org/favicon.ico","https://watchott.org/favicon.png"]},
-{name:"1tube",url:"https://www.1tube.org/",domain:"1tube.org",ads:2,pop:84,smooth:66,langs:82,new:false,desc:"Movies, TV and other streaming content.",logoSources:["assets/logos/sites/1tube.png","https://www.1tube.org/logo.png","https://www.1tube.org/favicon.ico","https://www.1tube.org/favicon.png"]}
-];
+const S=[];;
 
 const A=[
 {appType:"movie",name:"FilmTV",url:"https://www.filmtvapp.com/",downloadUrl:"https://www.filmtvapp.com/#download",downloadDirect:false,domain:"filmtvapp.com",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"FilmTV Android app. Use the official site download section.",logoSources:["assets/logos/sites/filmtv.png","https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo-transparent.png","https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo.jpg"]},
@@ -420,7 +407,9 @@ function logoHTML(it,preferLocal){
   const domainKey=type+":"+domain;
   const nameKey=type+":"+slug;
   const localItem=logoMap[domainKey]||logoMap[nameKey]||(window.MAHIFLIX_LOGOS||{})[domain];
+  const preview=String(it.thumbnail||it.thumbnailUrl||"").trim();
   const sources=[
+    ...(preview?[preview]:[]),
     ...(localItem?[localItem]:[]),
     ...(it.logoSources||[]),
     "https://"+domain+"/favicon.ico",
@@ -430,7 +419,8 @@ function logoHTML(it,preferLocal){
     "https://icons.duckduckgo.com/ip3/"+encodeURIComponent(domain)+".ico"
   ];
   const unique=Array.from(new Set(sources.filter(Boolean)));
-  return "<img loading='lazy' decoding='async' width='240' height='240' alt='"+clean(it.name)+" logo' referrerpolicy='no-referrer' src='"+unique[0]+"' data-logo-sources='"+clean(JSON.stringify(unique))+"' data-logo-index='0' onerror='nextLogo(this)'>";
+  const alt=clean(it.name)+(preview?" thumbnail":" logo");
+  return "<img loading='lazy' decoding='async' width='240' height='240' alt='"+alt+"' class='"+(preview?"source-thumbnail":"")+"' referrerpolicy='no-referrer' src='"+unique[0]+"' data-logo-sources='"+clean(JSON.stringify(unique))+"' data-logo-index='0' onerror='nextLogo(this)'>";
 }
 function nextLogo(img){
   try{
@@ -438,6 +428,7 @@ function nextLogo(img){
     const index=Number(img.getAttribute("data-logo-index")||"0")+1;
     if(index<sources.length){
       img.setAttribute("data-logo-index",String(index));
+      if(index>0)img.classList.remove("source-thumbnail");
       img.src=sources[index];
       return;
     }
@@ -465,7 +456,8 @@ function card(it,i,isTop){
   const ad=it.ads<2?"<span class='ad "+adClass[it.ads]+"'>"+(it.ads===0?"NO AD":"LESS AD")+"</span>":"";
   return "<div class='card logo-card live' tabindex='0' role='button' style='--c1:"+c1+";--c2:"+c2+"' data-name='"+clean(it.name.toLowerCase())+"'>"+
     logoHTML(it)+nw+ad+
-    "<div class='cap'>"+clean(it.name)+"</div></div>";
+    "<div class='cap'>"+clean(it.name)+"</div>"+
+    "<div class='site-meta'><span>"+clean(it.domain||it.url||"Website")+"</span><span class='site-open'>Visit ↗</span></div></div>";
 }
 
 function appCard(it,i){
@@ -670,7 +662,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
       target.innerHTML=typed.length?rowHTML("Music Apps",typed,{kind:"app",note:"Direct app downloads"}):"";
     }
     document.getElementById("empty").style.display=typed.length?"none":"block";
-    document.getElementById("empty").textContent=search.value?"No listings matched your search. Try another name or filter.":"No listings match these filters.";
+    document.getElementById("empty").textContent=search.value?"No listings matched your search. Try another name or filter.":mode==="sites"&&!S.length?"No websites added yet. Send ChatGPT a message like Website - https://example.com to add one.":"No listings match these filters.";
     document.getElementById("sitesView").classList.toggle("active",mode==="sites");
     document.getElementById("appsView").classList.toggle("active",mode!=="sites");
     document.querySelectorAll(".mode").forEach(b=>{const on=b.dataset.mode===mode;b.classList.toggle("active",on);b.setAttribute("aria-selected",String(on))});
