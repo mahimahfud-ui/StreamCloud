@@ -51,7 +51,8 @@
       },
       "runtime": 138,
       "imdbId": "tt1324059",
-      "industry": "Bollywood"
+      "industry": "Bollywood",
+      "poster": "https://image.pmgstatic.com/cache/resized/w663/files/images/film/posters/162/736/162736633_2b43b9.jpg"
     },
     {
       "title": "Ajab Prem Ki Ghazab Kahani",
@@ -100,7 +101,8 @@
       },
       "runtime": 158,
       "imdbId": "tt7019842",
-      "industry": "Kollywood"
+      "industry": "Kollywood",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMGI5M2Q4MDktOWVlOS00MzVjLWJlNzktMWZmYTkwOGI2MDc4XkEyXkFqcGc%40._V1_FMjpg_UX1000_.jpg"
     },
     {
       "title": "October",
@@ -115,7 +117,8 @@
       },
       "runtime": 115,
       "imdbId": "tt7700730",
-      "industry": "Bollywood"
+      "industry": "Bollywood",
+      "poster": "https://cf-img-a-in.tosshub.com/sites/visualstory/wp/2025/07/OctoberITG-1751617529495.jpg?size=%2A%3A900"
     },
     {
       "title": "Zindagi Na Milegi Dobara",
@@ -133,7 +136,8 @@
       },
       "runtime": 155,
       "imdbId": "tt1562872",
-      "industry": "Bollywood"
+      "industry": "Bollywood",
+      "poster": "https://m.media-amazon.com/images/M/MV5BOGIzYzg5NzItNDRkYS00NmIzLTk3NzQtZWYwY2VlZDhiYWQ4XkEyXkFqcGc%40._V1_.jpg"
     },
     {
       "title": "Ek Villain",
@@ -187,7 +191,8 @@
       "overview": "A mythological horror story about greed and a hidden ancestral treasure in a rain-soaked village.",
       "runtime": 108,
       "imdbId": "tt8239946",
-      "industry": "Bollywood"
+      "industry": "Bollywood",
+      "poster": "https://mir-s3-cdn-cf.behance.net/project_modules/hd_webp/58d54067564965.5bbf2e5dab990.jpg"
     }
   ],
   "series": [
@@ -266,7 +271,8 @@
       "seasonCount": 1,
       "episodeCount": 8,
       "imdbId": "tt35870921",
-      "industry": "Bollywood"
+      "industry": "Bollywood",
+      "poster": "https://www.hindustantimes.com/ht-img/img/2026/05/29/600x800/HJeTcPZXUAcPmZ7_1780062930818_1780062947744_d9b1b57b-74de-4ab4-9880-fdcb25a979a4_1780063317716_8a4ca5f2-2e6a-4bac-9cb4-43a11e15a6ca.jpg"
     },
     {
       "title": "Black Warrant",
@@ -283,7 +289,8 @@
       "seasonCount": 1,
       "episodeCount": 7,
       "imdbId": "tt35064818",
-      "industry": "Bollywood"
+      "industry": "Bollywood",
+      "poster": "https://m.media-amazon.com/images/M/MV5BMDg4YTgzODUtYTI5YS00ZWEwLTg4OGYtMGUxNWFkYTdjNDFjXkEyXkFqcGc%40._V1_.jpg"
     },
     {
       "title": "Farzi",
@@ -302,7 +309,8 @@
       "seasonCount": 1,
       "episodeCount": 8,
       "imdbId": "tt15477488",
-      "industry": "Bollywood"
+      "industry": "Bollywood",
+      "poster": "https://pics.filmaffinity.com/Farzi_Serie_de_TV-626428942-large.jpg"
     },
     {
       "title": "Asur: Welcome to Your Dark Side",
@@ -321,7 +329,8 @@
       "seasonCount": 2,
       "episodeCount": 16,
       "imdbId": "tt11912196",
-      "industry": "Bollywood"
+      "industry": "Bollywood",
+      "poster": "https://media.senscritique.com/media/000021211700/0/asur_welcome_to_your_dark_side.jpg"
     }
   ]
 }
