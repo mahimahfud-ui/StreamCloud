@@ -27,6 +27,13 @@ jobs:
       - name: Validate JavaScript, JSON, and local assets
         run: npm run lint
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Test catalog link extraction
+        run: python -m unittest scripts.test_check_links -v
+
       - name: Install browser test runner
         run: npm install --no-save --package-lock=false --no-audit --no-fund playwright
       - name: Install Chromium
