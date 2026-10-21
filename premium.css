@@ -92,3 +92,8 @@ main .app-card{padding:18px!important;gap:12px}
 #toast{border-radius:999px}
 
 @media(prefers-reduced-motion:reduce){main .card,.detail-panel,.wl-panel,#acList,.detail-modal,.wl-modal{transition:none!important}main .card:hover{transform:none!important}}
+
+/* Touch and responsiveness polish */
+button,.card,.mode,.filter-chip,.open-link{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+main .card:active{transform:scale(.985)}
+@media(hover:none){main .card:hover{transform:none}}
