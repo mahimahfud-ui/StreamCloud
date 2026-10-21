@@ -2,58 +2,6 @@
   "_instructions": "Manual source of truth for StreamCloud recommendations. Add objects to movies or series; no movie metadata API or API key is used.",
   "movies": [
     {
-      "title": "Parasite",
-      "year": 2019,
-      "poster": "https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
-      "genres": [
-        "Thriller",
-        "Drama",
-        "Comedy"
-      ],
-      "rating": {
-        "source": "IMDb",
-        "value": 8.5
-      },
-      "overview": "A struggling family gradually becomes entangled with a wealthy household, setting off a tense story of class, ambition, and unexpected consequences.",
-      "imdbId": "tt6751668",
-      "note": "A tightly constructed social thriller with dark humour."
-    },
-    {
-      "title": "Spirited Away",
-      "year": 2001,
-      "poster": "https://image.tmdb.org/t/p/w500/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg",
-      "genres": [
-        "Animation",
-        "Fantasy",
-        "Adventure"
-      ],
-      "rating": {
-        "source": "IMDb",
-        "value": 8.6
-      },
-      "overview": "A young girl enters a mysterious spirit world and must find courage and resourcefulness to rescue her parents and return home.",
-      "imdbId": "tt0245429",
-      "note": "A richly imaginative animated fantasy."
-    },
-    {
-      "title": "Inception",
-      "year": 2010,
-      "poster": "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
-      "genres": [
-        "Sci-Fi",
-        "Action",
-        "Thriller"
-      ],
-      "rating": {
-        "source": "IMDb",
-        "value": 8.8
-      },
-      "overview": "A specialist who enters people's dreams is offered a chance to clear his past by carrying out an unusually difficult mission inside a target's mind.",
-      "runtime": 148,
-      "imdbId": "tt1375666",
-      "note": "A layered science-fiction thriller built around dreams and memory."
-    },
-    {
       "title": "Mimi",
       "year": 2021,
       "poster": "https://image.tmdb.org/t/p/w500/AtCUHSf5sG31FL0vugxplft5FXW.jpg",
@@ -72,63 +20,6 @@
     }
   ],
   "series": [
-    {
-      "title": "Dark",
-      "year": 2017,
-      "poster": "https://image.tmdb.org/t/p/w500/apbrbWs8M9lyOpJYU5WXrpFbk1Z.jpg",
-      "genres": [
-        "Mystery",
-        "Sci-Fi",
-        "Thriller"
-      ],
-      "rating": {
-        "source": "IMDb",
-        "value": 8.7
-      },
-      "overview": "A disappearance in a small German town reveals connections between several families and a mystery that stretches across generations and time.",
-      "seasonCount": 3,
-      "episodeCount": 26,
-      "imdbId": "tt5753856",
-      "note": "Best watched attentively; its timelines and family connections matter."
-    },
-    {
-      "title": "Money Heist",
-      "year": 2017,
-      "poster": "https://image.tmdb.org/t/p/w500/reEMJA1uzscCbkpeRJeTT2bjqUp.jpg",
-      "genres": [
-        "Crime",
-        "Drama",
-        "Thriller"
-      ],
-      "rating": {
-        "source": "IMDb",
-        "value": 8.2
-      },
-      "overview": "A meticulous criminal known as the Professor recruits a team for a high-stakes heist, while plans, loyalties, and relationships are repeatedly tested.",
-      "seasonCount": 5,
-      "episodeCount": 41,
-      "imdbId": "tt6468322",
-      "note": "A fast-paced heist drama with shifting alliances."
-    },
-    {
-      "title": "Breaking Bad",
-      "year": 2008,
-      "poster": "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
-      "genres": [
-        "Crime",
-        "Drama",
-        "Thriller"
-      ],
-      "rating": {
-        "source": "IMDb",
-        "value": 9.5
-      },
-      "overview": "After a serious diagnosis, a chemistry teacher turns to producing illegal drugs to secure his family's future, setting off a gradual transformation with far-reaching consequences.",
-      "seasonCount": 5,
-      "episodeCount": 62,
-      "imdbId": "tt0903747",
-      "note": "A character-driven crime drama with carefully built tension."
-    },
     {
       "title": "Game of Thrones",
       "year": 2011,
