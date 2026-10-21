@@ -97,7 +97,7 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "site:1tube": "./assets/logos/sites/1tube.png",
   "site:watchott": "./assets/logos/sites/watchott.webp",
   "site:cinevito": "./assets/logos/sites/cinevito.png",
-  "movie:filmtv": "./assets/logos/movie-apps/filmtv.png"
+  "movie:filmtv": "./assets/logos/movie-apps/filmtv.png",
   "site:pvrplay.fun": "assets/logos/sites/pvrplay.png",
   "site:pvrplay": "assets/logos/sites/pvrplay.png",
 };
