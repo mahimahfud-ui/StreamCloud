@@ -2,7 +2,6 @@
 import { state } from './state.js';
 import { initChoreography } from './choreography.js';
 import { initInteractions } from './interactions.js';
-import { initPortal } from './portal.js';
 import { initPreloader } from './preloader.js';
 import { initCategories } from './categories.js';
 
@@ -23,11 +22,10 @@ if (!document.querySelector('link[data-streamcloud-premium]')) {
 
 // Each feature is isolated: if one throws, the catalog and the others keep working.
 const safe = (fn, ...a) => { try { return fn(...a); } catch (e) { console.warn('[cinema]', e); } };
-safe(initCategories);                           // Must run before the portal builds its logo reel.
+safe(initCategories);                           // Category tabs work independently from hero effects.
 const choreo = safe(initChoreography, { invalidate });
 safe(initInteractions, { invalidate, refresh: choreo ? choreo.refresh : () => {} });
 safe(initPreloader);
-safe(initPortal);
 if (!choreo) releaseCinema();
 
 function boot() {
