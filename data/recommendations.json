@@ -111,6 +111,63 @@
       "episodeCount": 62,
       "imdbId": "tt0903747",
       "note": "A character-driven crime drama with carefully built tension."
+    },
+    {
+      "title": "Game of Thrones",
+      "year": 2011,
+      "poster": "https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
+      "genres": [
+        "Fantasy",
+        "Drama",
+        "Adventure"
+      ],
+      "rating": {
+        "source": "IMDb",
+        "value": 9.2
+      },
+      "overview": "Noble families fight for control of Westeros and the Iron Throne while an ancient threat rises beyond the Wall.",
+      "seasonCount": 8,
+      "episodeCount": 73,
+      "imdbId": "tt0944947",
+      "note": "An expansive fantasy epic of power, political intrigue, and shifting alliances."
+    },
+    {
+      "title": "House of the Dragon",
+      "year": 2022,
+      "poster": "https://image.tmdb.org/t/p/w500/z2yahl2uefxDCl0nogcRBstwruJ.jpg",
+      "genres": [
+        "Fantasy",
+        "Drama",
+        "Action"
+      ],
+      "rating": {
+        "source": "IMDb",
+        "value": 8.3
+      },
+      "overview": "Set nearly two centuries before Game of Thrones, the Targaryen dynasty faces a bitter succession struggle that threatens to tear the realm apart.",
+      "seasonCount": 2,
+      "episodeCount": 18,
+      "imdbId": "tt11198330",
+      "note": "A dragon-filled political drama about succession, family, and power."
+    },
+    {
+      "title": "A Knight of the Seven Kingdoms",
+      "year": 2026,
+      "poster": "https://image.tmdb.org/t/p/w500/mIHlUjx6nQgbScAG4u3O1nIH8KJ.jpg",
+      "genres": [
+        "Fantasy",
+        "Adventure",
+        "Drama"
+      ],
+      "rating": {
+        "source": "IMDb",
+        "value": 8.6
+      },
+      "overview": "A century before Game of Thrones, the wandering knight Ser Duncan the Tall and his young squire Egg travel through Westeros and encounter adventures that test their courage and friendship.",
+      "seasonCount": 1,
+      "episodeCount": 6,
+      "imdbId": "tt27497448",
+      "note": "A more grounded Westeros adventure focused on Dunk and Egg."
     }
   ]
 }
