@@ -180,7 +180,11 @@
     grid.appendChild(fragment);
     msg.textContent = "";
     if (list.length) return;
-    if (!query) { msg.textContent = tab === "movie" ? "No movies here yet." : "No web series here yet."; return; }
+    if (!query) {
+      if ((industrySelect && industrySelect.value) || (genreSelect && genreSelect.value)) { msg.textContent = "Nothing matches these filters."; return; }
+      msg.textContent = tab === "movie" ? "No movies here yet." : "No web series here yet.";
+      return;
+    }
     var otherType = tab === "movie" ? "series" : "movie", otherLabel = otherType === "movie" ? "Movies" : "Web Series";
     var more = items.filter(function (it) {
       return it.type === otherType && norm([it.title, it.originalTitle, it.year, (it.genres || []).join(" ")].join(" ")).indexOf(query) !== -1;
