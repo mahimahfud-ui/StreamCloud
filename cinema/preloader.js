@@ -18,7 +18,8 @@ export function initPreloader() {
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(() => settle('fonts'), () => settle('fonts'));
   document.readyState === 'complete' ? settle('load') : addEventListener('load', () => settle('load'), { once: true });
 
-  const logos = [...new Set(Object.values(window.MAHIFLIX_LOGOS || {}))];
+  const bundled = Object.values(window.STREAMCLOUD_ITEM_LOGOS || {});
+  const logos = [...new Set(bundled.length ? bundled : Object.values(window.MAHIFLIX_LOGOS || {}))];
   if (!logos.length) settle('logos');
   else {
     let n = 0; const one = () => { if (++n >= logos.length) settle('logos'); else parts.logos = n / logos.length; };

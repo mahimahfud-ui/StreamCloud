@@ -1,0 +1,149 @@
+/* StreamCloud premium motion layer. Kept separate so the original design tokens and page structure remain intact. */
+:root {
+  --sc-ease: cubic-bezier(.22, 1, .36, 1);
+  --sc-spring: cubic-bezier(.34, 1.35, .64, 1);
+}
+
+/* Three equal, adjacent and keyboard-friendly category tabs. */
+.mode-switch.streamcloud-tabs-ready {
+  width: min(100%, 590px);
+  max-width: 100%;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border-color: rgba(255,255,255,.13);
+  box-shadow: 0 16px 34px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.035);
+}
+.mode-switch.streamcloud-tabs-ready .mode {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 12px clamp(7px, 1.5vw, 20px);
+  white-space: nowrap;
+  text-align: center;
+  font-size: clamp(9px, 1.05vw, 12px);
+  letter-spacing: .035em;
+  line-height: 1.25;
+  color: #a5a5a8;
+  z-index: 1;
+  transition: color .35s ease, transform .45s var(--sc-spring), background .35s ease;
+}
+.mode-switch.streamcloud-tabs-ready .mode.active {
+  color: #fff;
+  background: transparent;
+  box-shadow: none;
+}
+.mode-switch.streamcloud-tabs-ready .mode:not(.active):hover { color: #fff; }
+.mode-switch.streamcloud-tabs-ready .mode-thumb {
+  z-index: 0;
+  top: 5px;
+  bottom: 5px;
+  border: 1px solid rgba(255,255,255,.11);
+  background: linear-gradient(135deg, #f01924, #b80710 70%, #8f050b);
+  box-shadow: 0 5px 18px rgba(229,9,20,.3), inset 0 1px 0 rgba(255,255,255,.12);
+  transition: transform .56s var(--sc-spring), width .56s var(--sc-spring);
+  pointer-events: none;
+}
+
+/* A sharper, more deliberate logo reveal with a single restrained light pass. */
+.intro .intro-logo {
+  position: relative;
+  isolation: isolate;
+  filter: drop-shadow(0 0 18px rgba(229,9,20,.2));
+  will-change: transform, opacity, filter;
+}
+.intro .intro-logo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(112deg, transparent 22%, rgba(255,255,255,.04) 38%, rgba(255,255,255,.72) 49%, rgba(255,100,106,.2) 56%, transparent 70%);
+  -webkit-mask: url('../s-logo-v1.svg') center / contain no-repeat;
+  mask: url('../s-logo-v1.svg') center / contain no-repeat;
+  mix-blend-mode: screen;
+  animation: sc-logo-sweep 1.45s cubic-bezier(.22,1,.36,1) .62s both;
+}
+.intro .intro-count {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .08em;
+  text-shadow: 0 0 20px rgba(229,9,20,.3);
+}
+@keyframes sc-logo-sweep {
+  0% { opacity: 0; transform: translateX(-22%) scale(.98); }
+  18% { opacity: .8; }
+  72% { opacity: .55; }
+  100% { opacity: 0; transform: translateX(22%) scale(1.02); }
+}
+
+/* More refined edges and a low-intensity red edge light on the existing website cards. */
+.card.logo-card {
+  border: 1px solid rgba(255,255,255,.075);
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.24);
+  transition: transform .58s var(--sc-ease), box-shadow .58s var(--sc-ease), border-color .4s ease;
+}
+.card.logo-card:after { border-radius: inherit; }
+.card.logo-card.live:hover,
+.card.logo-card.live:focus-within {
+  border-color: rgba(229,9,20,.42);
+  box-shadow: 0 26px 58px rgba(0,0,0,.62), 0 0 0 1px rgba(229,9,20,.16), 0 0 30px rgba(229,9,20,.09);
+}
+.card.logo-card img {
+  border-radius: 13px;
+  transition: transform .58s var(--sc-ease), filter .5s ease, box-shadow .5s ease;
+}
+.card.app-card,
+.card.app-card.live {
+  border-color: rgba(255,255,255,.095);
+  box-shadow: 0 12px 28px rgba(0,0,0,.18);
+  transition: transform .5s var(--sc-ease), box-shadow .5s var(--sc-ease), border-color .4s ease;
+}
+.card.app-card.live:hover,
+.card.app-card.live:focus-within {
+  box-shadow: 0 22px 50px rgba(0,0,0,.48), 0 0 0 1px var(--accent-glow), 0 0 26px var(--accent-glow);
+}
+.card.app-card .movie-card-actions .open-link,
+.card.app-card .movie-fav,
+.mode-switch.streamcloud-tabs-ready .mode {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Rows re-enter cleanly when the selected category changes or a filter re-renders the catalog. */
+#appsView[data-category="movie"] .row[data-row="music apps"],
+#appsView[data-category="music"] .row[data-row="movie apps"] { display: none !important; }
+#appsView[data-category="movie"] .row[data-row="movie apps"],
+#appsView[data-category="music"] .row[data-row="music apps"] {
+  animation: sc-category-enter .38s var(--sc-ease) both;
+}
+@keyframes sc-category-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 760px) {
+  .mode-switch.streamcloud-tabs-ready { width: 100%; border-radius: 12px; }
+  .mode-switch.streamcloud-tabs-ready .mode {
+    padding: 11px 5px;
+    font-size: clamp(9px, 2.55vw, 11px);
+    letter-spacing: .015em;
+  }
+  .card.logo-card { border-radius: 14px; }
+  .card.logo-card img { border-radius: 0; }
+}
+@media (hover: none) {
+  .card.logo-card.live:hover:not(:focus-within) { transform: none; border-color: rgba(255,255,255,.075); }
+  .card.logo-card.live:active,
+  .card.app-card.live:active { transform: scale(.975); transition-duration: .12s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro .intro-logo::after { animation: none !important; opacity: 0 !important; }
+  .mode-switch.streamcloud-tabs-ready .mode-thumb { transition: none !important; }
+  #appsView .row { animation: none !important; }
+  .card.logo-card,
+  .card.logo-card img,
+  .card.app-card,
+  .card.app-card.live { transition: none !important; }
+}

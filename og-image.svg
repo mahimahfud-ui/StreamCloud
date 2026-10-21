@@ -13,15 +13,15 @@
   <rect x="400" y="48" width="175" height="285" rx="18" fill="#1c1c1c" stroke="#555" stroke-width="2"/>
   <path d="M48 110l80 42-80 42z" fill="#e50914"/><path d="M248 134l80 42-80 42z" fill="#555"/><path d="M448 158l80 42-80 42z" fill="#555"/>
 </g>
-<g transform="translate(82 120)">
-  <path d="M0 300V0h72l75 196L222 0h72v300h-72V157l-75 163-75-163v143z" fill="url(#red)"/>
-  <path d="M0 0h72l75 196-47 104L0 134z" fill="#ff6267" opacity=".55"/>
+<g transform="translate(12 49) scale(.862)">
+  <path d="M420 82H170L108 113 82 158V202L121 246 155 269H337L360 290V308L338 328H82V430H342L405 394 430 350V303L390 258 359 237H175L153 218V202L175 183H420Z" fill="url(#red)"/>
+  <path d="M420 82H170L108 113 82 158V202L121 246 155 269H206L168 238 153 218V202L175 183H420Z" fill="#ff6267" opacity=".55"/>
 </g>
-<text x="430" y="282" font-family="Arial,Helvetica,sans-serif" font-size="94" font-weight="800" letter-spacing="-3" fill="#fff">MahiFlix</text>
-<text x="437" y="344" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="600" letter-spacing="5" fill="#ff545b">MOVIE &amp; SERIES DIRECTORY</text>
-<text x="437" y="400" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#c4c4c4">Hand-picked by Mahi. Search, compare, discover.</text>
+<text x="430" y="282" font-family="Arial,Helvetica,sans-serif" font-size="94" font-weight="800" letter-spacing="-3" fill="#fff">StreamCloud</text>
+<text x="437" y="344" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="600" letter-spacing="5" fill="#ff545b">MOVIES, SERIES &amp; MUSIC</text>
+<text x="437" y="400" font-family="Arial,Helvetica,sans-serif" font-size="22" fill="#c4c4c4">Curated movie websites, streaming apps &amp; music apps.</text>
 <rect x="437" y="455" width="205" height="47" rx="9" fill="#e50914"/>
 <text x="539" y="485" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" fill="#fff">EXPLORE LISTINGS</text>
-<text x="84" y="578" font-family="Arial,Helvetica,sans-serif" font-size="15" letter-spacing="4" fill="#777">MAHIFLIX</text>
+<text x="84" y="578" font-family="Arial,Helvetica,sans-serif" font-size="15" letter-spacing="4" fill="#777">STREAMCLOUD</text>
 <text x="1115" y="578" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="15" fill="#777">CURATED BY MAHI</text>
 </svg>
