@@ -95,5 +95,6 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "site:vega": "./assets/logos/sites/vega.webp",
   "site:nxsha": "./assets/logos/sites/nxsha.ico",
   "site:anivortex": "./assets/logos/sites/anivortex.webp",
-  "site:filmtv": "./assets/logos/sites/filmtv.jpg"
+  "site:filmtv": "./assets/logos/sites/filmtv.jpg",
+  "site:movy": "./assets/logos/sites/movy.webp"
 };
