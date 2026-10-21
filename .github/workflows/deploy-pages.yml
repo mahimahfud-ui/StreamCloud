@@ -32,6 +32,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Validate site before deployment
+        run: npm run build
+
       - name: Download and cache official website logos
         run: node scripts/fetch-logos.mjs
 
