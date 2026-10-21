@@ -325,14 +325,19 @@
     else if (!event.shiftKey && active === last) { event.preventDefault(); first.focus(); }
   });
 
+  function loadTitles() {
   fetch(SOURCE, { cache: "no-cache" }).then(function (response) {
     if (!response.ok) throw new Error("HTTP " + response.status);
     return response.json();
   }).then(function (source) {
-    var movies = (Array.isArray(source.movies) ? source.movies : []).map(function (entry, index) {
+    /* Published admin listings (Supabase) are merged after the curated list. */
+    return Promise.resolve(window.STREAMCLOUD_TITLE_LISTINGS).then(function (extra) { return [source, extra || {}]; }, function () { return [source, {}]; });
+  }).then(function (pair) {
+    var source = pair[0], extra = pair[1];
+    var movies = (Array.isArray(source.movies) ? source.movies : []).concat(Array.isArray(extra.movies) ? extra.movies : []).map(function (entry, index) {
       return normalizeItem(entry, "movie", index);
     }).filter(Boolean);
-    var series = (Array.isArray(source.series) ? source.series : []).map(function (entry, index) {
+    var series = (Array.isArray(source.series) ? source.series : []).concat(Array.isArray(extra.series) ? extra.series : []).map(function (entry, index) {
       return normalizeItem(entry, "series", index);
     }).filter(Boolean);
     items = movies.concat(series);
@@ -344,4 +349,7 @@
     sec.hidden = false;
     msg.textContent = "Recommendations could not be loaded. Please refresh the page.";
   });
+  }
+  window.STREAMCLOUD_RELOAD_TITLES = loadTitles;
+  loadTitles();
 })();

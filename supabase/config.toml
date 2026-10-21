@@ -1,0 +1,10 @@
+# Our functions verify their own short-lived admin token (HMAC), so the
+# platform JWT check is off. This also works with new-style publishable keys.
+[functions.admin-login]
+verify_jwt = false
+
+[functions.admin-detect]
+verify_jwt = false
+
+[functions.admin-listings]
+verify_jwt = false
