@@ -104,11 +104,12 @@
       card.type = "button";
       card.dataset.key = it.key;
       card.appendChild(posterBox(it, "w342", "(max-width:560px) 45vw, 200px"));
+      var score = rating(it);
+      if (score) card.appendChild(el("span", "t-rating-badge", "★ " + score));
       card.appendChild(el("b", "", it.title));
       var meta = [
         it.year || "",
-        it.type === "series" && it.seasonCount ? plural(it.seasonCount, "season") : "",
-        rating(it)
+        it.type === "series" && it.seasonCount ? plural(it.seasonCount, "season") : ""
       ].filter(Boolean).join(" · ");
       if (meta) card.appendChild(el("p", "t-meta", meta));
       fragment.appendChild(card);
