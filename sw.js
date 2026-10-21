@@ -1,35 +1,20 @@
-const CACHE_NAME = "streamcloud-shell-v13";
+const CACHE_NAME = "mahiflix-shell-v2";
 
-// Keep the existing offline shell and cache the two category/motion modules as part of it.
+// Everything the page needs to render offline, including the cinematic layer and local logo marks.
 const SHELL_PATHS = [
-  "./", "./index.html", "./s-logo-v1.svg", "./manifest.webmanifest", "./link-status.json",
+  "./", "./index.html", "./m-logo-v2.svg", "./manifest.webmanifest", "./link-status.json",
   "./logo-manifest.js",
-  "./titles.css", "./titles.js", "./premium.css", "./data/recommendations.json",
   "./cinema/cinema.css",
   "./cinema/portal.css",
-  "./cinema/premium.css",
-  "./cinema/categories.js",
   "./cinema/main.js",
   "./cinema/state.js",
   "./cinema/choreography.js",
   "./cinema/interactions.js",
+  "./cinema/portal.js",
   "./cinema/preloader.js",
   "./cinema/scene.js",
   "./vendor/three.module.min.js",
   "./assets/logos/1tube.svg",
-  "./assets/logos/site-1tube.webp",
-  "./assets/logos/site-bcine.webp",
-  "./assets/logos/site-bingr.webp",
-  "./assets/logos/site-cinegram.webp",
-  "./assets/logos/site-cinehd.webp",
-  "./assets/logos/site-cinejoy.webp",
-  "./assets/logos/site-m4uhd.webp",
-  "./assets/logos/site-nightflix-to.webp",
-  "./assets/logos/site-nightflix-vg.webp",
-  "./assets/logos/site-plex.webp",
-  "./assets/logos/site-pvrplay.webp",
-  "./assets/logos/site-7reel.webp",
-  "./assets/logos/site-watchott.webp",
   "./assets/logos/7movies.svg",
   "./assets/logos/7reel.svg",
   "./assets/logos/anivortex.svg",
@@ -73,9 +58,8 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(key =>
-      (key.startsWith("streamcloud-shell-") || key.startsWith("mahiflix-shell-")) && key !== CACHE_NAME
-    ).map(key => caches.delete(key)));
+    await Promise.all(keys.filter(key => key.startsWith("mahiflix-shell-") && key !== CACHE_NAME)
+      .map(key => caches.delete(key)));
     await self.clients.claim();
   })());
 });
@@ -99,7 +83,7 @@ self.addEventListener("fetch", event => {
         const cached = await caches.match(request) ||
           await caches.match(new URL("./", self.registration.scope).href) ||
           await caches.match(new URL("./index.html", self.registration.scope).href);
-        return cached || new Response("StreamCloud is offline. Open the site once while connected to cache the directory.", {
+        return cached || new Response("MahiFlix is offline. Open the site once while connected to cache the directory.", {
           status: 503,
           headers: { "Content-Type": "text/plain; charset=utf-8" }
         });
@@ -107,7 +91,6 @@ self.addEventListener("fetch", event => {
     })());
     return;
   }
-
 
   if (shellUrls().includes(request.url)) {
     event.respondWith((async () => {

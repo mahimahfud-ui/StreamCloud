@@ -4,25 +4,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>StreamCloud</title>
-<meta name="description" content="Explore curated movie and web-series websites, streaming apps, and music apps—all in one place.">
-<meta property="og:title" content="StreamCloud — Movies, Series &amp; Music">
-<meta property="og:description" content="Discover curated movie and web-series websites, streaming apps, and music apps, all in one place.">
+<title>MahiFlix</title>
+<meta name="description" content="Discover movie and series platforms with searchable listings, ad-level filters, editorial directory scores and clear third-party disclaimers.">
+<meta property="og:title" content="MahiFlix — Movie &amp; Series Directory">
+<meta property="og:description" content="Hand-picked by Mahi. Compare streaming directories and apps using transparent editorial estimates.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://raw.githubusercontent.com/mahimahfud-ui/StreamCloud/main/og-image.svg">
 <meta property="og:image:type" content="image/svg+xml">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="StreamCloud — Movies, series, and music platforms, curated by Mahi">
+<meta property="og:image:alt" content="MahiFlix — Movie and Series Directory, hand-picked by Mahi">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/mahimahfud-ui/StreamCloud/main/og-image.svg">
 <meta name="theme-color" content="#141414">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="StreamCloud">
-<link rel="icon" type="image/svg+xml" href="./s-logo-v1.svg">
+<meta name="apple-mobile-web-app-title" content="MahiFlix">
+<link rel="icon" type="image/svg+xml" href="./m-logo-v2.svg">
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="preconnect" href="https://image.tmdb.org" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -47,23 +46,15 @@ nav.solid{background:rgba(20,20,20,.98);box-shadow:0 8px 30px rgba(0,0,0,.18)}na
 .mode-wrap{position:relative;z-index:15;margin:-34px 4% 28px;display:flex;flex-direction:column;align-items:center}.mode-switch{display:flex;width:max-content;max-width:100%;padding:5px;background:rgba(36,36,36,.94);border:1px solid #404040;border-radius:13px;box-shadow:0 16px 30px rgba(0,0,0,.35)}.mode{border:0;background:transparent;color:#999;padding:12px 22px;border-radius:9px;font-weight:800;font-size:13px;letter-spacing:.04em}.mode.active{background:var(--red);color:#fff;box-shadow:0 5px 18px rgba(229,9,20,.28)}.mode{transition:transform .4s cubic-bezier(.22,1,.36,1),background .55s cubic-bezier(.22,1,.36,1),color .4s ease,box-shadow .55s cubic-bezier(.22,1,.36,1);will-change:transform}.mode:active{transform:scale(.96)}.legend{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.legend span{font-size:10px;color:#8f8f8f}
 main{position:relative;z-index:2;padding-bottom:60px}.view{display:none}.view.active{display:block}
 .row{margin:0 0 30px}.row-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:0 4% 10px}.row h2{margin:0;font-size:20px;font-weight:800}.row-note{font-size:11px;color:#757575}.rail{position:relative}.track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;padding:22px 4% 54px;margin:0}.arrow{display:none}
-.card{position:relative;cursor:pointer;flex:0 0 clamp(180px,22vw,330px);aspect-ratio:1/1;border-radius:4px;background:linear-gradient(140deg,var(--c1),var(--c2));display:grid;place-items:center;overflow:visible;scroll-snap-align:start;transition:transform .58s cubic-bezier(.22,1,.36,1),box-shadow .58s cubic-bezier(.22,1,.36,1);isolation:isolate;backface-visibility:hidden;transform:translateZ(0)}.card.logo-card img{position:relative;z-index:2;width:94%;height:94%;max-height:94%;object-fit:contain;background:#000;padding:10px;border-radius:18px;box-shadow:0 9px 24px rgba(0,0,0,.36);transition:transform .7s cubic-bezier(.22,1,.36,1),filter .7s ease}
-.card.logo-card img.homepage-preview{object-fit:cover;background:#111;padding:0;border-radius:18px}
-.detail-logo img.homepage-preview{object-fit:cover!important;padding:0!important;border-radius:0!important}.initials{font:400 clamp(34px,5vw,58px)/1 "Bebas Neue";text-shadow:0 3px 12px rgba(0,0,0,.45)}.cap{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:26px 10px 9px;background:linear-gradient(0deg,rgba(0,0,0,.88),transparent);font-size:13px;font-weight:800}.actions{display:flex;gap:7px;margin-bottom:8px}.round{width:32px;height:32px;border:1px solid #555;border-radius:50%;background:#2a2a2a;color:#fff;display:grid;place-items:center}.round.go{background:#fff;color:#000;border-color:#fff}.round svg{width:14px;height:14px}.ad{position:absolute;top:8px;right:8px;z-index:8;padding:3px 6px;border-radius:3px;background:rgba(0,0,0,.67);font-size:9px;font-weight:800}.a0{color:#9ef0b1}.a1{color:#ffe18a}.a2{color:#ff9b9f}.badge{position:absolute;top:8px;left:8px;z-index:8;background:var(--red);padding:3px 6px;border-radius:3px;font-size:9px;font-weight:900}.card.live{animation:cardIn .72s cubic-bezier(.22,1,.36,1) both;will-change:transform,opacity,filter}.card.live:hover,.card.live:focus-within{transform:translate3d(0,-10px,0) scale(1.065);z-index:20;box-shadow:0 30px 70px rgba(0,0,0,.72),0 0 0 1px rgba(255,255,255,.09)}.card.live:hover img,.card.live:focus-within img{transform:translateZ(0) scale(1.045);filter:brightness(1.08)}.card.live:hover .cap,.card.live:focus-within .cap{display:none}
+.card{position:relative;cursor:pointer;flex:0 0 clamp(180px,22vw,330px);aspect-ratio:1/1;border-radius:4px;background:linear-gradient(140deg,var(--c1),var(--c2));display:grid;place-items:center;overflow:visible;scroll-snap-align:start;transition:transform .58s cubic-bezier(.22,1,.36,1),box-shadow .58s cubic-bezier(.22,1,.36,1);isolation:isolate;backface-visibility:hidden;transform:translateZ(0)}.card.logo-card img{position:relative;z-index:2;width:94%;height:94%;max-height:94%;object-fit:contain;background:#000;padding:10px;border-radius:18px;box-shadow:0 9px 24px rgba(0,0,0,.36);transition:transform .7s cubic-bezier(.22,1,.36,1),filter .7s ease}.initials{font:400 clamp(34px,5vw,58px)/1 "Bebas Neue";text-shadow:0 3px 12px rgba(0,0,0,.45)}.cap{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:26px 10px 9px;background:linear-gradient(0deg,rgba(0,0,0,.88),transparent);font-size:13px;font-weight:800}.more{position:absolute;left:0;right:0;top:100%;z-index:30;background:#181818;padding:11px 12px 13px;border-radius:0 0 5px 5px;opacity:0;pointer-events:none;box-shadow:0 18px 34px rgba(0,0,0,.65);transform:translateY(-5px);transition:opacity .45s ease,transform .55s cubic-bezier(.22,1,.36,1);will-change:opacity,transform}.actions{display:flex;gap:7px;margin-bottom:8px}.round{width:32px;height:32px;border:1px solid #555;border-radius:50%;background:#2a2a2a;color:#fff;display:grid;place-items:center}.round.go{background:#fff;color:#000;border-color:#fff}.round svg{width:14px;height:14px}.more b{display:block;font-size:13px;margin-bottom:4px}.more p{margin:0;color:#a8a8a8;font-size:11px;line-height:1.38}.more .lang{color:var(--green);font-weight:700;margin-top:5px}.ad{position:absolute;top:8px;right:8px;z-index:8;padding:3px 6px;border-radius:3px;background:rgba(0,0,0,.67);font-size:9px;font-weight:800}.a0{color:#9ef0b1}.a1{color:#ffe18a}.a2{color:#ff9b9f}.badge{position:absolute;top:8px;left:8px;z-index:8;background:var(--red);padding:3px 6px;border-radius:3px;font-size:9px;font-weight:900}.card.live{animation:cardIn .72s cubic-bezier(.22,1,.36,1) both;will-change:transform,opacity,filter}.card.live:hover,.card.live:focus-within{transform:translate3d(0,-10px,0) scale(1.065);z-index:20;box-shadow:0 30px 70px rgba(0,0,0,.72),0 0 0 1px rgba(255,255,255,.09)}.card.live:hover img,.card.live:focus-within img{transform:translateZ(0) scale(1.045);filter:brightness(1.08)}.card.live:hover .cap,.card.live:focus-within .cap{display:none}.card.live:hover .more,.card.live:focus-within .more{opacity:1;pointer-events:auto;transform:translateY(0)}
 .top10 .track{padding-left:4%}.top10 .card{aspect-ratio:2/3;overflow:visible}.top10 .num{position:absolute;right:100%;bottom:0;z-index:-1;margin-right:-14px;font:400 clamp(155px,19vw,260px)/.78 "Bebas Neue";color:#151515;-webkit-text-stroke:3px #5a5a5a;pointer-events:none}.top10 .card.logo-card img{width:88%;max-height:66%}.top10 .cap{padding-bottom:11px}
 .section-divider{height:1px;background:linear-gradient(90deg,transparent,#333,transparent);margin:12px 4% 28px}.empty{text-align:center;color:#888;padding:100px 4%;display:none}
 footer{text-align:center;color:#666;padding:30px 4% 44px;font-size:12px}footer .links{display:flex;justify-content:center;gap:18px;margin-bottom:11px}footer a{color:#eee}.hero-in .ig-link{display:grid;place-items:center;width:42px;height:42px;margin:2px auto 18px}.hero-in .ig-link svg{width:36px;height:36px;transition:.2s}.hero-in .ig-link:hover svg{transform:scale(1.14) rotate(-3deg)}.hero-in .ig-link{transition:transform .65s cubic-bezier(.22,1,.36,1)}.hero-in .ig-link:hover{transform:translateY(-3px) scale(1.035)}.ig-link{display:grid;place-items:center;width:30px;height:30px;margin:4px auto 14px;color:#fff}.ig-link svg{width:22px;height:22px;transition:.2s}.ig-link:hover svg{transform:scale(1.08);color:#e1306c}
 
-.intro{display:none}.intro-on .intro{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:#000;cursor:pointer;transition:opacity .7s cubic-bezier(.22,1,.36,1);will-change:opacity}.intro-on nav,.intro-on .hero,.intro-on .mode-wrap,.intro-on main,.intro-on footer{opacity:0}.intro-leave nav,.intro-leave .hero,.intro-leave .mode-wrap,.intro-leave main,.intro-leave footer{opacity:1}.intro-leave .intro{opacity:0;pointer-events:none}.intro .intro-logo{width:clamp(150px,28vw,280px);height:clamp(150px,28vw,280px);background:url('./s-logo-v1.svg') center/contain no-repeat;transform:scaleY(1.14);opacity:0;animation:rev 1.4s cubic-bezier(.2,.7,.2,1) .12s forwards;text-shadow:0 0 40px rgba(229,9,20,.25)}.intro:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(229,9,20,.38),transparent 60%);opacity:0;animation:glow 2s .1s forwards}@keyframes rev{from{opacity:0;transform:translate3d(0,8px,0) scale(1.12) scaleY(1.14);filter:blur(12px)}55%{opacity:1;transform:translate3d(0,0,0) scale(1.018) scaleY(1.14);filter:blur(0)}to{opacity:1;transform:translate3d(0,0,0) scale(1) scaleY(1.14);filter:blur(0)}}@keyframes glow{to{opacity:1}}@keyframes cardIn{0%{opacity:0;transform:translate3d(0,22px,0) scale(.965);filter:blur(7px)}55%{opacity:.92;transform:translate3d(0,3px,0) scale(.992);filter:blur(1px)}100%{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+.intro{display:none}.intro-on .intro{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:#000;cursor:pointer;transition:opacity .7s cubic-bezier(.22,1,.36,1);will-change:opacity}.intro-on nav,.intro-on .hero,.intro-on .mode-wrap,.intro-on main,.intro-on footer{opacity:0}.intro-leave nav,.intro-leave .hero,.intro-leave .mode-wrap,.intro-leave main,.intro-leave footer{opacity:1}.intro-leave .intro{opacity:0;pointer-events:none}.intro .intro-logo{width:clamp(150px,28vw,280px);height:clamp(150px,28vw,280px);background:url('./m-logo-v2.svg') center/contain no-repeat;transform:scaleY(1.14);opacity:0;animation:rev 1.4s cubic-bezier(.2,.7,.2,1) .12s forwards;text-shadow:0 0 40px rgba(229,9,20,.25)}.intro:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(229,9,20,.38),transparent 60%);opacity:0;animation:glow 2s .1s forwards}@keyframes rev{from{opacity:0;transform:translate3d(0,8px,0) scale(1.12) scaleY(1.14);filter:blur(12px)}55%{opacity:1;transform:translate3d(0,0,0) scale(1.018) scaleY(1.14);filter:blur(0)}to{opacity:1;transform:translate3d(0,0,0) scale(1) scaleY(1.14);filter:blur(0)}}@keyframes glow{to{opacity:1}}@keyframes cardIn{0%{opacity:0;transform:translate3d(0,22px,0) scale(.965);filter:blur(7px)}55%{opacity:.92;transform:translate3d(0,3px,0) scale(.992);filter:blur(1px)}100%{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
 @media(min-width:761px){.card.live{transform-origin:center center}.card.live:hover,.card.live:focus-within{transform:translate3d(0,-10px,0) scale(1.065)}}
-@media(max-width:760px){nav{gap:12px;padding:12px 4%}nav .logo{font-size:31px}nav ul{display:none}.search.open input{width:145px}.hero{min-height:0;padding:78px 4% 6px}.hero h1{font-size:70px}.mode-wrap{margin:4px 4% 14px}.mode{padding:11px 15px}.arrow{display:none}.card.live:hover,.card.live:focus-within{transform:translateY(-4px) scale(1.035)}.card .cap{display:block!important}.row h2{font-size:17px}.row-note{display:none}}
+@media(max-width:760px){nav{gap:12px;padding:12px 4%}nav .logo{font-size:31px}nav ul{display:none}.search.open input{width:145px}.hero{min-height:0;padding:78px 4% 6px}.hero h1{font-size:70px}.mode-wrap{margin:4px 4% 14px}.mode{padding:11px 15px}.arrow{display:none}.card.live:hover,.card.live:focus-within{transform:translateY(-4px) scale(1.035)}.card .more{display:none}.card .cap{display:block!important}.row h2{font-size:17px}.row-note{display:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-
-/* Keep white brand marks visible on a dark tile. */
-.logo-card:has(img.white-mark) .logo-wrap,
-.logo-card:has(img.white-mark) .logo,
-.logo-card:has(img.white-mark) .poster { background:#050505 !important; }
-.logo-card img.white-mark { background:#050505; object-fit:contain; padding:18%; border-radius:14px; filter:brightness(0) invert(1); }
 </style>
 <style>
 .search{border-color:rgba(255,255,255,.22);background:rgba(0,0,0,.56);border-radius:8px;backdrop-filter:blur(8px)}
@@ -142,113 +133,17 @@ footer .links{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin
 </style>
 <link rel="stylesheet" href="./cinema/cinema.css">
 <link rel="stylesheet" href="./cinema/portal.css">
-
-<style id="homepage-preview-fit-fix">
-/* Make website homepage previews fill the complete logo tile edge-to-edge. */
-.card.logo-card{overflow:hidden}
-.card.logo-card img.homepage-preview{
-  display:block!important;
-  position:absolute!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  min-width:100%!important;
-  min-height:100%!important;
-  max-width:none!important;
-  max-height:none!important;
-  aspect-ratio:auto!important;
-  object-fit:cover!important;
-  object-position:center center!important;
-  padding:0!important;
-  margin:0!important;
-  border:0!important;
-  border-radius:0!important;
-  background:#111!important;
-  box-shadow:none!important;
-}
-.detail-logo img.homepage-preview{
-  display:block!important;width:100%!important;height:100%!important;
-  max-width:none!important;max-height:none!important;object-fit:cover!important;
-  object-position:center center!important;padding:0!important;margin:0!important;
-  border:0!important;border-radius:0!important;box-shadow:none!important;
-}
-@media(max-width:760px){
-  .card.logo-card img.homepage-preview{
-    position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
-    aspect-ratio:auto!important;max-height:none!important;object-fit:cover!important;
-  }
-}
-</style>
-
-
-<style id="premium-upgrade">
-:root{--pu-accent:#e5484d;--pu-accent2:#ff8a5c;--pu-surface:#14151a;--pu-surface2:#1b1d24;--pu-line:rgba(255,255,255,.1);--pu-text:#f3f4f7;--pu-muted:#a3a7b3}
-html{scroll-behavior:smooth}
-body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),transparent 60%),#0b0c10}
-:where(a,button,input,select,[tabindex]):focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:8px;box-shadow:0 0 0 5px rgba(229,72,77,.55)}
-.card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
-.card:hover,.card:focus-visible{transform:translateY(-4px);box-shadow:0 14px 34px rgba(0,0,0,.55)}
-.app-card{border:1px solid var(--pu-line);border-radius:16px}
-.open-link,.modal-action,.filter-chip,.mode{transition:background .2s,transform .15s,border-color .2s}
-.open-link:active,.modal-action:active,.filter-chip:active{transform:scale(.97)}
-.filter-chip{border-radius:999px}
-.catalog-tools{gap:12px;flex-wrap:wrap}
-.wl-open{background:linear-gradient(135deg,var(--pu-accent),var(--pu-accent2));color:#fff;border:0;border-radius:999px;padding:10px 18px;font:600 14px/1.25 inherit;font-family:inherit;cursor:pointer;box-shadow:0 6px 18px rgba(229,72,77,.35)}
-.wl-open:hover{filter:brightness(1.1)}
-.wl-open b{background:rgba(0,0,0,.28);border-radius:999px;padding:2px 8px;margin-left:6px;font-size:12px}
-.round.info{font-weight:700;font-size:15px}
-#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#22252e;color:#fff;padding:12px 18px;border-radius:12px;border:1px solid var(--pu-line);box-shadow:0 10px 30px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:10000;max-width:90vw;font-size:14px}
-#toast.show{opacity:1;transform:translate(-50%,0)}
-#acList{position:fixed;z-index:10001;margin:0;padding:6px;list-style:none;background:var(--pu-surface2);border:1px solid var(--pu-line);border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.6);max-height:min(60vh,380px);overflow:auto;display:none}
-#acList.open{display:block}
-#acList li{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:10px;cursor:pointer;color:var(--pu-text);font-size:14px}
-#acList li[aria-selected=true],#acList li:hover{background:rgba(229,72,77,.22)}
-#acList li.none{cursor:default;color:var(--pu-muted);justify-content:center}
-#acList .ac-ico{width:28px;height:28px;border-radius:8px;flex:none;object-fit:contain;background:#0d0e12;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff}
-#acList mark{background:none;color:var(--pu-accent2);font-weight:700}
-#acList small{margin-left:auto;color:var(--pu-muted);font-size:11px;white-space:nowrap}
-.wl-modal{position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;padding:16px}
-.wl-modal.open{display:flex}
-.wl-scrim{position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(4px)}
-.wl-panel{position:relative;width:min(720px,100%);max-height:92vh;overflow:auto;background:var(--pu-surface);border:1px solid var(--pu-line);border-radius:20px;padding:24px;color:var(--pu-text);box-shadow:0 30px 80px rgba(0,0,0,.7);animation:wlIn .25s ease}
-@keyframes wlIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
-.wl-panel h2{margin:0 0 4px;font-size:24px}
-.wl-note{color:var(--pu-muted);font-size:13px;margin:0 0 16px}
-.wl-x{position:absolute;right:14px;top:12px;background:none;border:0;color:#fff;font-size:28px;cursor:pointer;line-height:1}
-.wl-form{display:grid;grid-template-columns:1fr 130px 150px auto;gap:8px;margin-bottom:6px}
-.wl-form input,.wl-form select,.wl-search{background:#0d0e12;color:#fff;border:1px solid var(--pu-line);border-radius:10px;padding:11px 12px;font:inherit;min-width:0}
-.wl-form button.primary{background:var(--pu-accent);color:#fff;border:0;border-radius:10px;padding:0 18px;font-weight:600;cursor:pointer}
-.wl-err{color:#ff8b8b;font-size:13px;min-height:18px;margin:0 0 8px}
-.wl-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 12px}
-.wl-search{flex:1;min-width:160px}
-.wl-chip{background:#0d0e12;color:var(--pu-muted);border:1px solid var(--pu-line);border-radius:999px;padding:7px 12px;font-size:13px;cursor:pointer}
-.wl-chip[aria-pressed=true]{background:var(--pu-accent);color:#fff;border-color:transparent}
-.wl-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.wl-list li{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;background:var(--pu-surface2);border:1px solid var(--pu-line);border-radius:12px;padding:12px}
-.wl-list .t{font-weight:600;overflow-wrap:anywhere}
-.wl-list .m{color:var(--pu-muted);font-size:12px}
-.wl-act{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.wl-act select,.wl-act button{background:#0d0e12;color:#fff;border:1px solid var(--pu-line);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer}
-.wl-act .del.sure{background:#b3262b;border-color:#b3262b}
-.wl-empty{text-align:center;color:var(--pu-muted);padding:26px 8px}
-@media(max-width:640px){.wl-form{grid-template-columns:1fr 1fr}.wl-form input[name=title],.wl-form button{grid-column:1/-1}.wl-form button{padding:12px}.wl-panel{padding:18px}.wl-list li{grid-template-columns:1fr}.wl-act{justify-content:flex-start}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
-</style>
-<link rel="stylesheet" href="./premium.css" data-streamcloud-premium>
-<link rel="stylesheet" href="./titles.css">
-
 </head>
 <body>
 <div class="cinema-fallback" aria-hidden="true"></div>
 <canvas id="cinema" aria-hidden="true"></canvas>
-
-<div class="intro" id="intro" aria-hidden="true"><div class="intro-logo" aria-label="StreamCloud"></div><div class="intro-count" id="introCount"><span id="introVal">0</span><i>%</i></div></div>
+<canvas id="portal-canvas" class="portal-canvas" aria-hidden="true"></canvas>
+<div class="intro" id="intro" aria-hidden="true"><div class="intro-logo" aria-label="MahiFlix"></div><div class="intro-count" id="introCount"><span id="introVal">0</span><i>%</i></div></div>
 
 <nav id="nav">
-  <a class="logo" href="#top" aria-label="StreamCloud"><img src="./s-logo-v1.svg" alt="StreamCloud"></a>
+  <a class="logo" href="#top" aria-label="MahiFlix"><img src="./m-logo-v2.svg" alt="MahiFlix"></a>
   <ul>
     <li><a href="#top" data-nav="home" class="on">Home</a></li>
-    <li id="recsNav" hidden><a href="#recs">Movies &amp; Series</a></li>
   </ul>
   <div class="nav-tools">
     <div class="search" id="search"><button id="sbtn" aria-label="Search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button><input id="q" type="search" placeholder="Search" autocomplete="off"></div>
@@ -257,19 +152,21 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
 
 <header class="hero" id="top">
   <div class="hero-in">
-    <h1><span class="hero-line sm">Unlocking the Universe of</span><span class="hero-line big">Movies, Series &amp; Music</span></h1>
-    <p id="heroDesc" class="hero-line">Explore curated movie and web-series websites, streaming apps, and music apps—all in one place.</p>
+    <h1><span class="hero-line sm">Unlocking the Universe of</span><span class="hero-line big">Movies &amp; Web Series</span></h1>
+    <p id="heroDesc" class="hero-line">A curated collection of the best movie &amp; web-series websites and apps.</p>
     <a class="ig-link" href="https://www.instagram.com/mahimahfud/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><radialGradient id="igBgHero" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="6" fill="url(#igBgHero)"/><rect x="6.3" y="6.3" width="11.4" height="11.4" rx="3.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="2.7" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="16.35" cy="7.65" r="1.05" fill="#fff"/></svg></a>
-    
+    <section class="portal-wrap" aria-label="Jump to the other collection">
+      <div class="portal-heading"><span>Next:</span><span><span id="portalCount">[00]</span> <strong id="portalName">Apps</strong></span></div>
+      <button class="portal" id="portal" type="button" aria-label="Jump to Apps"></button>
+    </section>
   </div>
   <a class="cue" href="#browse" aria-label="Browse websites and apps"><span>Browse</span><i></i></a>
 </header>
 
 <div class="mode-wrap" id="browse">
-  <div class="mode-switch" role="tablist" aria-label="StreamCloud categories">
+  <div class="mode-switch" role="tablist" aria-label="MahiFlix categories">
     <button class="mode active" data-mode="sites" role="tab" aria-selected="true">WEBSITES</button>
-    <button class="mode" data-mode="apps" role="tab" aria-selected="false">MOVIE APPS</button>
-    <button class="mode" data-mode="music" role="tab" aria-selected="false">MUSIC APPS</button>
+    <button class="mode" data-mode="apps" role="tab" aria-selected="false">APPS</button>
   </div>
 </div>
 
@@ -287,7 +184,7 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
     <label for="sortSelect">Sort by
       <select id="sortSelect"><option value="score">Mahi score</option><option value="popular">Popularity index</option><option value="newest">Newest first</option><option value="name">Name A–Z</option></select>
     </label>
-    <button id="installApp" class="install-app" type="button" hidden>Install StreamCloud</button>
+    <button id="installApp" class="install-app" type="button" hidden>Install MahiFlix</button>
   </div>
 </section>
 
@@ -297,34 +194,11 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
   <p id="empty" class="empty">Nothing matched your search.</p>
 </main>
 
-
-<section class="recs" id="recs" aria-labelledby="recsTitle" hidden>
-  <div class="t-head">
-    <h2 id="recsTitle">Recommendations</h2>
-    <div class="t-tabs" role="tablist" aria-label="Recommendation type">
-      <button class="t-tab" type="button" role="tab" data-type="movie" aria-selected="true">Movies</button>
-      <button class="t-tab" type="button" role="tab" data-type="series" aria-selected="false">Web Series</button>
-    </div>
-    <input class="t-search" id="recsSearch" type="search" placeholder="Search titles" aria-label="Search recommendations" autocomplete="off">
-  </div>
-  <div class="t-grid" id="recsGrid"></div>
-  <p class="t-note" id="recsMsg" role="status"></p>
-  <p class="t-credit">Titles, ratings and summaries are curated manually. Movie-data APIs are not used; poster images load from the URLs set for each title.</p>
-</section>
-
-<div class="detail-modal" id="titleModal" aria-hidden="true">
-  <div class="modal-scrim" data-t-close></div>
-  <section class="detail-panel t-panel" role="dialog" aria-modal="true" aria-labelledby="titleHeading" tabindex="-1">
-    <button class="modal-close" type="button" data-t-close aria-label="Close details">×</button>
-    <div id="titleBody"></div>
-  </section>
-</div>
-
 <div class="detail-modal" id="detailModal" aria-hidden="true">
   <div class="modal-scrim" data-modal-close></div>
   <section class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detailTitle" tabindex="-1">
     <button class="modal-close" type="button" data-modal-close aria-label="Close details">×</button>
-    <div class="detail-heading"><div class="detail-logo" id="detailLogo"></div><div><p class="detail-eyebrow">StreamCloud directory</p><h2 id="detailTitle">Details</h2><p class="detail-domain" id="detailDomain"></p></div></div>
+    <div class="detail-heading"><div class="detail-logo" id="detailLogo"></div><div><p class="detail-eyebrow">MahiFlix directory</p><h2 id="detailTitle">Details</h2><p class="detail-domain" id="detailDomain"></p></div></div>
     <div class="detail-tags" id="detailTags"></div>
     <p class="detail-desc" id="detailDescription"></p>
     <div class="detail-metrics">
@@ -342,99 +216,77 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
   </section>
 </div>
 
-<section class="finale" id="finale" aria-label="StreamCloud">
+<section class="finale" id="finale" aria-label="MahiFlix">
   <div class="finale-in">
-    <img class="finale-logo" src="./s-logo-v1.svg" alt="" width="128" height="128">
-    <h2>StreamCloud</h2>
-    <p>Explore curated movie and web-series websites, streaming apps, and music apps—all in one place.</p>
+    <img class="finale-logo" src="./m-logo-v2.svg" alt="" width="128" height="128">
+    <h2>MahiFlix</h2>
+    <p>A curated collection of the best movie &amp; web-series websites and apps.</p>
     <div class="btns"><a class="btn play" href="#top">Back to top</a><a class="btn info" href="https://www.instagram.com/mahimahfud/" target="_blank" rel="noopener noreferrer">Instagram</a></div>
   </div>
 </section>
 
 <footer>
   <div class="links"><a href="https://www.instagram.com/mahimahfud/" target="_blank" rel="noopener noreferrer">Contact Mahi</a><a href="#privacy" data-legal-toggle>Privacy</a><a href="#disclaimer" data-legal-toggle>Disclaimer</a></div>
-  <div>StreamCloud © <span id="yr"></span> · Directory updated October 18, 2026</div>
+  <div>MahiFlix © <span id="yr"></span> · Directory updated October 18, 2026</div>
   <details class="footer-legal" id="footerLegal"><summary>Privacy policy &amp; legal disclaimer</summary>
     <div class="legal-copy">
-      <section id="privacy"><h3>Privacy</h3><p>StreamCloud does not ask you to create an account. Search and filter choices update this page, while favourites and personal ratings are saved in your own browser storage and are not submitted as public votes. Your hosting provider and linked third-party websites may process their own connection data under their respective policies.</p></section>
-      <section id="disclaimer"><h3>Third-party content &amp; copyright</h3><p>StreamCloud is a directory, not a streaming host. It does not host, upload, or embed third-party videos. External sites and app pages are operated by their respective owners; availability, security, ads, and content rights can change at any time. Use licensed sources and follow local copyright laws. Check app permissions and source authenticity before installing any APK. Directory scores and ad labels are editorial estimates, not independent live tests or guarantees.</p></section>
+      <section id="privacy"><h3>Privacy</h3><p>MahiFlix does not ask you to create an account. Search and filter choices update this page, while favourites and personal ratings are saved in your own browser storage and are not submitted as public votes. Your hosting provider and linked third-party websites may process their own connection data under their respective policies.</p></section>
+      <section id="disclaimer"><h3>Third-party content &amp; copyright</h3><p>MahiFlix is a directory, not a streaming host. It does not host, upload, or embed third-party videos. External sites and app pages are operated by their respective owners; availability, security, ads, and content rights can change at any time. Use licensed sources and follow local copyright laws. Check app permissions and source authenticity before installing any APK. Directory scores and ad labels are editorial estimates, not independent live tests or guarantees.</p></section>
     </div>
   </details>
 </footer>
 
 <script>
 const S=[
-{name:"Freekz",url:"https://freekz.to/",domain:"freekz.to",ads:1,pop:82,smooth:84,langs:86,new:true,desc:"Freekz movie and TV homepage.",logoSources:["assets/logos/sites/freekz.png","https://freekz.to/05BB1581-39C9-4B10-AA10-7957B2994AE4.png","https://freekz.to/banner.png","https://freekz.to/favicon.ico"]},
-{name:"7reel",url:"https://7reels.cc/",domain:"7reels.cc",ads:2,pop:74,smooth:62,langs:72,new:true,desc:"Free movie and series streaming directory.",logoSources:["assets/logos/sites/7reel.png","https://7reels.cc/favicon-96x96.png","https://7reels.cc/favicon.ico","https://7reels.cc/favicon.png"]},
-{name:"M4UHD",url:"https://m4uhd.gold/",domain:"m4uhd.gold",ads:2,pop:94,smooth:60,langs:76,new:false,desc:"Large movie and TV streaming catalogue.",logoSources:["assets/logos/sites/m4uhd.png","https://m4uhd.gold/images/m4uhd-logo.png","https://m4uhd.gold/images/m4uhd-icon.png","https://m4uhd.gold/favicon.ico"]},
-{name:"CineHD",url:"https://cinehd.vc/",domain:"cinehd.vc",ads:2,pop:92,smooth:61,langs:78,new:false,desc:"Movies and series with a large free-streaming catalogue.",logoSources:["assets/logos/sites/cinehd.png","https://cinehd.vc/icon-192x192.png","https://cinehd.vc/favicon.ico","https://cinehd.dev/images/favicon.ico"]},
-{name:"NightFlix",url:"https://nightflix.vg/",domain:"nightflix.vg",ads:2,pop:86,smooth:62,langs:78,new:false,desc:"Free movies and TV streaming site.",logoSources:["assets/logos/sites/nightflix.png","https://nightflix.vg/favicon.ico","https://nightflix.vg/favicon.png","https://nightflix.vg/favicon-192x192.png"]},
-{name:"The OG Pirate Bot",url:"https://theogpiratebot.online/",domain:"theogpiratebot.online",ads:0,pop:70,smooth:70,langs:70,new:true,desc:"The OG Pirate Bot website.",logoSources:["assets/logos/sites/the-og-pirate-bot.ico","https://theogpiratebot.online/favicon.ico","https://theogpiratebot.online/favicon.png"]},
-{name:"Cinevito",url:"https://cinevito.net/",domain:"cinevito.net",ads:0,pop:70,smooth:70,langs:70,new:true,desc:"Cinevito website.",logoSources:["assets/logos/sites/cinevito.png","assets/logos/sites/cinevito.ico","https://cinevito.net/favicon.ico","https://cinevito.net/favicon.png"]},
-{name:"Bingr",url:"https://bingr.one/",domain:"bingr.one",ads:2,pop:73,smooth:56,langs:70,new:false,desc:"Movie and TV discovery/streaming platform.",logoSources:["assets/logos/sites/bingr.ico","https://bingr.in/images/site/bingr-logo-pink.png","https://bingr.in/favicon.ico?v=1"]},
-{name:"Cinejoy",url:"https://cinejoy.to/",domain:"cinejoy.to",ads:2,pop:68,smooth:52,langs:66,new:false,desc:"Movies, TV and short-drama streaming platform.",logoSources:["assets/logos/sites/cinejoy.ico","https://cinejoy.to/brand/logomark-white.svg","https://cinejoy.to/favicon.svg","https://cinejoy.to/favicon.ico"]},
-{name:"Cinegram",url:"https://cinegram.tv/",domain:"cinegram.tv",ads:1,pop:77,smooth:75,langs:76,new:false,desc:"Movies and series streaming platform.",logoSources:["assets/logos/sites/cinegram.png","https://cinegram.tv/sizes/fav-192.png","https://cinegram.tv/favicon.ico","https://cinegram.tv/favicon.png"]},
-{name:"Watchott",url:"https://watchott.org/",domain:"watchott.org",ads:1,pop:58,smooth:58,langs:65,new:false,desc:"Movie and TV streaming website.",logoSources:["assets/logos/sites/watchott.webp","https://watchott.org/favicon.svg","https://watchott.org/favicon.ico","https://watchott.org/favicon.png"]},
-{name:"1tube",url:"https://www.1tube.org/",domain:"1tube.org",ads:2,pop:84,smooth:66,langs:82,new:false,desc:"Movies, TV and other streaming content.",logoSources:["assets/logos/sites/1tube.png","https://www.1tube.org/logo.png","https://www.1tube.org/favicon.ico","https://www.1tube.org/favicon.png"]},
-{name:"Movy",url:"https://www.movy.sx/",domain:"movy.sx",ads:1,pop:70,smooth:70,langs:70,new:true,desc:"Movy website.",logoSources:["https://www.movy.sx/favicon.ico","https://www.movy.sx/favicon.svg"]},
+{name:"bCine",url:"https://cineyz.com/",domain:"cineyz.com",ads:1,pop:82,smooth:84,langs:86,new:true,desc:"Movie and TV streaming website.",logoSources:["https://cineyz.com/favicon.ico","https://cineyz.com/favicon.png","https://cineyz.com/icon-192.png"]},
+{name:"7reel",url:"https://7reels.cc",domain:"7reels.cc",ads:2,pop:74,smooth:62,langs:72,new:true,desc:"Free movie and series streaming directory.",logoSources:["https://7reels.cc/favicon-96x96.png","https://7reels.cc/favicon.ico","https://7reels.cc/favicon.png"]},
+{name:"Plex",url:"https://watch.plex.tv/en-GB",domain:"plex.tv",ads:1,pop:96,smooth:94,langs:88,new:false,desc:"Free ad-supported movies, shows and live TV with premium options.",logoSources:["https://watch.plex.tv/favicon.ico","https://plex.tv/favicon.ico","https://www.plex.tv/favicon.ico"]},
+{name:"M4UHD",url:"https://m4uhd.gold/",domain:"m4uhd.gold",ads:2,pop:94,smooth:60,langs:76,new:false,desc:"Large movie and TV streaming catalogue.",logoSources:["https://m4uhd.gold/logo.png","https://m4uhd.gold/favicon.png","https://m4uhd.gold/favicon.ico"]},
+{name:"CineHD",url:"https://cinehd.vc/",domain:"cinehd.vc",ads:2,pop:92,smooth:61,langs:78,new:false,desc:"Movies and series with a large free-streaming catalogue.",logoSources:["https://cinehd.vc/icon-192x192.png","https://cinehd.vc/favicon.ico","https://cinehd.dev/images/favicon.ico"]},
+{name:"NightFlix",url:"https://nightflix.vg/",domain:"nightflix.vg",ads:2,pop:86,smooth:62,langs:78,new:false,desc:"Free movies and TV streaming site.",logoSources:["https://nightflix.vg/favicon.ico","https://nightflix.vg/favicon.png","https://nightflix.vg/favicon-192x192.png"]},
+{name:"Pvrplay",url:"https://pvrplay.online/",domain:"pvrplay.online",ads:2,pop:82,smooth:65,langs:74,new:false,desc:"Free movies and web-series streaming platform.",logoSources:["https://pvrplay.online/favicon.ico","https://pvrplay.online/favicon.png"]},
+{name:"Nightflix",url:"https://nightflix.to/",domain:"nightflix.to",ads:2,pop:79,smooth:63,langs:78,new:false,desc:"Free movies and TV streaming platform.",logoSources:["https://nightflix.to/favicon.ico","https://nightflix.to/favicon.png","https://nightflix.to/favicon-192x192.png"]},
+{name:"Bingr",url:"https://bingr.one/",domain:"bingr.one",ads:2,pop:73,smooth:56,langs:70,new:false,desc:"Movie and TV discovery/streaming platform.",logoSources:["https://bingr.one/favicon.svg","https://bingr.one/icons/favicon-96x96.png","https://bingr.one/favicon.ico"]},
+{name:"Cinejoy",url:"https://cinejoy.to/",domain:"cinejoy.to",ads:2,pop:68,smooth:52,langs:66,new:false,desc:"Movies, TV and short-drama streaming platform.",logoSources:["https://cinejoy.to/favicon.svg","https://cinejoy.to/brand/logomark-white.svg","https://cinejoy.to/favicon.png","https://cinejoy.to/favicon.ico"]},
+{name:"Cinegram",url:"https://cinegram.tv/home",domain:"cinegram.tv",ads:1,pop:77,smooth:75,langs:76,new:false,desc:"Movies and series streaming platform.",logoSources:["https://cinegram.tv/sizes/fav-192.png","https://cinegram.tv/favicon.ico","https://cinegram.tv/favicon.png"]},
+{name:"Watchott",url:"https://watchott.org/",domain:"watchott.org",ads:1,pop:58,smooth:58,langs:65,new:false,desc:"Movie and TV streaming website.",logoSources:["https://watchott.org/favicon.svg","https://watchott.org/favicon.ico","https://watchott.org/favicon.png"]},
+{name:"1tube",url:"https://www.1tube.org/",domain:"1tube.org",ads:2,pop:84,smooth:66,langs:82,new:false,desc:"Movies, TV and other streaming content.",logoSources:["https://www.1tube.org/logo.png","https://www.1tube.org/favicon.ico","https://www.1tube.org/favicon.png"]}
 ];
 
 const A=[
-{appType:"movie",name:"FilmTV",url:"https://www.filmtvapp.com/",downloadUrl:"https://www.filmtvapp.com/#download",downloadDirect:false,domain:"filmtvapp.com",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"FilmTV Android app. Use the official site download section.",logoSources:["assets/logos/sites/filmtv.png","https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo-transparent.png","https://www.filmtvapp.com/wp-content/themes/filmtv-footer-pages-no-duplicates-final/assets/filmtv-logo.jpg"]},
-{appType:"movie",name:"Nuvix",url:"https://www.nuvixapp.in/",downloadUrl:"https://www.nuvixapp.in/#download-apk",downloadDirect:false,domain:"nuvixapp.in",ads:0,pop:82,smooth:88,langs:86,new:true,desc:"Nuvix Android app. Use the official site download section.",logoSources:["assets/logos/sites/nuvix.webp","https://www.nuvixapp.in/img/nuvix-logo.webp","https://www.nuvixapp.in/favicon.ico?favicon.0dc47d6d.ico"]},
-{appType:"movie",name:"Vega",url:"https://vega.zendax.me/",downloadUrl:"https://vega.zendax.me/",downloadDirect:false,domain:"vega.zendax.me",ads:0,pop:88,smooth:91,langs:92,new:true,desc:"Android media player with ad-free streaming and downloads.",logoSources:["assets/logos/sites/vega.png","https://vega.zendax.me/cdn-cgi/image/onerror=redirect,width=96,height=96,quality=80,format=webp/_astro/logo.D0gpMGRY.png","https://vega.zendax.me/favicon.ico"]},
-{appType:"movie",name:"NetMirror",url:"https://netmirror.gg/",downloadUrl:"https://netmirror.gg/",downloadDirect:false,domain:"netmirror.gg",ads:2,pop:90,smooth:66,langs:84,new:true,desc:"Android streaming app with movie and series sources.",logoSources:["assets/logos/sites/netmirror.png","https://netmirror.gg/img/nf2/icon_x192.png","https://netmirror.gg/favicon.ico"]},
-{appType:"movie",name:"CineHD",url:"https://cinehd.dev/",downloadUrl:"https://cinehd.dev/",downloadDirect:false,domain:"cinehd.dev",ads:2,pop:86,smooth:60,langs:78,new:false,desc:"Android movie and series streaming app.",logoSources:["assets/logos/sites/cinehd-app.png","https://cinehd.dev/images/cinehd-logo.png","https://cinehd.dev/images/favicon.ico?v=1145"]},
-{appType:"movie",name:"Moviboxapk",url:"https://moviboxapk.com/",downloadUrl:"https://moviboxapk.com/",downloadDirect:false,domain:"moviboxapk.com",ads:2,pop:77,smooth:63,langs:76,new:false,desc:"Android movie and series streaming app.",logoSources:["assets/logos/sites/moviboxapk.webp","https://moviboxapk.com/wp-content/uploads/2026/06/cropped-moviebox-icon.webp","https://moviboxapk.com/favicon.ico"]},
-{appType:"movie",name:"PvrPlay",url:"https://pvrplay.online/",downloadUrl:"https://pvrplay.online/",downloadDirect:false,domain:"pvrplay.online",ads:2,pop:75,smooth:64,langs:74,new:false,desc:"Android app for movies and web series.",logoSources:["assets/logos/sites/pvrplay.png","assets/logos/site-pvrplay.webp","https://pvrplay.online/favicon.ico","https://pvrplay.online/favicon.png"]},
-{appType:"movie",name:"Hdghartv",url:"https://watch.hdghartv.com.pk/",downloadUrl:"https://hdghartv.com.pk/apk/",downloadDirect:false,domain:"watch.hdghartv.com.pk",ads:0,pop:72,smooth:86,langs:70,new:false,desc:"HDGharTV Android app. Use the official download page if available.",logoSources:["assets/logos/sites/hdghartv.png","https://hdghartv.com.pk/wp-content/uploads/2026/08/hdghartv-logo.png","https://watch.hdghartv.com.pk/favicon.ico"]},
-{appType:"movie",name:"Anivortex",url:"https://anivortex.in/",downloadUrl:"https://anivortex.in/",downloadDirect:false,domain:"anivortex.in",ads:1,pop:70,smooth:72,langs:80,new:false,desc:"Anime-focused streaming app.",logoSources:["assets/logos/sites/anivortex.webp","https://anivortex.in/images/anivortex_logo_transparent.webp","https://anivortex.in/images/anivortex_logo.webp"]},
-{appType:"movie",name:"Nxsha",url:"https://nxsha.app/",downloadUrl:"https://nxsha.app/",downloadDirect:false,domain:"nxsha.app",ads:1,pop:74,smooth:84,langs:90,new:false,desc:"Movies, TV, anime and K-drama discovery app.",logoSources:["assets/logos/sites/nxsha.png","nxsha_icon.png","https://nxsha.app/favicon.ico","https://nxsha.app/og.jpg"]},
-{appType:"movie",name:"Freekz",url:"https://freekz.to/",downloadUrl:"https://freekz.to/",downloadDirect:false,domain:"freekz.to",ads:1,pop:75,smooth:78,langs:78,new:true,desc:"Freekz Android app with a direct APK download.",logoSources:["assets/logos/sites/freekz.png","https://freekz.to/05BB1581-39C9-4B10-AA10-7957B2994AE4.png","https://freekz.to/banner.png","https://freekz.to/favicon.ico"]}
+{name:"FilmTV",url:"https://www.filmtvapp.com/",domain:"filmtvapp.com",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"FilmTV Android app with direct APK download.",logoSources:["https://www.filmtvapp.com/favicon.ico","https://www.filmtvapp.com/favicon.png","https://www.filmtvapp.com/icon-192.png"]},
+{name:"Nuvix",url:"https://www.nuvixapp.in/",domain:"nuvixapp.in",ads:0,pop:82,smooth:88,langs:86,new:true,desc:"Nuvix Android app with direct APK download.",logoSources:["https://www.nuvixapp.in/favicon.ico","https://www.nuvixapp.in/favicon.png","https://www.nuvixapp.in/icon-192.png"]},
+{name:"Vega",url:"https://github.com/vega-org/vega-app/releases/latest",domain:"github.com",ads:0,pop:88,smooth:91,langs:92,new:true,desc:"Open-source Android media streaming app with ad-free streaming and downloads.",logoSources:["https://raw.githubusercontent.com/vega-org/vega-app/main/assets/adaptive_icon.png"]},
+{name:"NetMirror",url:"https://netmirror.gg/10/en-us",domain:"netmirror.gg",ads:2,pop:90,smooth:66,langs:84,new:true,desc:"Android streaming app with movie and series sources.",logoSources:["https://netmirror.gg/favicon.ico","https://netmirror.gg/favicon.png","https://netmiirror.app/wp-content/uploads/2026/10/cropped-NetMirror-1-192x192.webp","https://netmiirror.app/wp-content/uploads/2026/10/cropped-NetMirror-1-180x180.webp"]},
+{name:"CineHD",url:"https://cinehd.dev/",domain:"cinehd.dev",ads:2,pop:86,smooth:60,langs:78,new:false,desc:"Android movie and series streaming app.",logoSources:["https://cinehd.vc/icon-192x192.png","https://cinehd.dev/images/favicon.ico"]},
+{name:"Moviboxapk",url:"https://moviboxapk.com/",domain:"moviboxapk.com",ads:2,pop:77,smooth:63,langs:76,new:false,desc:"Android movie and series streaming app.",logoSources:["https://moviboxapk.com/wp-content/uploads/2026/06/cropped-cropped-moviebox-icon-192x192.webp","https://moviboxapk.com/wp-content/uploads/2026/06/cropped-cropped-moviebox-icon-180x180.webp","https://moviboxapk.com/favicon.ico","https://moviboxapk.com/favicon.png"]},
+{name:"PvrPlay",url:"https://pvrplay.online/",domain:"pvrplay.online",ads:2,pop:75,smooth:64,langs:74,new:false,desc:"Android app for movies and web series.",logoSources:["https://pvrplay.online/favicon.ico","https://pvrplay.online/favicon.png"]},
+{name:"Hdghartv",url:"https://hdghartv.com.pk/apk/",domain:"hdghartv.com.pk",ads:0,pop:72,smooth:86,langs:70,new:false,desc:"Free Android movies and TV app; its site advertises an ad-free experience.",logoSources:["https://hdghartv.com.pk/wp-content/uploads/2026/08/hdghartv-logo.png","https://hdghartv.com.pk/logo.png","https://hdghartv.com.pk/favicon.png","https://hdghartv.com.pk/favicon.ico"]},
+{name:"Anivortex",url:"https://anivortex.in/",domain:"anivortex.in",ads:1,pop:70,smooth:72,langs:80,new:false,desc:"Anime-focused streaming app.",logoSources:["https://anivortex.in/images/anivortex_logo.webp","https://anivortex.in/images/anivortex_logo_transparent.webp","https://anivortex.in/favicon.ico","https://anivortex.in/favicon.png"]},
+{name:"Nxsha",url:"https://github.com/dev-alessiorizzo/nxsha-apk/releases/latest",domain:"nxsha.app",ads:1,pop:74,smooth:84,langs:90,new:false,desc:"Movies, TV, anime and K-drama discovery app.",logoSources:["https://nxsha.app/favicon.ico","https://nxsha.app/favicon.png","https://nxsha.app/icon-192.png"]}
 ];
 
-const M=[
-{appType:"music",name:"Demus",kind:"app",url:"https://en.softonic.com/download/demus/android/post-download?dt=internalDownload",downloadUrl:"https://en.softonic.com/download/demus/android/post-download?dt=internalDownload",domain:"demus.en.softonic.com",ads:1,pop:76,smooth:82,langs:86,new:true,desc:"Demus music app for Android.",logoSources:["assets/logos/sites/demus-hd.png","assets/logos/sites/demus.ico","assets/logos/sites/demus.jpg","https://images.sftcdn.net/images/t_app-icon-s/p/2b0597be-ed36-477e-990e-7fd7e34cc5c1/1880695670/demus-download-Demus.jpg"]},
-{appType:"music",name:"Youtify",kind:"app",url:"https://d.apkpure.net/b/XAPK/com.youtify.music?version=latest",downloadUrl:"https://d.apkpure.net/b/XAPK/com.youtify.music?version=latest",domain:"play.google.com",ads:1,pop:72,smooth:78,langs:82,new:true,desc:"Youtify music app — latest XAPK download.",logoSources:["assets/logos/sites/youtify.webp","https://image.winudf.com/v2/image1/Y29tLnlvdXRpZnkubXVzaWNfaWNvbl8xNzg4NjgxOTcxXzA4Nw/icon.webp?fakeurl=1&type=.webp&w=512"]},
-{appType:"music",name:"BitChord",kind:"app",url:"https://github.com/search?q=BitChord+android&type=repositories",downloadUrl:"https://github.com/search?q=BitChord+android&type=repositories",downloadDirect:false,domain:"github.com",ads:0,pop:72,smooth:84,langs:80,new:true,desc:"BitChord Android music app — direct APK download.",logoSources:["assets/logos/sites/bitchord.png","https://raw.githubusercontent.com/kushagrasinghx/BitChord/main/app/src/main/ic_launcher-playstore.png","https://raw.githubusercontent.com/kushagrasinghx/BitChord/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp"]},
-{appType:"music",name:"Echo Music",kind:"app",url:"https://github.com/EchoMusicApp/Echo-Music/releases/latest/download/EchoMusic.apk",downloadUrl:"https://github.com/EchoMusicApp/Echo-Music/releases/latest/download/EchoMusic.apk",domain:"github.com",ads:0,pop:78,smooth:86,langs:82,new:true,desc:"Echo Music Android app — direct APK download.",logoSources:["assets/logos/sites/echo-music.png","https://raw.githubusercontent.com/EchoMusicApp/Echo-Music/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"]},
-{appType:"music",name:"Echo Nightly",kind:"app",url:"https://github.com/itsmechinmoy/echo-nightly/releases/latest/download/app-release.apk",downloadUrl:"https://github.com/itsmechinmoy/echo-nightly/releases/latest/download/app-release.apk",domain:"github.com",ads:0,pop:76,smooth:86,langs:80,new:true,desc:"Echo Nightly Android music player — direct APK download.",logoSources:["assets/logos/sites/echo-nightly.webp","https://raw.githubusercontent.com/itsmechinmoy/echo-nightly/main/app/src/nightly/res/mipmap-xxxhdpi/ic_launcher.webp"]},
-{appType:"music",name:"Spotube",kind:"app",url:"https://spotube.cc/downloads/redirect/?platform=Android&filetype=apk&p=latest%2Fdownload%2FSpotube-android-all-arch.apk",downloadUrl:"https://spotube.cc/downloads/redirect/?platform=Android&filetype=apk&p=latest%2Fdownload%2FSpotube-android-all-arch.apk",domain:"spotube.cc",ads:0,pop:88,smooth:90,langs:84,new:true,desc:"Spotube — music player with universal Android APK download.",logoSources:["assets/logos/sites/spotube.png","https://raw.githubusercontent.com/team-spotube/spotube/master/assets/branding/spotube-logo.png","https://raw.githubusercontent.com/team-spotube/spotube/master/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"]},
-{appType:"music",name:"OuterTune",kind:"app",url:"https://github.com/OuterTune/OuterTune/releases/latest",downloadUrl:"https://github.com/OuterTune/OuterTune/releases/latest",downloadDirect:false,domain:"github.com",ads:0,pop:78,smooth:88,langs:86,new:true,desc:"OuterTune Android music app — direct APK download.",logoSources:["assets/logos/sites/outertune.png","https://raw.githubusercontent.com/OuterTune/OuterTune/lite/app/src/main/ic_launcher-playstore.png","https://raw.githubusercontent.com/OuterTune/OuterTune/lite/fastlane/metadata/android/en-US/images/icon.png"]},
-{appType:"music",name:"LastWave",kind:"app",url:"https://github.com/Clash-Projects/LastWave-Native/releases/latest",downloadUrl:"https://github.com/Clash-Projects/LastWave-Native/releases/latest",downloadDirect:false,domain:"github.com",ads:0,pop:75,smooth:84,langs:82,new:true,desc:"LastWave Native music app — direct universal APK download.",logoSources:["assets/logos/sites/lastwave.png","https://raw.githubusercontent.com/Clash-Projects/LastWave-Native/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png","https://raw.githubusercontent.com/Clash-Projects/LastWave-Native/main/lastwave_logo.png"]},
-{appType:"music",name:"Meld",kind:"app",url:"https://github.com/FrancescoGrazioso/Meld/releases/download/v0.7.2/Meld-izzy.apk",downloadUrl:"https://github.com/FrancescoGrazioso/Meld/releases/download/v0.7.2/Meld-izzy.apk",domain:"github.com/FrancescoGrazioso/Meld",ads:0,pop:84,smooth:88,langs:86,new:true,desc:"Meld is an Android music player combining YouTube Music playback with Spotify-powered search, playlists and recommendations. Version 0.7.2 APK.",logoSources:["assets/logos/sites/meld.png","https://play-lh.googleusercontent.com/F7sFbp7vJzYkjk16fJJINv003mwK6XoXIZKpJ9LhOPaN-vt7efBqCLBQ0KBjiKmNHbKmNYyNSjxkjQ78WdUgYg=w240-h480"]}
-];
-
-window.MAHIFLIX_CATALOG={get sites(){return S},get apps(){return A.concat(M)}};
+window.MAHIFLIX_CATALOG={get sites(){return S},get apps(){return A}};
 const adLabel=["No / minimal ads","Some ads","More / heavier ads"];
 const adClass=["a0","a1","a2"];
 
-const clean=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clean=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const initials=n=>n.replace(/[^a-z0-9 ]/gi,"").split(/\s+/).map(x=>x[0]||"").join("").slice(0,2).toUpperCase();
 const hue=n=>{let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h};
 
-function logoHTML(it,preferLocal){
-  const slug=String(it.name||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-  const logoMap=window.STREAMCLOUD_ITEM_LOGOS||{};
-  const type=it.appType||"site";
-  const domain=String(it.domain||"").toLowerCase();
-  const domainKey=type+":"+domain;
-  const nameKey=type+":"+slug;
-  const localItem=logoMap[domainKey]||logoMap[nameKey]||(window.MAHIFLIX_LOGOS||{})[domain];
-  const preview=String(it.thumbnail||it.thumbnailUrl||"").trim();
+function logoHTML(it){
+  const local=(window.MAHIFLIX_LOGOS||{})[it.domain];
   const sources=[
-    ...(preview?[preview]:[]),
-    ...(localItem?[localItem]:[]),
     ...(it.logoSources||[]),
-    "https://"+domain+"/favicon.ico",
-    "https://"+domain+"/favicon.png",
-    "https://"+domain+"/favicon.svg",
-    "https://www.google.com/s2/favicons?sz=256&domain="+encodeURIComponent(domain),
-    "https://icons.duckduckgo.com/ip3/"+encodeURIComponent(domain)+".ico"
+    ...(local?[local]:[]),
+    "https://"+it.domain+"/favicon.ico",
+    "https://"+it.domain+"/favicon.png",
+    "https://"+it.domain+"/favicon.svg",
+    "https://www.google.com/s2/favicons?sz=256&domain="+encodeURIComponent(it.domain),
+    "https://icons.duckduckgo.com/ip3/"+encodeURIComponent(it.domain)+".ico"
   ];
-  const unique=Array.from(new Set(sources.filter(Boolean)));
-  const alt=clean(it.name)+(preview?" thumbnail":" logo");
-  return "<img loading='lazy' decoding='async' width='240' height='240' alt='"+alt+"' class='"+(preview?"source-thumbnail":"")+"' referrerpolicy='no-referrer' src='"+unique[0]+"' data-logo-sources='"+clean(JSON.stringify(unique))+"' data-logo-index='0' onerror='nextLogo(this)'>";
+  const json=JSON.stringify(sources);
+  return "<img loading='lazy' fetchpriority='auto' decoding='async' alt='"+clean(it.name)+" logo' src='"+sources[0]+"' data-logo-sources='"+clean(json)+"' data-logo-index='0' onerror='nextLogo(this)'>";
 }
 function nextLogo(img){
   try{
@@ -442,7 +294,6 @@ function nextLogo(img){
     const index=Number(img.getAttribute("data-logo-index")||"0")+1;
     if(index<sources.length){
       img.setAttribute("data-logo-index",String(index));
-      if(index>0)img.classList.remove("source-thumbnail");
       img.src=sources[index];
       return;
     }
@@ -456,43 +307,26 @@ function qualityScore(it){
   return (it.pop*.42)+(it.smooth*.30)+(it.langs*.18)+((2-it.ads)*10);
 }
 
+const top10=[...S].sort((a,b)=>qualityScore(b)-qualityScore(a)).slice(0,10);
+
 function bucket(arr,n){
   return arr.filter(x=>x.ads===n).sort((a,b)=>qualityScore(b)-qualityScore(a));
 }
 
-
-
 function card(it,i,isTop){
-  if(it.kind==="app")return appCard(it,i);
   const c1=it.color||("hsl("+hue(it.name)+" 55% 34%)");
   const c2="#0d0d0d";
+  const num=isTop?"<span class='num'>"+(i+1)+"</span>":"";
   const nw=it.new?"<span class='badge'>NEW</span>":"";
   const ad=it.ads<2?"<span class='ad "+adClass[it.ads]+"'>"+(it.ads===0?"NO AD":"LESS AD")+"</span>":"";
+  const url=linkOf(it);
   return "<div class='card logo-card live' tabindex='0' role='button' style='--c1:"+c1+";--c2:"+c2+"' data-name='"+clean(it.name.toLowerCase())+"'>"+
-    logoHTML(it)+nw+ad+
-    "<div class='cap'>"+clean(it.name)+"</div>"+
-    "<div class='site-meta'><span>"+clean(it.domain||it.url||"Website")+"</span><span class='site-open'>Visit ↗</span></div></div>";
+    num+logoHTML(it)+nw+ad+
+    "<div class='cap'>"+clean(it.name)+(it.kind==="app"?" · App":"")+"</div>"+
+    "<div class='more'><div class='actions'><a class='round go' href='"+url+"' target='_blank' rel='noopener noreferrer' aria-label='Open "+clean(it.name)+"'>"+svgPlay()+"</a><button class='round fav' aria-label='Add to My List'>"+svgPlus()+"</button></div>"+
+    "<b>"+clean(it.name)+"</b><p>"+clean(it.desc)+"</p><p class='lang'>Mahi score · "+Math.round(qualityScore(it))+"/100</p></div></div>";
 }
 
-function appCard(it,i){
-  const music=it.appType==="music";
-  const accent=music?"#73e6ef":"#ff7166";
-  const accent2=music?"#7253bd":"#8e202d";
-  const adTag=it.ads===0?"<span class='ad-low'>No / minimal ads</span>":it.ads===1?"<span class='ad-mid'>Some ads</span>":"<span class='ad-high'>More / heavier ads</span>";
-  const freshness=it.new?"<span class='fresh'>NEW</span>":"";
-  const domain="<span>"+clean(it.domain||"app")+"</span>";
-  const download=it.downloadUrl||it.url;
-  const logo=logoHTML(it,!music);
-  const favourite="<button class='fav movie-fav' type='button' data-on='' aria-pressed='false' aria-label='Add "+clean(it.name)+" to My List' title='Add to My List'>"+svgPlus()+"</button>";
-  const links=music
-    ?"<a class='open-link download-link' href='"+clean(download)+"' target='_blank' rel='noopener noreferrer'>"+(it.downloadDirect===false?"Official download page":"Download app")+" <span aria-hidden='true'>↧</span></a>"
-    :"<a class='open-link secondary-link' href='"+clean(it.url)+"' target='_blank' rel='noopener noreferrer'>Visit website <span aria-hidden='true'>↗</span></a><a class='open-link download-link' href='"+clean(download)+"' target='_blank' rel='noopener noreferrer'>"+(it.downloadDirect===false?"Official download page":"Download APK")+" <span aria-hidden='true'>↧</span></a>";
-  const tags="<div class='movie-app-tags'>"+freshness+(music?(it.downloadDirect===false?"":"<span class='download-tag'>DIRECT DOWNLOAD</span>"):adTag)+domain+"</div>";
-  return "<article class='card app-card movie-app-card live' tabindex='0' role='button' data-name='"+clean(it.name.toLowerCase())+"' data-category='"+(music?"music":"movie")+"' style='--accent:"+accent+";--accent2:"+accent2+";--accent-glow:"+accent+"30;animation-delay:"+Math.min(i,8)*42+"ms'>"+
-    "<div class='card-top'><div class='app-icon movie-logo'>"+logo+"</div><span class='kind'>"+(music?"MUSIC APP":"MOVIE APP")+"</span></div>"+
-    "<h3><span>"+clean(it.name)+"</span>"+favourite+"</h3><p>"+clean(it.desc||"")+"</p>"+tags+
-    "<div class='card-footer'><small>"+(music?(it.downloadDirect===false?"Official download page":"Direct app download"):"Language coverage score · "+clean(it.langs==null?"—":it.langs)+"/100")+"</small><div class='movie-card-actions'>"+links+"</div></div></article>";
-}
 function rowHTML(title,items,opts){
   if(!items.length)return "";
   const top=opts&&opts.top,note=opts&&opts.note?opts.note:"";
@@ -502,12 +336,9 @@ function rowHTML(title,items,opts){
 function renderView(type){
   const el=document.getElementById(type==="sites"?"sitesView":"appsView");
   const data=type==="sites"?S:A;
+  const label=type==="sites"?"Websites":"Apps";
   const sorted=data.slice().sort((a,b)=>qualityScore(b)-qualityScore(a));
-  if(type==="sites"){
-    el.innerHTML=rowHTML("Movie Websites",sorted,{kind:"site",note:"Your curated StreamCloud collection"});
-  }else{
-    el.innerHTML=rowHTML("Movie Apps",sorted,{kind:"app",note:"Direct APK links and app information"});
-  }
+  el.innerHTML=rowHTML(label,sorted,{kind:type==="sites"?"site":"app",note:"Your curated MahiFlix collection"});
 }
 
 renderView("sites");
@@ -530,7 +361,7 @@ document.querySelectorAll(".mode").forEach(function(btn){
     btn.classList.add("active");btn.setAttribute("aria-selected","true");
     var mode=btn.dataset.mode;
     document.getElementById("sitesView").classList.toggle("active",mode==="sites");
-    document.getElementById("appsView").classList.toggle("active",mode!=="sites");
+    document.getElementById("appsView").classList.toggle("active",mode==="apps");
     document.getElementById("q").value="";
     document.getElementById("empty").style.display="none";
       });
@@ -550,11 +381,6 @@ document.addEventListener("click",function(e){
     return;
   }
   var cardEl=e.target.closest(".card");
-  if(cardEl && document.querySelector(".view.active")===document.getElementById("sitesView") && !e.target.closest(".fav")){
-    var siteName=cardEl.dataset.name||"";
-    var siteItem=S.find(function(x){return x.name.toLowerCase()===siteName;});
-    if(siteItem&&siteItem.url){e.preventDefault();window.location.href=siteItem.url;return;}
-  }
   if(cardEl && !e.target.closest("a,button")){
     var name=cardEl.dataset.name||"";
     var current=(document.querySelector(".view.active")===document.getElementById("appsView"))?A:S;
@@ -607,7 +433,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   const adFilter=document.getElementById("adFilter");
   const sortSelect=document.getElementById("sortSelect");
   let mode="sites",filter="all",sort="score",current=null,currentList="sites",lastFocus=null,statusEntries={};
-  const allData=()=>mode==="sites"?S:A.concat(M);
+  const allData=()=>mode==="apps"?A:S;
   const slug=name=>name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   const ratingKey=item=>"mahiflix-rating:"+slug(item.name);
   const favKey=item=>"mahiflix-favorite:"+slug(item.name);
@@ -632,13 +458,13 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     updateDetailStatus();
     document.getElementById("detailTags").innerHTML=[
       item.new?"New entry":"",
-      currentList!=="sites"?"Android app":"Website",
+      currentList==="apps"?"Android app":"Website",
       /anime/i.test(item.name+" "+item.desc)?"Anime":""
     ].filter(Boolean).map(t=>"<span class='detail-tag'>"+clean(t)+"</span>").join("");
     document.getElementById("detailLogo").innerHTML=logoHTML(item);
     const visit=document.getElementById("detailVisit");visit.href=item.url;
-    visit.target="_blank";visit.rel="noopener noreferrer";
-    visit.textContent=currentList!=="sites"?"Open App Page":"Visit Site";
+    visit.target=currentList==="apps"?"_self":"_blank";visit.rel="noopener noreferrer";
+    visit.textContent=currentList==="apps"?"Open App Page":"Visit Site";
     setRating(savedRating(item));updateFav();
     modal.classList.add("open");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
     document.querySelector(".detail-panel").focus();
@@ -661,26 +487,18 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     return true;
   }
   function render(){
-    const tools=document.querySelector(".catalog-tools");
-    if(tools) tools.hidden = mode==="sites" && S.length===0;
-    const data=allData().filter(matches).filter(item=>mode==="sites"?!item.appType:mode==="apps"?item.appType==="movie":item.appType==="music");
+    const data=allData().filter(matches);
     if(sort==="popular")data.sort((a,b)=>b.pop-a.pop);
     else if(sort==="newest")data.sort((a,b)=>Number(b.new)-Number(a.new)||qualityScore(b)-qualityScore(a));
     else if(sort==="name")data.sort((a,b)=>a.name.localeCompare(b.name));
     else data.sort((a,b)=>qualityScore(b)-qualityScore(a));
-    const typed=data.map(item=>Object.assign({},item,{kind:mode==="sites"?"site":"app"}));
-    const target=document.getElementById(mode==="sites"?"sitesView":"appsView");
-    if(mode==="sites"){
-      target.innerHTML=typed.length?rowHTML("Movie Websites",typed,{kind:"site",note:"Hand-picked by Mahi · Scores are estimates"}):"";
-    }else if(mode==="apps"){
-      target.innerHTML=typed.length?rowHTML("Movie Apps",typed,{kind:"app",note:"Official pages & verified downloads · Scores are estimates"}):"";
-    }else{
-      target.innerHTML=typed.length?rowHTML("Music Apps",typed,{kind:"app",note:"Direct app downloads"}):"";
-    }
+    const typed=data.map(item=>Object.assign({},item,{kind:mode==="apps"?"app":"site"}));
+    const target=document.getElementById(mode==="apps"?"appsView":"sitesView");
+    target.innerHTML=typed.length?rowHTML(mode==="apps"?"Apps":"Websites",typed,{kind:mode==="apps"?"app":"site",note:"Hand-picked by Mahi · Scores are estimates"}):"";
     document.getElementById("empty").style.display=typed.length?"none":"block";
-    document.getElementById("empty").textContent=search.value?"No listings matched your search. Try another name or filter.":mode==="sites"&&!S.length?"No websites are listed yet. Please check back soon.":"No listings match these filters.";
+    document.getElementById("empty").textContent=search.value?"No listings matched your search. Try another name or filter.":"No listings match these filters.";
     document.getElementById("sitesView").classList.toggle("active",mode==="sites");
-    document.getElementById("appsView").classList.toggle("active",mode!=="sites");
+    document.getElementById("appsView").classList.toggle("active",mode==="apps");
     document.querySelectorAll(".mode").forEach(b=>{const on=b.dataset.mode===mode;b.classList.toggle("active",on);b.setAttribute("aria-selected",String(on))});
     document.querySelectorAll(".filter-chip").forEach(b=>{const on=b.dataset.filter===filter;b.classList.toggle("active",on);b.setAttribute("aria-pressed",String(on))});
     target.querySelectorAll(".card").forEach((c,i)=>{
@@ -691,7 +509,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     paintStatusBadges();
   }
   function statusFor(item,type){
-    return statusEntries[(type==="sites"?"site":"app")+":"+slug(item.name)]||null;
+    return statusEntries[(type==="apps"?"app":"site")+":"+slug(item.name)]||null;
   }
   function updateDetailStatus(){
     const state=current?statusFor(current,currentList):null;
@@ -709,7 +527,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     document.getElementById("detailUpdated").textContent="Last checked "+when+" · "+state.reason+". 403, rate limits and temporary network failures are treated as unverified rather than down.";
   }
   function paintStatusBadges(){
-    const target=document.getElementById(mode==="sites"?"sitesView":"appsView");
+    const target=document.getElementById(mode==="apps"?"appsView":"sitesView");
     target.querySelectorAll(".card").forEach(card=>{
       const item=allData().find(x=>x.name.toLowerCase()===card.dataset.name);
       const state=item?statusFor(item,mode):null;
@@ -720,9 +538,6 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     });
     if(current)updateDetailStatus();
   }
-  window.STREAMCLOUD_SET_MODE = function(nextMode){
-    mode = nextMode; filter = "all"; adFilter.value = "all"; search.value = ""; render();
-  };
   document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{
     mode=b.dataset.mode;filter="all";adFilter.value="all";search.value="";render();
   }));
@@ -748,15 +563,11 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     if(arrow){e.preventDefault();e.stopImmediatePropagation();const track=arrow.closest(".rail").querySelector(".track");track.scrollBy({left:(arrow.classList.contains("l")?-1:1)*track.clientWidth*.82,behavior:"smooth"});return}
     if(e.target.closest("[data-modal-close]")){e.preventDefault();e.stopImmediatePropagation();closeDetail();return}
     if(e.target.closest("[data-legal-toggle]")){e.preventDefault();e.stopImmediatePropagation();const legal=document.getElementById("footerLegal");legal.open=true;legal.scrollIntoView({behavior:"smooth",block:"center"});return}
-    const info=e.target.closest("[data-detail]");
-    if(info){e.preventDefault();e.stopImmediatePropagation();const ic=info.closest(".card"),ii=ic&&allData().find(x=>x.name.toLowerCase()===ic.dataset.name);if(ii)openDetail(ii,mode);return}
     const card=e.target.closest(".card");
     if(card&&!e.target.closest("a,button")){
       e.preventDefault();e.stopImmediatePropagation();
       const item=allData().find(x=>x.name.toLowerCase()===card.dataset.name);
-      if(!item)return;
-      if(mode==="sites"&&item.url){window.open(item.url,"_blank","noopener,noreferrer");return}
-      openDetail(item,mode);
+      if(item)openDetail(item,mode);
     }
   },true);
   document.addEventListener("keydown",function(e){
@@ -766,9 +577,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     if(!card||e.target.closest("a,button"))return;
     e.preventDefault();e.stopImmediatePropagation();
     const item=allData().find(x=>x.name.toLowerCase()===card.dataset.name);
-    if(!item)return;
-    if(mode==="sites"&&item.url){window.open(item.url,"_blank","noopener,noreferrer");return}
-    openDetail(item,mode);
+    if(item)openDetail(item,mode);
   },true);
   document.querySelectorAll("#ratingStars button").forEach(b=>b.addEventListener("click",()=>{
     if(!current)return;
@@ -783,21 +592,11 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   document.getElementById("detailShare").addEventListener("click",async function(){
     if(!current)return;const url=location.origin+location.pathname+"#"+slug(current.name);
     try{
-      if(navigator.share)await navigator.share({title:"StreamCloud · "+current.name,text:current.desc||"View this listing on StreamCloud.",url});
+      if(navigator.share)await navigator.share({title:"MahiFlix · "+current.name,text:current.desc||"View this listing on MahiFlix.",url});
       else if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(url);this.textContent="Link copied"}
       else{const t=document.createElement("textarea");t.value=url;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();this.textContent="Link copied"}
     }catch(e){}
   });
-  // Shared mode setter for the dynamically-created Music Apps tab in cinema/categories.js.
-  // Keep mode, filters, active tabs and rendered data in sync through the original renderer.
-  window.STREAMCLOUD_SET_MODE = function(nextMode){
-    if(!["sites","apps","music"].includes(nextMode)) return;
-    mode=nextMode;
-    filter="all";
-    adFilter.value="all";
-    search.value="";
-    render();
-  };
   render();
   fetch("./link-status.json",{cache:"no-store"}).then(response=>{if(!response.ok)throw new Error("Status file unavailable");return response.json()}).then(payload=>{
     statusEntries=payload.entries||{};
@@ -805,10 +604,9 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   }).catch(()=>{});
   const initial=(location.hash||"").slice(1).toLowerCase();
   if(initial){
-    const item=S.concat(A,M).find(x=>slug(x.name)===initial);
-    if(item){mode=M.includes(item)?"music":(A.includes(item)?"apps":"sites");render();openDetail(item,mode)}
+    const item=S.concat(A).find(x=>slug(x.name)===initial);
+    if(item){mode=A.includes(item)?"apps":"sites";render();openDetail(item,mode)}
   }
-
 })();
 </script>
 <script>
@@ -828,7 +626,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   });
   installButton.addEventListener("click",async function(){
     if(installButton.dataset.iosInstall==="true"){
-      window.alert("To install StreamCloud on iPhone: open this site in Safari, tap Share, then choose Add to Home Screen.");
+      window.alert("To install MahiFlix on iPhone: open this site in Safari, tap Share, then choose Add to Home Screen.");
       return;
     }
     if(!installPrompt)return;
@@ -847,115 +645,6 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   }
 })();
 </script>
-
-<div class="wl-modal" id="wlModal" aria-hidden="true">
-  <div class="wl-scrim" data-wl-close></div>
-  <section class="wl-panel" role="dialog" aria-modal="true" aria-labelledby="wlTitle" tabindex="-1">
-    <button class="wl-x" type="button" data-wl-close aria-label="Close watchlist">×</button>
-    <h2 id="wlTitle">My Watchlist</h2>
-    <p class="wl-note">Your list is stored locally in this browser only (localStorage). It is not synced across devices, and StreamCloud does not know what you have watched.</p>
-    <form class="wl-form" id="wlForm" novalidate>
-      <input name="title" type="text" maxlength="120" placeholder="Movie or series title" aria-label="Title" autocomplete="off">
-      <select name="type" aria-label="Type"><option>Movie</option><option>Series</option></select>
-      <select name="status" aria-label="Status"><option>Plan to Watch</option><option>Watching</option><option>Watched</option></select>
-      <button class="primary" type="submit" id="wlSubmit">Add</button>
-    </form>
-    <p class="wl-err" id="wlErr" role="alert"></p>
-    <div class="wl-bar">
-      <input class="wl-search" id="wlSearch" type="search" placeholder="Search your list" aria-label="Search your watchlist">
-      <span id="wlChips" role="group" aria-label="Filter by status"></span>
-    </div>
-    <ul class="wl-list" id="wlList"></ul>
-  </section>
-</div>
-<div id="toast" role="status" aria-live="polite"></div>
-<ul id="acList" role="listbox" aria-label="Search suggestions"></ul>
-<script id="streamcloud-premium-features">
-(function(){
-  var KEY="streamcloud-watchlist-v1",ST=["Plan to Watch","Watching","Watched"],$=function(id){return document.getElementById(id)};
-  var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
-  var toastTimer;function toast(m){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove("show")},2600)}
-  window.scToast=toast;
-  function load(){try{var a=JSON.parse(localStorage.getItem(KEY)||"[]");if(!Array.isArray(a))return[];return a.filter(function(x){return x&&typeof x.title==="string"&&x.title.trim()&&ST.indexOf(x.status)>-1&&(x.type==="Movie"||x.type==="Series")}).map(function(x,i){return{id:String(x.id||Date.now()+"-"+i),title:x.title.trim().slice(0,120),type:x.type,status:x.status}})}catch(e){return[]}}
-  var items=load(),editId=null,fStatus="All",lastFocus=null,armed=null,armTimer;
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(items));return true}catch(e){toast("Could not save: browser storage is unavailable.");return false}}
-  var modal=$("wlModal"),form=$("wlForm"),err=$("wlErr");
-  function counts(){var c={All:items.length};ST.forEach(function(s){c[s]=items.filter(function(x){return x.status===s}).length});return c}
-  function paint(){
-    var c=counts(),q=($("wlSearch").value||"").trim().toLowerCase();
-    $("wlChips").innerHTML=["All"].concat(ST).map(function(s){return"<button type='button' class='wl-chip' data-s='"+s+"' aria-pressed='"+(s===fStatus)+"'>"+s+" ("+c[s]+")</button>"}).join(" ");
-    var badge=document.querySelector(".wl-open b");if(badge)badge.textContent=c.All;
-    var list=items.filter(function(x){return(fStatus==="All"||x.status===fStatus)&&(!q||x.title.toLowerCase().indexOf(q)>-1)});
-    $("wlList").innerHTML=list.length?list.map(function(x){return"<li data-id='"+esc(x.id)+"'><div><div class='t'>"+esc(x.title)+"</div><div class='m'>"+x.type+"</div></div><div class='wl-act'><select data-act='status' aria-label='Status for "+esc(x.title)+"'>"+ST.map(function(s){return"<option"+(s===x.status?" selected":"")+">"+s+"</option>"}).join("")+"</select><button type='button' data-act='edit'>Edit</button><button type='button' data-act='del' class='del"+(armed===x.id?" sure":"")+"'>"+(armed===x.id?"Confirm delete":"Delete")+"</button></div></li>"}).join(""):"<li class='wl-empty'>"+(items.length?"No titles match your search or filter.":"Your watchlist is empty. Add a movie or series above to start tracking.")+"</li>";
-  }
-  function openWl(){lastFocus=document.activeElement;modal.classList.add("open");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";paint();setTimeout(function(){form.title.focus()},30)}
-  function resetForm(){editId=null;form.reset();$("wlSubmit").textContent="Add";err.textContent=""}
-  function closeWl(){if(!modal.classList.contains("open"))return;modal.classList.remove("open");modal.setAttribute("aria-hidden","true");document.body.style.overflow="";resetForm();if(lastFocus&&lastFocus.focus)lastFocus.focus()}
-  var btn=document.createElement("button");btn.type="button";btn.className="wl-open";btn.innerHTML="My Watchlist <b>"+items.length+"</b>";btn.addEventListener("click",openWl);
-  var host=document.querySelector(".catalog-selects");if(host)host.insertBefore(btn,host.firstChild);
-  form.addEventListener("submit",function(e){
-    e.preventDefault();var title=form.elements.title.value.replace(/\s+/g," ").trim();
-    if(!title){err.textContent="Please enter a title.";form.elements.title.focus();return}
-    var type=form.elements.type.value,status=form.elements.status.value;
-    if(items.some(function(x){return x.id!==editId&&x.title.toLowerCase()===title.toLowerCase()&&x.type===type})){err.textContent="That "+type.toLowerCase()+" is already in your list.";return}
-    if(editId){items=items.map(function(x){return x.id===editId?{id:x.id,title:title,type:type,status:status}:x});toast("Updated “"+title+"”")}
-    else{items.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:title,type:type,status:status});toast("Added “"+title+"”")}
-    save();resetForm();paint();form.elements.title.focus();
-  });
-  $("wlSearch").addEventListener("input",paint);
-  $("wlChips").addEventListener("click",function(e){var b=e.target.closest("[data-s]");if(b){fStatus=b.dataset.s;paint()}});
-  $("wlList").addEventListener("change",function(e){
-    var li=e.target.closest("li[data-id]");if(!li||e.target.dataset.act!=="status")return;
-    items.forEach(function(x){if(x.id===li.dataset.id){x.status=e.target.value;toast("Moved to "+x.status)}});save();paint();
-  });
-  $("wlList").addEventListener("click",function(e){
-    var b=e.target.closest("button[data-act]"),li=e.target.closest("li[data-id]");if(!b||!li)return;var id=li.dataset.id;
-    if(b.dataset.act==="edit"){var x=items.filter(function(i){return i.id===id})[0];if(!x)return;editId=id;form.elements.title.value=x.title;form.elements.type.value=x.type;form.elements.status.value=x.status;$("wlSubmit").textContent="Save";form.elements.title.focus()}
-    else if(b.dataset.act==="del"){
-      if(armed===id){items=items.filter(function(i){return i.id!==id});armed=null;save();paint();toast("Removed from your watchlist")}
-      else{armed=id;clearTimeout(armTimer);armTimer=setTimeout(function(){armed=null;paint()},3000);paint()}
-    }
-  });
-  modal.addEventListener("click",function(e){if(e.target.closest("[data-wl-close]"))closeWl()});
-  document.addEventListener("keydown",function(e){if(e.key==="Escape")closeWl()});
-  paint();
-})();
-(function(){
-  var $=function(id){return document.getElementById(id)},input=$("q"),box=$("acList");if(!input||!box||!window.MAHIFLIX_CATALOG)return;
-  var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
-  var shown=[],active=-1;
-  function all(){var C=window.MAHIFLIX_CATALOG;return C.sites.map(function(i){return{i:i,mode:"sites",label:"Website"}}).concat(C.apps.map(function(i){return{i:i,mode:i.appType==="music"?"music":"apps",label:i.appType==="music"?"Music app":"Movie app"}}))}
-  function logo(i){var m=window.STREAMCLOUD_ITEM_LOGOS||{},d=String(i.domain||"").toLowerCase();return m[(i.appType||"site")+":"+d]||(!i.appType&&(window.MAHIFLIX_LOGOS||{})[d])||""}
-  function hl(name,q){var k=name.toLowerCase().indexOf(q);return k<0?esc(name):esc(name.slice(0,k))+"<mark>"+esc(name.slice(k,k+q.length))+"</mark>"+esc(name.slice(k+q.length))}
-  function place(){var r=input.getBoundingClientRect(),w=Math.min(Math.max(r.width,300),window.innerWidth-16),l=Math.max(8,Math.min(r.right-w,window.innerWidth-w-8));box.style.width=w+"px";box.style.left=l+"px";box.style.top=(r.bottom+8)+"px"}
-  function close(){box.classList.remove("open");active=-1;input.setAttribute("aria-expanded","false");input.removeAttribute("aria-activedescendant")}
-  function setActive(n){var li=box.querySelectorAll("li[role=option]");if(!li.length)return;active=(n+li.length)%li.length;li.forEach(function(x,k){x.setAttribute("aria-selected",String(k===active))});li[active].scrollIntoView({block:"nearest"});input.setAttribute("aria-activedescendant",li[active].id)}
-  function pick(e){close();var b=document.querySelector('.mode[data-mode="'+e.mode+'"]');if(b)b.click();input.value=e.i.name;input.dispatchEvent(new Event("input",{bubbles:true}));close();var br=$("browse");if(br)br.scrollIntoView({behavior:"smooth",block:"start"})}
-  function show(){
-    var q=input.value.trim().toLowerCase();if(!q){close();return}
-    shown=all().filter(function(e){return e.i.name.toLowerCase().indexOf(q)>-1||String(e.i.domain||"").toLowerCase().indexOf(q)>-1}).sort(function(a,b){return(b.i.name.toLowerCase().indexOf(q)===0)-(a.i.name.toLowerCase().indexOf(q)===0)||a.i.name.localeCompare(b.i.name)}).slice(0,8);
-    box.innerHTML=shown.length?shown.map(function(e,k){var l=logo(e.i);return"<li role='option' id='ac-"+k+"' aria-selected='false' data-k='"+k+"'>"+(l?"<img class='ac-ico' alt='' width='28' height='28' loading='lazy' src='"+esc(l)+"' onerror=\"this.outerHTML='<span class=&quot;ac-ico&quot;>"+esc(e.i.name.slice(0,2).toUpperCase())+"</span>'\">":"<span class='ac-ico'>"+esc(e.i.name.slice(0,2).toUpperCase())+"</span>") +"<span>"+hl(e.i.name,q)+"</span><small>"+e.label+"</small></li>"}).join(""):"<li class='none' role='presentation'>No matching websites or apps</li>";
-    active=-1;place();box.classList.add("open");input.setAttribute("aria-expanded","true");
-  }
-  input.setAttribute("role","combobox");input.setAttribute("aria-controls","acList");input.setAttribute("aria-autocomplete","list");input.setAttribute("aria-expanded","false");
-  input.addEventListener("input",show);input.addEventListener("focus",show);
-  input.addEventListener("keydown",function(e){
-    var open=box.classList.contains("open");
-    if(e.key==="ArrowDown"){if(!open)show();e.preventDefault();setActive(active+1)}
-    else if(e.key==="ArrowUp"&&open){e.preventDefault();setActive(active-1)}
-    else if(e.key==="Enter"&&open&&active>-1){e.preventDefault();pick(shown[active])}
-    else if(e.key==="Escape"&&open){close()}
-  });
-  box.addEventListener("mousedown",function(e){e.preventDefault()});
-  box.addEventListener("click",function(e){var li=e.target.closest("li[data-k]");if(li)pick(shown[Number(li.dataset.k)])});
-  document.addEventListener("click",function(e){if(!e.target.closest("#acList")&&e.target!==input&&!e.target.closest("#search"))close()});
-  window.addEventListener("resize",function(){if(box.classList.contains("open"))place()});
-  window.addEventListener("scroll",function(){if(box.classList.contains("open"))place()},{passive:true});
-})();
-</script>
-
 <script type="module" src="./cinema/main.js"></script>
-<script src="./premium.js" defer></script>
-<script src="./titles.js" defer></script>
 </body>
 </html>

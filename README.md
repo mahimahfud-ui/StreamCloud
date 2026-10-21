@@ -39,17 +39,3 @@ For directories or the complete tree, use the GitHub API links above. Do not ask
 ## Development notes
 
 Keep the existing dark cinematic design and data. Prefer targeted changes, verify JavaScript syntax after edits, preserve the vendor license, and avoid claiming a deployment or live link check is complete until it has been verified.
-
-## Movies & Web Series recommendations
-- [Reusable ChatGPT prompt for Movies, Series, Websites, and Apps](./CHATGPT-STREAMCLOUD-PROMPT.md)
-
-
-Recommendations are maintained manually in `data/recommendations.json`. The Website list starts empty and only includes URLs you explicitly supply. There is **no TMDB/OMDb metadata API, API key, repository secret, or build-time metadata fetch**.
-
-- Add movie objects to `movies` and TV/web-series objects to `series`.
-- Useful fields: `title` (required), `year`, `poster` (direct HTTPS image URL or a local image path), `genres`, `rating` (optional `{"source":"IMDb","value":8.5}`), `overview`, `imdbId`, `runtime` for movies, and `seasonCount` / `episodeCount` for series.
-- `note`, `originalTitle`, `status`, custom `links`, and `seasonList` are optional.
-- To add or edit a recommendation, update only `data/recommendations.json` and push to `main`. The existing GitHub Pages workflow deploys the data along with the site.
-- With repository access connected in ChatGPT, you can simply ask: **“Add [title] ([year]) to StreamCloud recommendations as a movie/web series, verify the basic details and poster URL, update `data/recommendations.json`, and commit to `main`.”**
-
-Ratings, summaries and season counts are manually maintained snapshots and may need edits over time. Poster images are loaded from the URLs recorded in the JSON file.

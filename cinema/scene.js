@@ -128,13 +128,12 @@ export function startScene({ canvas, state, onReady, onFail }) {
 
   const mqPhone = matchMedia('(max-width:760px)'), mqTab = matchMedia('(max-width:1100px)');
   const lowEnd = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
-  // Start conservatively: integrated GPUs stay smooth without waiting for the governor to react.
-  const tier = mqPhone.matches ? { n: 360, dpr: 1, ribbons: 1 }
-             : (mqTab.matches || lowEnd) ? { n: 800, dpr: 1.05, ribbons: 1 }
-             : { n: 1500, dpr: 1.2, ribbons: 1 };
+  const tier = mqPhone.matches ? { n: 450, dpr: 1, ribbons: 1 }
+             : (mqTab.matches || lowEnd) ? { n: 1100, dpr: 1.25, ribbons: 1 }
+             : { n: 2200, dpr: 1.5, ribbons: 2 };
   // governor levels: [pixel-ratio scale, particle share, ribbons shown]
-  const LEVELS = [[.58, .35, 1], [.78, .62, 1], [1, 1, tier.ribbons]];
-  let level = 1;
+  const LEVELS = [[.6, .3, 1], [.75, .6, 1], [1, 1, tier.ribbons]];
+  let level = 2;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, 1, .1, 60);
