@@ -47,11 +47,11 @@ function extractEntries(arrayName, kind) {
   if (end < 0) return [];
   const section = html.slice(start, end + 3);
   const result = [];
-  const objectRe = /\{name:"([^"]+)"([\s\S]*?)\}/g;
+  const objectRe = /\{([\s\S]*?)\}/g;
   let match;
   while ((match = objectRe.exec(section))) {
     const block = match[0];
-    const name = match[1];
+    const name = (block.match(/\bname:"([^"]+)"/) || [])[1] || "";
     const domain = (block.match(/domain:"([^"]+)"/) || [])[1] || "";
     const pageUrl = (block.match(/url:"([^"]+)"/) || [])[1] || "";
     const logoMatch = block.match(/logoSources:\[([\s\S]*?)\]/);
