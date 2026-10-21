@@ -26,11 +26,21 @@ def extract_items(source: str, array_name: str) -> list[dict[str, str]]:
     match = re.search(rf"const\s+{re.escape(array_name)}\s*=\s*\[(.*?)\n\];", source, re.S)
     if not match:
         raise RuntimeError(f"Could not find the {array_name} catalog array in index.html")
-    rows = re.findall(
-        r'\{\s*name:"([^"]+)",url:"([^"]+)",domain:"([^"]+)"',
-        match.group(1),
-    )
-    return [{"name": name, "url": url, "domain": domain} for name, url, domain in rows]
+    rows: list[dict[str, str]] = []
+    # Catalog objects can start with appType/kind before name; inspect each object
+    # instead of assuming name is always its first property.
+    for object_match in re.finditer(r"\{([^{}]*)\}", match.group(1), re.S):
+        row = object_match.group(1)
+        name_match = re.search(r'\bname\s*:\s*"([^"]+)"', row)
+        url_match = re.search(r'\burl\s*:\s*"([^"]+)"', row)
+        domain_match = re.search(r'\bdomain\s*:\s*"([^"]+)"', row)
+        if name_match and url_match and domain_match:
+            rows.append({
+                "name": name_match.group(1),
+                "url": url_match.group(1),
+                "domain": domain_match.group(1),
+            })
+    return rows
 
 
 def check_url(url: str) -> dict[str, object]:
@@ -102,7 +112,7 @@ def check_url(url: str) -> dict[str, object]:
 def main() -> None:
     source = HTML_PATH.read_text(encoding="utf-8")
     entries: dict[str, dict[str, object]] = {}
-    for kind, array_name in (("site", "S"), ("app", "A")):
+    for kind, array_name in (("site", "S"), ("app", "A"), ("music", "M")):
         for item in extract_items(source, array_name):
             # App entries point to an internal detail/download route; check the listed source domain.
             url = item["url"] if item["url"].startswith(("https://", "http://")) else f"https://{item['domain']}/"
