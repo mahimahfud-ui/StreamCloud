@@ -20,7 +20,6 @@ export function initCategories() {
   if (!siteItems.length || (!movieApps.length && !musicApps.length)) return;
 
   const labels = { sites: 'Websites', movie: 'Movie Apps', music: 'Music Apps' };
-  const nextCategory = { sites: 'movie', movie: 'music', music: 'sites' };
   const slug = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   let initialHash = (location.hash || '').slice(1);
@@ -67,8 +66,6 @@ export function initCategories() {
   modeSwitch.classList.add('has-thumb', 'streamcloud-tabs-ready');
   document.documentElement.classList.add('streamcloud-categories-ready');
 
-  // The portal uses these arrays to preview and jump to the exact adjacent category.
-  window.STREAMCLOUD_CATALOGS = { sites: siteItems, movie: movieApps, music: musicApps };
   window.STREAMCLOUD_ACTIVE_CATEGORY = selectedCategory;
 
   function activeButton() {
@@ -83,20 +80,6 @@ export function initCategories() {
     thumb.style.transform = 'translateX(' + Math.max(0, active.offsetLeft - 5) + 'px)';
   }
 
-  function updatePortalPresentation() {
-    const next = nextCategory[selectedCategory];
-    const portal = document.getElementById('portal');
-    const name = document.getElementById('portalName');
-    const count = document.getElementById('portalCount');
-    const countLabel = '[' + String((window.STREAMCLOUD_CATALOGS[next] || []).length).padStart(2, '0') + ']';
-    if (name && name.textContent !== labels[next]) name.textContent = labels[next];
-    if (count && count.textContent !== countLabel) count.textContent = countLabel;
-    if (portal) {
-      const accessibleName = 'Jump to ' + labels[next];
-      if (portal.getAttribute('aria-label') !== accessibleName) portal.setAttribute('aria-label', accessibleName);
-      if (portal.dataset.label !== labels[next]) portal.dataset.label = labels[next];
-    }
-  }
 
   function updateEmptyState() {
     const empty = document.getElementById('empty');
@@ -128,7 +111,6 @@ export function initCategories() {
       button.tabIndex = active ? 0 : -1;
     });
     positionThumb();
-    updatePortalPresentation();
     updateEmptyState();
   }
 
@@ -183,10 +165,6 @@ export function initCategories() {
     buttons[next].click();
   });
 
-  // The portal's cinematic transition commits by clicking the destination category's existing tab.
-  // The new tab is handled above, including translating Music Apps into the original Apps renderer.
-  const portalButton = document.getElementById('portal');
-  if (portalButton) portalButton.setAttribute('aria-label', 'Jump to ' + labels[nextCategory[selectedCategory]]);
 
   // Rebuilds triggered by the existing search/filter/sort code only need visibility/empty-state sync.
   const viewObserver = new MutationObserver(updateCategoryView);
