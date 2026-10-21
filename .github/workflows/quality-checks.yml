@@ -26,3 +26,10 @@ jobs:
           node-version: 22
       - name: Validate JavaScript, JSON, and local assets
         run: npm run lint
+
+      - name: Install browser test runner
+        run: npm install --no-save --package-lock=false --no-audit --no-fund playwright
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser smoke tests
+        run: node scripts/smoke.mjs
