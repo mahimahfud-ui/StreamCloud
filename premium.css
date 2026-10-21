@@ -136,3 +136,7 @@ main .app-card p{min-height:40px}
  main .app-card .app-icon{width:54px;height:54px}
 }
 @media(prefers-reduced-motion:reduce){.mode-switch .mode,.mode-switch .mode::before,.mode-switch .mode-thumb,.card.logo-card .site-open{transition:none!important}}
+
+/* Keep a single Download action visible when no verified direct APK link exists. */
+.download-unavailable{font:inherit;border:0;opacity:.42;cursor:not-allowed;pointer-events:none}
+.unavailable-tag{opacity:.65}
