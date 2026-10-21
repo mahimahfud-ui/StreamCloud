@@ -42,3 +42,10 @@
 .t-season li i{flex:0 0 28px;font-style:normal;color:var(--muted)}
 @media (max-width:560px){.t-top{flex-direction:column}.t-top .t-poster{flex-basis:auto;width:46%}.t-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px}.t-search{width:100%}}
 @media (prefers-reduced-motion:reduce){.t-poster,.t-poster img{transition:none}.t-card:hover .t-poster,.t-card:active .t-poster{transform:none}}
+
+
+/* Clear, readable rating badge placed over the real poster image. */
+.t-card{position:relative}
+.t-rating-badge{position:absolute;z-index:2;top:8px;left:8px;max-width:calc(100% - 16px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;padding:6px 8px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(8,8,10,.84);backdrop-filter:blur(8px);color:#f8d66d;font-size:10px;font-weight:850;line-height:1.2;box-shadow:0 3px 12px rgba(0,0,0,.32)}
+.t-card b{margin-top:9px}
+@media(max-width:560px){.t-rating-badge{top:6px;left:6px;padding:5px 6px;font-size:9px}}
