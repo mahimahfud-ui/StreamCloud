@@ -430,6 +430,18 @@ function bucket(arr,n){
 }
 
 
+
+function card(it,i,isTop){
+  if(it.kind==="app")return appCard(it,i);
+  const c1=it.color||("hsl("+hue(it.name)+" 55% 34%)");
+  const c2="#0d0d0d";
+  const nw=it.new?"<span class='badge'>NEW</span>":"";
+  const ad=it.ads<2?"<span class='ad "+adClass[it.ads]+"'>"+(it.ads===0?"NO AD":"LESS AD")+"</span>":"";
+  return "<div class='card logo-card live' tabindex='0' role='button' style='--c1:"+c1+";--c2:"+c2+"' data-name='"+clean(it.name.toLowerCase())+"'>"+
+    logoHTML(it)+nw+ad+
+    "<div class='cap'>"+clean(it.name)+"</div></div>";
+}
+
 function appCard(it,i){
   const music=it.appType==="music";
   const accent=music?"#73e6ef":"#ff7166";
