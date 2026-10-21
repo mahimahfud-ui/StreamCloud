@@ -17,7 +17,7 @@ export function initCategories() {
   const allApps = Array.from(sharedCatalog.apps || []);
   const movieApps = allApps.filter(item => item && item.appType === 'movie');
   const musicApps = allApps.filter(item => item && item.appType === 'music');
-  if (!siteItems.length || (!movieApps.length && !musicApps.length)) return;
+  if (!movieApps.length && !musicApps.length) return;
 
   const labels = { sites: 'Websites', movie: 'Movie Apps', music: 'Music Apps' };
   const slug = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -95,7 +95,12 @@ export function initCategories() {
       ? Array.from(row.querySelectorAll('.card')).filter(card => card.style.display !== 'none').length
       : 0;
     empty.style.display = visibleCount ? 'none' : 'block';
-    if (!visibleCount) empty.textContent = 'No listings found in ' + labels[selectedCategory] + ' with the current search or filters.';
+    if (!visibleCount) {
+      const query = document.getElementById('q');
+      empty.textContent = selectedCategory === 'sites' && siteItems.length === 0 && !(query && query.value.trim())
+        ? 'No websites added yet. Send ChatGPT a message like Website - https://example.com to add one.'
+        : 'No listings found in ' + labels[selectedCategory] + ' with the current search or filters.';
+    }
   }
 
   function updateCategoryView() {
