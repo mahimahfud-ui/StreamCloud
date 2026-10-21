@@ -16,7 +16,8 @@
       "overview": "An aspiring actress agrees to become a surrogate for an American couple, but when they change their minds, she decides to raise the child herself.",
       "runtime": 132,
       "imdbId": "tt10895576",
-      "note": "A Hindi comedy-drama about surrogacy, parenthood, and family."
+      "note": "A Hindi comedy-drama about surrogacy, parenthood, and family.",
+      "industry": "Bollywood"
     }
   ],
   "series": [
@@ -37,7 +38,8 @@
       "seasonCount": 8,
       "episodeCount": 73,
       "imdbId": "tt0944947",
-      "note": "An expansive fantasy epic of power, political intrigue, and shifting alliances."
+      "note": "An expansive fantasy epic of power, political intrigue, and shifting alliances.",
+      "industry": "Hollywood"
     },
     {
       "title": "House of the Dragon",
@@ -56,7 +58,8 @@
       "seasonCount": 2,
       "episodeCount": 18,
       "imdbId": "tt11198330",
-      "note": "A dragon-filled political drama about succession, family, and power."
+      "note": "A dragon-filled political drama about succession, family, and power.",
+      "industry": "Hollywood"
     },
     {
       "title": "A Knight of the Seven Kingdoms",
@@ -75,7 +78,8 @@
       "seasonCount": 1,
       "episodeCount": 6,
       "imdbId": "tt27497448",
-      "note": "A more grounded Westeros adventure focused on Dunk and Egg."
+      "note": "A more grounded Westeros adventure focused on Dunk and Egg.",
+      "industry": "Hollywood"
     }
   ]
 }
