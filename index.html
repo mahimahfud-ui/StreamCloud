@@ -22,6 +22,7 @@
 <meta name="apple-mobile-web-app-title" content="StreamCloud">
 <link rel="icon" type="image/svg+xml" href="./s-logo-v1.svg">
 <link rel="manifest" href="./manifest.webmanifest">
+<link rel="preconnect" href="https://image.tmdb.org" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -234,6 +235,7 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
 <link rel="stylesheet" href="./premium.css" data-streamcloud-premium>
+<link rel="stylesheet" href="./titles.css">
 
 </head>
 <body>
@@ -246,6 +248,7 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
   <a class="logo" href="#top" aria-label="StreamCloud"><img src="./s-logo-v1.svg" alt="StreamCloud"></a>
   <ul>
     <li><a href="#top" data-nav="home" class="on">Home</a></li>
+    <li id="recsNav" hidden><a href="#recs">Movies &amp; Series</a></li>
   </ul>
   <div class="nav-tools">
     <div class="search" id="search"><button id="sbtn" aria-label="Search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button><input id="q" type="search" placeholder="Search" autocomplete="off"></div>
@@ -293,6 +296,29 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
   <div id="appsView" class="view"></div>
   <p id="empty" class="empty">Nothing matched your search.</p>
 </main>
+
+
+<section class="recs" id="recs" aria-labelledby="recsTitle" hidden>
+  <div class="t-head">
+    <h2 id="recsTitle">Recommendations</h2>
+    <div class="t-tabs" role="tablist" aria-label="Recommendation type">
+      <button class="t-tab" type="button" role="tab" data-type="movie" aria-selected="true">Movies</button>
+      <button class="t-tab" type="button" role="tab" data-type="series" aria-selected="false">Web Series</button>
+    </div>
+    <input class="t-search" id="recsSearch" type="search" placeholder="Search titles" aria-label="Search recommendations" autocomplete="off">
+  </div>
+  <div class="t-grid" id="recsGrid"></div>
+  <p class="t-note" id="recsMsg" role="status"></p>
+  <p class="t-credit">This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+</section>
+
+<div class="detail-modal" id="titleModal" aria-hidden="true">
+  <div class="modal-scrim" data-t-close></div>
+  <section class="detail-panel t-panel" role="dialog" aria-modal="true" aria-labelledby="titleHeading" tabindex="-1">
+    <button class="modal-close" type="button" data-t-close aria-label="Close details">×</button>
+    <div id="titleBody"></div>
+  </section>
+</div>
 
 <div class="detail-modal" id="detailModal" aria-hidden="true">
   <div class="modal-scrim" data-modal-close></div>
@@ -922,5 +948,6 @@ document.getElementById("yr").textContent=new Date().getFullYear();
 
 <script type="module" src="./cinema/main.js"></script>
 <script src="./premium.js" defer></script>
+<script src="./titles.js" defer></script>
 </body>
 </html>
