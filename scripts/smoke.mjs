@@ -93,10 +93,16 @@ try {
   mobile.on("pageerror", (error) => failures.push("Mobile uncaught page error: " + error.message));
   await mobile.goto(ORIGIN, { waitUntil: "domcontentloaded" });
   await mobile.waitForSelector("#sitesView .card", { timeout: 15000 });
-  const dimensions = await mobile.evaluate(() => ({
-    viewport: document.documentElement.clientWidth,
-    content: document.documentElement.scrollWidth,
-  }));
+  const dimensions = await mobile.evaluate(() => {
+    const viewport = document.documentElement.clientWidth;
+    const content = document.documentElement.scrollWidth;
+    const offenders = Array.from(document.querySelectorAll("body *")).map((el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return {tag: el.tagName, id: el.id || "", className: typeof el.className === "string" ? el.className.slice(0, 100) : "", left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width), display: cs.display, position: cs.position, html: el.outerHTML.slice(0, 180)};
+    }).filter((x) => x.right > viewport + 1 && x.width > 0 && x.display !== "none" && x.position !== "fixed" && x.position !== "absolute").sort((a,b) => b.right-a.right).slice(0, 12);
+    return {viewport, content, offenders};
+  });
   assert.ok(dimensions.content <= dimensions.viewport + 1, `Mobile layout overflows horizontally: ${JSON.stringify(dimensions)}`);
   await mobile.close();
 
