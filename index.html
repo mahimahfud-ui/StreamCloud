@@ -923,7 +923,7 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
     <div class="admin-header">
       <span class="admin-eyebrow">StreamCloud Directory Admin</span>
       <h2 id="adminTitle">Add New Listing</h2>
-      <p class="admin-subtitle">Live real-time addition to StreamCloud catalog</p>
+      <p class="admin-subtitle">Adds to the catalog; without a server API, listings are saved only in this browser.</p>
     </div>
 
     <div class="admin-steps-indicator">
@@ -1017,7 +1017,7 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
       <div class="admin-buttons">
         <button type="button" class="admin-btn secondary" id="adminNameBackBtn">&larr; Back</button>
         <button type="button" class="admin-btn primary" id="adminSubmitBtn">
-          <span class="btn-text">Add to Directory Live</span>
+          <span class="btn-text">Add to Directory</span>
           <span class="btn-spinner" id="adminSpinner" style="display:none;"></span>
         </button>
       </div>
@@ -1663,15 +1663,21 @@ document.getElementById("yr").textContent=new Date().getFullYear();
       setTimeout(() => adminUrlInput.classList.remove("shake"), 400);
       return;
     }
-    adminUrlError.textContent = "";
+
     try {
-      const u = new URL(/^https?:\/\//i.test(raw) ? raw : "https://" + raw);
-      const guessed = u.hostname.replace(/^www\./, "").split(".")[0];
+      const parsed = normalizeListingUrl(raw);
+      adminUrlInput.value = parsed.href;
+      adminUrlError.textContent = "";
+      const guessed = parsed.hostname.replace(/^www\./, "").split(".")[0];
       if (!adminNameInput.value && guessed) {
         adminNameInput.value = guessed.charAt(0).toUpperCase() + guessed.slice(1);
       }
-    } catch (e) {}
-    setAdminStep(4);
+      setAdminStep(4);
+    } catch (e) {
+      adminUrlError.textContent = "Enter a valid website URL, such as https://example.com/.";
+      adminUrlInput.classList.add("shake");
+      setTimeout(() => adminUrlInput.classList.remove("shake"), 400);
+    }
   }
 
   if (adminUrlNextBtn) {
@@ -1691,11 +1697,31 @@ document.getElementById("yr").textContent=new Date().getFullYear();
 
   async function submitListing() {
     const nameVal = adminNameInput.value.trim();
-    const urlVal = adminUrlInput.value.trim();
+    const rawUrlVal = adminUrlInput.value.trim();
+
     if (!nameVal) {
       adminNameError.textContent = "Please provide a name for this listing.";
       adminNameInput.classList.add("shake");
       setTimeout(() => adminNameInput.classList.remove("shake"), 400);
+      return;
+    }
+
+    let parsedUrl;
+    try {
+      parsedUrl = normalizeListingUrl(rawUrlVal);
+    } catch (e) {
+      adminNameError.textContent = "Enter a valid website URL before adding this listing.";
+      return;
+    }
+
+    const targetList = adminCategory === "sites" ? S : (adminCategory === "music" ? M : A);
+    const urlKey = listingUrlKey(parsedUrl.href);
+    const duplicate = targetList.some(x =>
+      String(x.name || "").trim().toLowerCase() === nameVal.toLowerCase()
+    ) || S.concat(A, M).some(x => listingUrlKey(x.url) === urlKey);
+
+    if (duplicate) {
+      adminNameError.textContent = "A listing with this name or URL already exists.";
       return;
     }
 
@@ -1705,34 +1731,74 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     adminSubmitBtn.querySelector(".btn-text").textContent = "Adding...";
 
     try {
-      const response = await fetch("/api/listings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          password: "6993",
-          category: adminCategory,
-          url: urlVal,
-          name: nameVal
-        })
-      });
+      const fallbackItem = createListingItem(nameVal, parsedUrl.href, adminCategory);
+      let item = fallbackItem;
+      let savedRemotely = false;
 
-      const resData = await response.json();
-      if (!response.ok || !resData.success) {
-        throw new Error(resData.error || "Failed to add listing.");
+      try {
+        const response = await fetch("/api/listings", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            password: "6993",
+            category: adminCategory,
+            url: parsedUrl.href,
+            name: nameVal
+          })
+        });
+
+        const contentType = (response.headers.get("content-type") || "").toLowerCase();
+        if (contentType.includes("json")) {
+          const resData = await response.json();
+          if (!response.ok || !resData.success || !resData.item) {
+            throw new Error(resData.error || "The listing API could not save this entry.");
+          }
+
+          item = {
+            ...fallbackItem,
+            ...resData.item,
+            name: resData.item.name || nameVal,
+            url: normalizeListingUrl(resData.item.url || parsedUrl.href).href,
+            domain: resData.item.domain || parsedUrl.hostname.replace(/^www\./, ""),
+            logoSources: Array.isArray(resData.item.logoSources) && resData.item.logoSources.length
+              ? resData.item.logoSources
+              : fallbackItem.logoSources,
+            category: adminCategory
+          };
+          savedRemotely = true;
+        } else {
+          console.warn("Listing API did not return JSON; using browser storage instead.");
+        }
+      } catch (err) {
+        if (!(err instanceof TypeError) && !(err instanceof SyntaxError)) {
+          throw err;
+        }
+        console.warn("Listing API is unavailable; using browser storage instead.", err);
       }
 
-      const item = resData.item;
-      if (adminCategory === "sites") {
-        S.unshift(item);
-      } else if (adminCategory === "music") {
-        M.unshift(item);
+      if (!savedRemotely) {
+        try {
+          saveLocalListing(item, adminCategory);
+        } catch (storageError) {
+          throw new Error("The listing API is unavailable and this browser could not save local data. Check browser storage settings.");
+        }
       } else {
-        A.unshift(item);
+        try {
+          saveLocalListing(item, adminCategory);
+        } catch (storageError) {
+          console.warn("The server saved the listing, but browser caching failed.", storageError);
+        }
       }
+
+      const destination = adminCategory === "sites" ? S : (adminCategory === "music" ? M : A);
+      destination.unshift(item);
 
       closeAdminModal();
 
-      const targetMode = adminCategory === "sites" ? "sites" : adminCategory === "music" ? "music" : "apps";
+      const targetMode = adminCategory === "sites" ? "sites" : (adminCategory === "music" ? "music" : "apps");
       if (typeof window.STREAMCLOUD_SET_MODE === "function") {
         window.STREAMCLOUD_SET_MODE(targetMode);
       } else {
@@ -1740,13 +1806,17 @@ document.getElementById("yr").textContent=new Date().getFullYear();
         render();
       }
 
-      showToast(`Added "${item.name}" live to StreamCloud!`);
+      if (savedRemotely) {
+        showToast('Added "' + item.name + '" to StreamCloud.');
+      } else {
+        showToast('Added "' + item.name + '" locally only (not published globally).');
+      }
     } catch (err) {
       adminNameError.textContent = err.message || "An error occurred. Please try again.";
     } finally {
       adminSubmitBtn.disabled = false;
       if (adminSpinner) adminSpinner.style.display = "none";
-      adminSubmitBtn.querySelector(".btn-text").textContent = "Add to Directory Live";
+      adminSubmitBtn.querySelector(".btn-text").textContent = "Add to Directory";
     }
   }
 
@@ -1777,26 +1847,164 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     setTimeout(() => t.classList.remove("show"), 3500);
   }
 
-  async function fetchServerListings() {
+  const LOCAL_LISTINGS_KEY = "streamcloud-custom-listings-v1";
+
+  function normalizeListingUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) throw new Error("A website URL is required.");
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(raw) && !/^https?:\/\//i.test(raw)) {
+      throw new Error("Only HTTP and HTTPS URLs are supported.");
+    }
+    const parsed = new URL(/^https?:\/\//i.test(raw) ? raw : "https://" + raw);
+    if ((parsed.protocol !== "https:" && parsed.protocol !== "http:") || !parsed.hostname) {
+      throw new Error("Enter a valid HTTP or HTTPS URL.");
+    }
+    return parsed;
+  }
+
+  function listingUrlKey(value) {
     try {
-      const res = await fetch("/api/listings");
-      if (!res.ok) return;
-      const data = await res.json();
-      if (data.success && Array.isArray(data.listings) && data.listings.length) {
-        for (const item of data.listings) {
-          const exists = S.concat(A, M).some(x => x.url === item.url && x.name.toLowerCase() === item.name.toLowerCase());
-          if (!exists) {
-            if (item.category === "sites" || (!item.appType && item.kind === "site")) {
-              S.unshift(item);
-            } else if (item.category === "music" || item.appType === "music") {
-              M.unshift(item);
-            } else {
-              A.unshift(item);
-            }
-          }
+      return normalizeListingUrl(value).href.toLowerCase().replace(/\/+$/, "");
+    } catch (e) {
+      return String(value || "").trim().toLowerCase().replace(/\/+$/, "");
+    }
+  }
+
+  function createListingItem(name, url, category) {
+    const parsed = normalizeListingUrl(url);
+    const domain = parsed.hostname.replace(/^www\./, "");
+    return {
+      name: String(name || "").trim().slice(0, 100),
+      url: parsed.href,
+      domain: domain,
+      ads: 1,
+      pop: 50,
+      smooth: 50,
+      langs: 50,
+      new: true,
+      desc: "Added by StreamCloud admin. Quality details have not been reviewed yet.",
+      logoSources: [
+        new URL("/favicon.ico", parsed.origin).href,
+        new URL("/favicon.png", parsed.origin).href
+      ],
+      category: category
+    };
+  }
+
+  function readLocalListings() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(LOCAL_LISTINGS_KEY) || "[]");
+      if (!Array.isArray(parsed)) return [];
+      return parsed.map(entry => {
+        if (!entry || typeof entry.name !== "string" || typeof entry.url !== "string") return null;
+        const category = ["sites", "apps", "music"].includes(entry.category) ? entry.category : null;
+        if (!category || !entry.name.trim()) return null;
+        try {
+          const normalizedUrl = normalizeListingUrl(entry.url);
+          const defaults = createListingItem(entry.name, normalizedUrl.href, category);
+          return {
+            ...defaults,
+            ...entry,
+            name: entry.name.trim().slice(0, 100),
+            url: normalizedUrl.href,
+            domain: entry.domain || normalizedUrl.hostname.replace(/^www\./, ""),
+            logoSources: Array.isArray(entry.logoSources) && entry.logoSources.length
+              ? entry.logoSources
+              : defaults.logoSources,
+            category: category
+          };
+        } catch (e) {
+          return null;
         }
-        render();
+      }).filter(Boolean);
+    } catch (e) {
+      console.warn("Could not read locally saved StreamCloud listings:", e);
+      return [];
+    }
+  }
+
+  function saveLocalListing(item, category) {
+    const saved = readLocalListings();
+    const key = listingUrlKey(item.url);
+    const sameListing = saved.some(entry =>
+      (entry.category === category && entry.name.toLowerCase() === item.name.toLowerCase()) ||
+      listingUrlKey(entry.url) === key
+    );
+    if (sameListing) return true;
+    saved.unshift({ ...item, category: category });
+    localStorage.setItem(LOCAL_LISTINGS_KEY, JSON.stringify(saved));
+    return true;
+  }
+
+  function resolveListingCategory(item, fallbackCategory) {
+    if (["sites", "apps", "music"].includes(item.category)) return item.category;
+    if (item.appType === "music" || item.kind === "music") return "music";
+    if (item.kind === "site") return "sites";
+    return fallbackCategory || "apps";
+  }
+
+  function addListingToCatalog(item, fallbackCategory) {
+    if (!item || typeof item.name !== "string" || typeof item.url !== "string") return false;
+    const category = resolveListingCategory(item, fallbackCategory);
+    let prepared;
+    try {
+      const normalizedUrl = normalizeListingUrl(item.url);
+      const defaults = createListingItem(item.name, normalizedUrl.href, category);
+      prepared = {
+        ...defaults,
+        ...item,
+        name: item.name.trim().slice(0, 100),
+        url: normalizedUrl.href,
+        domain: item.domain || normalizedUrl.hostname.replace(/^www\./, ""),
+        logoSources: Array.isArray(item.logoSources) && item.logoSources.length
+          ? item.logoSources
+          : defaults.logoSources,
+        category: category
+      };
+    } catch (e) {
+      return false;
+    }
+
+    const target = category === "sites" ? S : (category === "music" ? M : A);
+    const urlKey = listingUrlKey(prepared.url);
+    const duplicateInCategory = target.some(entry =>
+      String(entry.name || "").trim().toLowerCase() === prepared.name.toLowerCase()
+    );
+    const duplicateUrl = S.concat(A, M).some(entry => listingUrlKey(entry.url) === urlKey);
+    if (duplicateInCategory || duplicateUrl) return false;
+
+    target.unshift(prepared);
+    return true;
+  }
+
+  async function fetchServerListings() {
+    let localChanged = false;
+    const localListings = readLocalListings().reverse();
+    for (const item of localListings) {
+      if (addListingToCatalog(item, item.category)) localChanged = true;
+    }
+    if (localChanged) render();
+
+    try {
+      const res = await fetch("/api/listings", {
+        headers: { "Accept": "application/json" },
+        cache: "no-store"
+      });
+      if (!res.ok) return;
+      const contentType = (res.headers.get("content-type") || "").toLowerCase();
+      if (!contentType.includes("json")) return;
+
+      const data = await res.json();
+      if (!data.success || !Array.isArray(data.listings)) return;
+
+      let serverChanged = false;
+      for (const item of data.listings) {
+        const fallbackCategory = item.category === "sites" ? "sites"
+          : (item.category === "music" || item.appType === "music") ? "music"
+          : (item.kind === "site" ? "sites" : "apps");
+        if (addListingToCatalog(item, fallbackCategory)) serverChanged = true;
       }
+      if (serverChanged) render();
     } catch (e) {
       console.warn("Could not load server listings:", e);
     }
