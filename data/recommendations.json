@@ -1,0 +1,30 @@
+{
+  "movies": [
+    {
+      "title": "Parasite",
+      "tmdbId": 496243
+    },
+    {
+      "title": "Spirited Away",
+      "tmdbId": 129
+    },
+    {
+      "title": "Inception",
+      "year": 2010
+    }
+  ],
+  "series": [
+    {
+      "title": "Dark",
+      "tmdbId": 70523
+    },
+    {
+      "title": "Money Heist",
+      "tmdbId": 71446
+    },
+    {
+      "title": "Breaking Bad",
+      "year": 2008
+    }
+  ]
+}
