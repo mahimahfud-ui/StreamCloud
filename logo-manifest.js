@@ -89,5 +89,11 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "music:outertune": "assets/logos/sites/outertune.png",
   "music:lastwave": "assets/logos/sites/lastwave.png",
   "music:meld": "assets/logos/sites/meld.png",
-  "music:github.com/francescograzioso/meld": "assets/logos/sites/meld.png"
+  "music:github.com/francescograzioso/meld": "assets/logos/sites/meld.png",
+  "site:nuvix": "./assets/logos/sites/nuvix.webp",
+  "site:netmirror": "./assets/logos/sites/netmirror.png",
+  "site:vega": "./assets/logos/sites/vega.webp",
+  "site:nxsha": "./assets/logos/sites/nxsha.ico",
+  "site:anivortex": "./assets/logos/sites/anivortex.webp",
+  "site:filmtv": "./assets/logos/sites/filmtv.jpg"
 };
