@@ -42,8 +42,12 @@ Keep the existing dark cinematic design and data. Prefer targeted changes, verif
 
 ## Movies & Web Series recommendations
 
-Edit `data/recommendations.json` and push to `main`; the deploy workflow fetches metadata from TMDB and publishes it.
+Recommendations are maintained manually in `data/recommendations.json`. There is **no TMDB/OMDb metadata API, API key, repository secret, or build-time metadata fetch**.
 
-- Each entry can be a title string or an object such as `{ "title": "Inception", "year": 2010, "tmdbId": 27205 }`. Use `tmdbId` to disambiguate similarly named titles.
-- Add repository secrets under Settings → Secrets and variables → Actions: `TMDB_API_KEY` or `TMDB_READ_ACCESS_TOKEN` is required; `OMDB_API_KEY` is optional and enables IMDb ratings.
-- Keys are only used in GitHub Actions. The public site loads generated `data/tmdb/*.json` files. If metadata fetching fails for a title, the previous generated entry is retained.
+- Add movie objects to `movies` and TV/web-series objects to `series`.
+- Useful fields: `title` (required), `year`, `poster` (direct HTTPS image URL or a local image path), `genres`, `rating` (optional `{"source":"IMDb","value":8.5}`), `overview`, `imdbId`, `runtime` for movies, and `seasonCount` / `episodeCount` for series.
+- `note`, `originalTitle`, `status`, custom `links`, and `seasonList` are optional.
+- To add or edit a recommendation, update only `data/recommendations.json` and push to `main`. The existing GitHub Pages workflow deploys the data along with the site.
+- With repository access connected in ChatGPT, you can simply ask: **“Add [title] ([year]) to StreamCloud recommendations as a movie/web series, verify the basic details and poster URL, update `data/recommendations.json`, and commit to `main`.”**
+
+Ratings, summaries and season counts are manually maintained snapshots and may need edits over time. Poster images are loaded from the URLs recorded in the JSON file.
