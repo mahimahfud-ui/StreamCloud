@@ -16,6 +16,65 @@
   var items = [];
   var tab = "movie";
   var opener = null;
+  var industrySelect = null;
+  var genreSelect = null;
+  var filterBar = null;
+
+  function setupFilters() {
+    if (filterBar) return;
+    var style = el("style");
+    style.textContent = ".t-filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px}.t-filter-select{min-width:155px;max-width:100%;padding:11px 36px 11px 13px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--panel,#181818);color:var(--text,#fff);font:inherit;font-size:13px;outline-offset:3px}.t-filter-select:focus-visible{outline:2px solid #fff}.t-filter-label{display:flex;align-items:center;gap:8px;color:var(--dim,#a7a7a7);font-size:12px}.t-filter-label span{white-space:nowrap}@media(max-width:480px){.t-filter-bar{gap:8px}.t-filter-label{flex:1;min-width:0;display:block}.t-filter-label span{display:block;margin:0 0 5px}.t-filter-select{width:100%;min-width:0}}";
+    document.head.appendChild(style);
+    filterBar = el("div", "t-filter-bar");
+    function makeSelect(label, id) {
+      var wrap = el("label", "t-filter-label");
+      wrap.appendChild(el("span", "", label));
+      var select = el("select", "t-filter-select");
+      select.id = id;
+      wrap.appendChild(select);
+      filterBar.appendChild(wrap);
+      return select;
+    }
+    industrySelect = makeSelect("Industry", "recsIndustry");
+    genreSelect = makeSelect("Genre", "recsGenre");
+    sec.querySelector(".t-head").insertAdjacentElement("afterend", filterBar);
+    industrySelect.addEventListener("change", function () { updateGenreOptions(); render(); });
+    genreSelect.addEventListener("change", render);
+  }
+  function option(select, value, label) {
+    var node = el("option", "", label);
+    node.value = value;
+    select.appendChild(node);
+  }
+  function updateGenreOptions() {
+    if (!genreSelect) return;
+    var selectedIndustry = industrySelect.value;
+    var genres = [];
+    items.forEach(function (it) {
+      if (it.type !== tab || (selectedIndustry && it.industry !== selectedIndustry)) return;
+      (it.genres || []).forEach(function (genre) { if (genres.indexOf(genre) === -1) genres.push(genre); });
+    });
+    genres.sort(function (a, b) { return a.localeCompare(b); });
+    var previous = genreSelect.value;
+    genreSelect.textContent = "";
+    option(genreSelect, "", "All genres");
+    genres.forEach(function (genre) { option(genreSelect, genre, genre); });
+    genreSelect.value = genres.indexOf(previous) !== -1 ? previous : "";
+  }
+  function updateFilterOptions() {
+    setupFilters();
+    var previous = industrySelect.value;
+    var industries = [];
+    items.forEach(function (it) {
+      if (it.type === tab && it.industry && industries.indexOf(it.industry) === -1) industries.push(it.industry);
+    });
+    industries.sort(function (a, b) { return a.localeCompare(b); });
+    industrySelect.textContent = "";
+    option(industrySelect, "", "All industries");
+    industries.forEach(function (industry) { option(industrySelect, industry, industry); });
+    industrySelect.value = industries.indexOf(previous) !== -1 ? previous : "";
+    updateGenreOptions();
+  }
 
   function el(tag, cls, text) {
     var node = document.createElement(tag);
@@ -92,9 +151,13 @@
   }
   function render() {
     var query = norm(input.value);
+    var selectedIndustry = industrySelect ? industrySelect.value : "";
+    var selectedGenre = genreSelect ? genreSelect.value : "";
     var list = items.filter(function (it) {
       if (it.type !== tab) return false;
-      var haystack = norm([it.title, it.originalTitle, it.year, (it.genres || []).join(" ")].join(" "));
+      if (selectedIndustry && it.industry !== selectedIndustry) return false;
+      if (selectedGenre && (it.genres || []).indexOf(selectedGenre) === -1) return false;
+      var haystack = norm([it.title, it.originalTitle, it.year, it.industry, (it.genres || []).join(" ")].join(" "));
       return !query || haystack.indexOf(query) !== -1;
     });
     grid.textContent = "";
@@ -136,6 +199,7 @@
       button.setAttribute("aria-selected", String(button.dataset.type === type));
       button.tabIndex = button.dataset.type === type ? 0 : -1;
     });
+    updateFilterOptions();
     render();
   }
   tabs.forEach(function (button) {
