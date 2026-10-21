@@ -64,5 +64,4 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "music:outertune": "./assets/logos/music-apps/outertune.png",
   "music:lastwave": "./assets/logos/music-apps/lastwave.png",
   "movie:reezn": "./assets/logos/movie-apps/reezn.jpg",
-  "movie:cineplus": "./assets/logos/movie-apps/cineplus.png"
 };
