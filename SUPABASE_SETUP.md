@@ -16,8 +16,8 @@ supabase db push             # runs supabase/migrations/20261022000000_listings.
 supabase secrets set \
   ADMIN_PIN='replace-with-your-private-pin' \
   ADMIN_SESSION_SECRET="$(openssl rand -hex 32)" \
-  GEMINI_API_KEY=<from https://aistudio.google.com/apikey> \
-  OMDB_API_KEY=<from https://www.omdbapi.com/apikey.aspx> \
+  GEMINI_API_KEY='এপিআই' \
+  OMDB_API_KEY='এপিআই' \
   ALLOWED_ORIGINS=https://mahimahfud-ui.github.io
 # optional: GEMINI_MODEL (default gemini-2.5-flash), GITHUB_TOKEN (higher GitHub API limit)
 ```
