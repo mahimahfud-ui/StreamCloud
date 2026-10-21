@@ -44,7 +44,7 @@ function extractEntries(arrayName, kind) {
   const start = html.indexOf("const " + arrayName + "=[");
   if (start < 0) return [];
   // A deliberately empty category must not accidentally absorb the following arrays.
-  if (/^const\\s+[A-Z]+\\s*=\\s*\\[\\s*\\]\\s*;/.test(html.slice(start))) return [];
+  if (/^const\s+[A-Z]+\s*=\s*\[\s*\]\s*;/.test(html.slice(start))) return [];
   const end = html.indexOf("\n];", start);
   if (end < 0) return [];
   const section = html.slice(start, end + 3);
