@@ -19,7 +19,9 @@ const SCHEMA = {
 export async function askGemini(page: PageInfo, section: string): Promise<GeminiResult | null> {
   const key = Deno.env.get("GEMINI_API_KEY");
   if (!key || key.trim() === "এপিয়াই") throw new Error("GEMINI_API_KEY is not set on the server.");
-  const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
+  const preferredModel = (Deno.env.get("GEMINI_MODEL") ?? "").trim() || "gemini-3.8-flash";
+  // Older Gemini 2.5 models were shut down in October 2026; keep compatible current fallbacks.
+  const models = [...new Set([preferredModel, "gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"])];
   const prompt = [
     `You extract listing details for a directory (type: ${section}) from ONE public web page.`,
     "Rules: use ONLY the page data below. If a value is not explicitly stated there, return null (or [] for genres).",
@@ -31,17 +33,32 @@ export async function askGemini(page: PageInfo, section: string): Promise<Gemini
     JSON.stringify({ title: page.title, siteName: page.siteName, metaDescription: page.description, canonical: page.canonical, imageCandidates: page.images, structuredMetadata: page.structured, imdbIds: page.imdbIds, jsonLd: page.jsonLd, visibleText: page.text }),
   ].join("\n");
 
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-    body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0, responseMimeType: "application/json", responseSchema: SCHEMA },
-    }),
-    signal: AbortSignal.timeout(25000),
-  });
-  if (!res.ok) throw new Error(`Gemini returned ${res.status}.`);
-  const data = await res.json();
+  let data: any = null;
+  let lastModel = "";
+  for (let i = 0; i < models.length; i++) {
+    const model = models[i];
+    lastModel = model;
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        // Gemini 3 models no longer need the legacy temperature parameter.
+        generationConfig: { responseMimeType: "application/json", responseSchema: SCHEMA },
+      }),
+      signal: AbortSignal.timeout(25000),
+    });
+    if (res.ok) { data = await res.json(); break; }
+    if (res.status === 404 && i < models.length - 1) continue;
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(`Gemini API key rejected (${res.status}). Check GEMINI_API_KEY in Supabase Secrets.`);
+    }
+    if (res.status === 404) {
+      throw new Error(`Gemini model "${model}" is unavailable (404). Set GEMINI_MODEL to a model enabled for your API key.`);
+    }
+    throw new Error(`Gemini returned ${res.status} for model "${model}".`);
+  }
+  if (!data) throw new Error(`No available Gemini model succeeded; last tried "${lastModel}".`);
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) throw new Error("Gemini returned no answer.");
   const v = JSON.parse(text);
