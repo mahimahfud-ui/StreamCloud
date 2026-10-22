@@ -395,3 +395,49 @@
   }
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
 })();
+
+/* StreamCloud Admin Quick Bar — floating shortcut pill, visible ONLY while an admin session is active.
+   Added as an isolated additive layer; the existing Admin Ultra implementation above remains unchanged. */
+(function () {
+  "use strict";
+  function $(s) { return document.querySelector(s); }
+  function sessionOk() {
+    try { var s = JSON.parse(sessionStorage.getItem("streamcloud-admin-session") || "null"); return !!(s && s.token && s.expiresAt > Date.now()); }
+    catch (e) { return false; }
+  }
+  function waitFor(fn, cb, tries) {
+    var r = fn(); if (r) return cb(r);
+    if ((tries || 0) > 40) return; setTimeout(function () { waitFor(fn, cb, (tries || 0) + 1); }, 60);
+  }
+  function tabBtn(label) {
+    var out = null; document.querySelectorAll(".scx-tab").forEach(function (b) { if (!out && b.textContent.indexOf(label) === 0) out = b; });
+    return out;
+  }
+  function openTab(label, after) {
+    var ov = $(".scx-ov"), icon = $("#adminIcon");
+    if ((!ov || ov.hidden) && icon) icon.click();
+    waitFor(function () { return tabBtn(label); }, function (b) { b.click(); if (after) waitFor(function () { return $(".ux-dockbtn"); }, after); });
+  }
+  var ICON = {
+    live: "M4 5h16v10H4zM8 19h8M12 15v4", cat: "M4 6h16M4 12h16M4 18h10", add: "M12 5v14M5 12h14"
+  };
+  function btn(key, label, title, onclick) {
+    var b = document.createElement("button"); b.type = "button"; b.title = title; b.setAttribute("aria-label", title);
+    b.innerHTML = "<svg viewBox='0 0 24 24' width='18' height='18' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='" + ICON[key] + "'/></svg><span>" + label + "</span>";
+    b.addEventListener("click", onclick); return b;
+  }
+  var style = document.createElement("style");
+  style.textContent =
+    ".ux-qbar{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));z-index:250;display:flex;gap:4px;padding:5px;border-radius:999px;background:rgba(20,20,20,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 34px rgba(0,0,0,.5)}" +
+    ".ux-qbar[hidden]{display:none}.ux-qbar button{display:flex;align-items:center;gap:7px;border:0;background:transparent;color:#fff;border-radius:999px;padding:9px 13px;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s}" +
+    ".ux-qbar button:hover,.ux-qbar button:focus-visible{background:var(--red,#e50914);outline:0}@media(max-width:560px){.ux-qbar button span{display:none}.ux-qbar button{padding:11px}}";
+  document.head.appendChild(style);
+  var bar = document.createElement("div"); bar.className = "ux-qbar"; bar.hidden = true; bar.setAttribute("role", "toolbar"); bar.setAttribute("aria-label", "Admin quick actions");
+  bar.appendChild(btn("live", "Live preview", "Edit appearance with live preview", function () {
+    openTab("Appearance", function (d) { var ov = $(".scx-ov"); if (ov && !ov.classList.contains("ux-dock")) d.click(); });
+  }));
+  bar.appendChild(btn("cat", "Catalogue", "Open Catalogue Pro", function () { openTab("Catalogue Pro"); }));
+  bar.appendChild(btn("add", "Add item", "Add a new item", function () { openTab("Add item"); }));
+  function mount() { document.body.appendChild(bar); bar.hidden = !sessionOk(); setInterval(function () { bar.hidden = !sessionOk(); }, 1500); }
+  if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
+})();
