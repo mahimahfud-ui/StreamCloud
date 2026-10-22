@@ -23,7 +23,9 @@ Deno.serve(async (req) => {
   const ipKey = "ip:" + (await sha256Hex(ip + ":" + Deno.env.get("ADMIN_SESSION_SECRET"))).slice(0, 32);
 
   for (const key of [ipKey, "global"]) {
-    const { data } = await db.rpc("admin_lock_status", { p_key: key });
+    const { data, error } = await db.rpc("admin_lock_status", { p_key: key });
+    // Fail closed: if the migration was not applied, rate limiting would silently not work.
+    if (error) return json(req, { error: "Server database is not set up. Run the SQL migration first." }, 500);
     if (data) {
       const retryAfter = Math.max(1, Math.ceil((new Date(data as string).getTime() - Date.now()) / 1000));
       return json(req, { error: "Too many wrong attempts. Try again later.", retryAfter }, 429);
