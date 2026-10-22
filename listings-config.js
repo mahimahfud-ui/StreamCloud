@@ -6,7 +6,9 @@ window.STREAMCLOUD_SUPABASE = {
   anonKey: "sb_publishable_S20xF3_NWiQjA727-mG6oQ_Rxst1YQM"  // Public publishable key; RLS protects database access
 };
 
-/* Admin Ultra layer (steppers, live-preview dock, Catalogue Pro, AI tools) *//* Load admin enhancements in dependency order: Admin Ultra first, then AI Copilot. */
+/* Admin Ultra layer (steppers, live-preview dock, Catalogue Pro, AI tools) */
+
+/* Load admin enhancements in dependency order: Admin Ultra first, then AI Copilot. */
 (function () {
   function load(src, done) {
     var s = document.createElement("script");
