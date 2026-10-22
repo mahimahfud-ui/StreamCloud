@@ -12,7 +12,7 @@
       recs: { visible: true, title: "Recommendations" },
       order: ["sites", "apps", "music", "recs"]
     },
-    content: { overrides: {}, hidden: [], order: {} }
+    content: { overrides: {}, hidden: [], deleted: [], order: {} }
   };
   var original = { sites: [], apps: [], music: [] };
   var dynamic = { sites: new Map(), apps: new Map(), music: new Map() };
@@ -38,6 +38,7 @@
     v.content = v.content && typeof v.content === "object" ? v.content : {};
     v.content.overrides = v.content.overrides && typeof v.content.overrides === "object" ? v.content.overrides : {};
     v.content.hidden = Array.isArray(v.content.hidden) ? v.content.hidden : [];
+    v.content.deleted = Array.isArray(v.content.deleted) ? v.content.deleted : [];
     v.content.order = v.content.order && typeof v.content.order === "object" ? v.content.order : {};
     return v;
   }
@@ -66,6 +67,7 @@
     return item;
   }
   function isHidden(item) { return settings.content.hidden.indexOf(item.__scKey) >= 0; }
+  function isDeleted(item) { return settings.content.deleted.indexOf(item.__scKey) >= 0; }
   function arrange(section, rows) {
     var order = settings.content.order[section];
     var sorted = rows.slice();
@@ -93,7 +95,7 @@
     var combined = original[section].map(function (x) { return overrideItem(section, x); });
     dynamic[section].forEach(function (x) { combined.push(overrideItem(section, x)); });
     registry[section] = combined.slice();
-    var visible = arrange(section, combined).filter(function (x) { return !isHidden(x); });
+    var visible = arrange(section, combined).filter(function (x) { return !isHidden(x) && !isDeleted(x); });
     manual[section] = Array.isArray(settings.content.order[section]) && settings.content.order[section].length > 0;
     replaceArray(target, visible);
   }
@@ -289,7 +291,7 @@
       var imported = settings.content.extraRecommendations && Array.isArray(settings.content.extraRecommendations[group]) ? settings.content.extraRecommendations[group] : [];
       imported.forEach(function (raw) { rows.push(overrideItem(section, raw)); });
       registry[section] = rows.slice();
-      out[group] = arrange(section, rows).filter(function (x) { return !isHidden(x); });
+      out[group] = arrange(section, rows).filter(function (x) { return !isHidden(x) && !isDeleted(x); });
     });
     return out;
   }
