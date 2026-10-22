@@ -75,7 +75,11 @@
 
     /* floating toast and quick bar */
     ".ux-toast{border-radius:14px;background:rgba(22,22,28,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14)}" +
-    ".ux-qbar{background:rgba(20,20,26,.78);border-color:rgba(255,255,255,.13);box-shadow:0 14px 44px rgba(0,0,0,.55)}.ux-qbar button:hover{background:" + G + "}";
+    ".ux-qbar{background:rgba(20,20,26,.78);border-color:rgba(255,255,255,.13);box-shadow:0 14px 44px rgba(0,0,0,.55)}.ux-qbar button:hover{background:" + G + "}" +
+    /* Default admin is a true full-screen view on the same page, not a split modal */
+    ".scx-ov:not(.ux-dock){padding:0!important;overflow:hidden!important;place-items:stretch!important;background:radial-gradient(1100px 560px at 85% -10%,rgba(229,9,20,.2),transparent 60%),radial-gradient(900px 520px at -10% 110%,rgba(112,82,255,.18),transparent 55%),rgb(6,6,10)!important}" +
+    ".scx-ov:not(.ux-dock) .scx-box{width:100%!important;max-width:none!important;height:100vh;height:100dvh;max-height:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:auto}" +
+    ".scx-ov:not(.ux-dock) .scx-head{border-radius:0}";
 
   var s = document.createElement("style");
   s.id = "ux-theme-aurora";
