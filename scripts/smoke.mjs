@@ -104,6 +104,10 @@ try {
         });
         return;
       }
+      if (body.url) {
+        await reply({ detected: { url: body.url, name: "Detected by OpenAI", description: "Mock OpenAI extraction." }, verified: { imdb: false, logo: false, download: false }, notes: [] });
+        return;
+      }
       await reply({ error: "Unknown mock detection action." }, 400);
       return;
     }
@@ -223,6 +227,10 @@ try {
   assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.title === "Example Film"), "AI Studio should request metadata through the admin-detect endpoint");
   await page.getByRole("button", { name: "Use this title in Add item" }).click();
   assert.ok(await page.locator("input.scx-in").evaluateAll((els) => els.some((el) => el.value === "Example Film")), "AI Studio metadata should transfer into Add item for review");
+  await page.getByLabel("AI provider").selectOption("openai");
+  await page.getByRole("button", { name: "Detect with AI" }).click();
+  await page.waitForFunction(() => Array.from(document.querySelectorAll("input.scx-in")).some((el) => el.value === "Detected by OpenAI"));
+  assert.ok(mockState.calls.some((x) => x.url && x.aiProvider === "openai"), "Add item should send the selected OpenAI provider to admin-detect");
 
   await page.getByRole("button", { name: "Content" }).click();
   await page.getByText("Smoke test listing").waitFor({ timeout: 8000 });

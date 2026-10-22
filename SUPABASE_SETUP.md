@@ -18,8 +18,10 @@ Set only the provider keys you actually use. These remain in Supabase Edge Funct
 ```bash
 supabase secrets set \
   GEMINI_API_KEY='YOUR_PRIVATE_GEMINI_KEY' \
+  OPENAI_API_KEY='YOUR_PRIVATE_OPENAI_API_KEY' \
+  OPENAI_MODEL='gpt-4.1-mini' \
   OMDB_API_KEY='YOUR_PRIVATE_OMDB_KEY' \
-  ALLOWED_ORIGINS='https://mahimahfud-ui.github.io,https://streamcloud.ai.studio'
+  ALLOWED_ORIGINS='https://mahimahfud-ui.github.io,https://streamcloud.ai.studio,https://streamcloud-527d.onrender.com'
 # Optional if you need authenticated GitHub release lookups:
 # GITHUB_TOKEN='YOUR_PRIVATE_GITHUB_TOKEN'
 # Optional model override:
@@ -37,7 +39,9 @@ The existing project database already has the requested initial PIN. Login retur
 
 ## 4. AI Studio and deployment
 
-The Admin Dashboard's **AI Studio** looks up Movie / Web Series metadata by exact title (optional release year) using `OMDB_API_KEY`. When available, Gemini can rewrite the verified OMDb plot into a short synopsis using `GEMINI_API_KEY`; if Gemini is unavailable, the verified plot is used instead. Ratings, posters, years, seasons and episode counts are never fabricated by title lookup. AI Studio only fills the Add item form; an administrator must review the destination URL and publish manually.
+The Admin Dashboard's **AI Studio** looks up Movie / Web Series metadata by exact title (optional release year) using `OMDB_API_KEY`. Choose **Gemini AI** (`GEMINI_API_KEY`) or **OpenAI GPT** (`OPENAI_API_KEY`) to rewrite the verified OMDb plot into a short synopsis. The Add item detector also lets you choose either provider for page extraction. `OPENAI_MODEL` is optional; it defaults to `gpt-4.1-mini`. Ratings, posters, years, seasons and episode counts are never fabricated by title lookup. AI Studio only fills the Add item form; an administrator must review the destination URL and publish manually.
+
+OpenAI API usage is billed separately from ChatGPT subscriptions. Keep `OPENAI_API_KEY` only in Supabase Edge Function Secrets; never add it to `admin-listings.js`, `listings-config.js`, or another public file.
 
 The existing Add item URL detector still uses Gemini for page extraction, with OMDb/IMDb verification for movie and series metadata.
 

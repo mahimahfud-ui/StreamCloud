@@ -4,6 +4,7 @@ import { baseDomain, parsePublicUrl, readLimited, safeFetch } from "../_shared/u
 import { verifyApk } from "../_shared/apk.ts";
 import { extractPage, type PageInfo } from "./page.ts";
 import { askGemini } from "./gemini.ts";
+import { askOpenAI } from "./openai.ts";
 import { omdbLookup } from "./omdb.ts";
 
 type Detected = Record<string, unknown>;
@@ -66,6 +67,7 @@ Deno.serve(async (req) => {
   const body = await readJson(req, 4_000);
   if (!body) return json(req, { error: "Invalid request." }, 400);
   const section = String(body.section ?? "sites");
+  const aiProvider = body.aiProvider === "openai" ? "openai" : "gemini";
 
   if (body.mode === "title-lookup") {
     if (section !== "movie" && section !== "series") return json(req, { error: "Choose Movie or Web Series." }, 422);
@@ -93,12 +95,12 @@ Deno.serve(async (req) => {
             jsonLd: [],
             structured: { name: d.title, description: d.plot, image: d.poster, year: d.year, genres: d.genres, platform: null, version: null },
           };
-          const ai = await askGemini(source, section);
+          const ai = aiProvider === "openai" ? await askOpenAI(source, section) : await askGemini(source, section);
           if (ai?.description && ai.description.length > 20) {
             description = ai.description;
-            notes.push("Gemini generated a shorter synopsis using only the verified plot. Confirm it before publishing.");
-          } else notes.push("AI summary was unavailable; the verified OMDb plot is shown instead.");
-        } catch { notes.push("AI summary was unavailable; the verified OMDb plot is shown instead."); }
+            notes.push((aiProvider === "openai" ? "OpenAI GPT" : "Gemini") + " generated a shorter synopsis using only the verified plot. Confirm it before publishing.");
+          } else notes.push((aiProvider === "openai" ? "OpenAI" : "Gemini") + " summary was unavailable; the verified OMDb plot is shown instead.");
+        } catch (error) { notes.push((aiProvider === "openai" ? "OpenAI" : "Gemini") + " summary was unavailable: " + ((error as Error).message || "unknown error") + ". The verified OMDb plot is shown instead."); }
       }
       const imdbUrl = "https://www.imdb.com/title/" + d.imdbId + "/";
       const detected: Detected = {
@@ -141,7 +143,7 @@ Deno.serve(async (req) => {
   // 2. Gemini analysis of the page text (key stays server-side).
   let ai: Awaited<ReturnType<typeof askGemini>> = null;
   if (page) {
-    try { ai = await askGemini(page, section); } catch (e) { notes.push(`AI analysis unavailable: ${(e as Error).message}`); }
+    try { ai = aiProvider === "openai" ? await askOpenAI(page, section) : await askGemini(page, section); } catch (e) { notes.push(`${aiProvider === "openai" ? "OpenAI" : "Gemini"} analysis unavailable: ${(e as Error).message}`); }
   }
   // Keep usable page metadata as a fallback when Gemini cannot parse a page or
   // returns only some fields. Many directory pages expose details in JSON-LD/OG tags.
