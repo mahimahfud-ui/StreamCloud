@@ -7,7 +7,7 @@ Everything secret lives in Supabase. The static site only holds the public URL a
 npm i -g supabase            # or: brew install supabase/tap/supabase
 supabase login
 supabase link --project-ref <YOUR_PROJECT_REF>
-supabase db push             # runs supabase/migrations/20261022000000_listings.sql
+supabase db push             # applies the existing listings migration and the admin-control migration
 ```
 (or paste that SQL file into Supabase -> SQL Editor).
 
@@ -38,32 +38,26 @@ The existing project database already has the requested initial PIN. Successful 
 ```bash
 for fn in admin-login admin-detect admin-listings; do supabase functions deploy "$fn"; done
 ```
-`supabase/config.toml` turns off the platform JWT check because the functions verify their own
-short-lived admin token.
+`supabase/config.toml` turns off platform JWT verification because the functions authenticate the HttpOnly session cookie against the private `admin_sessions` table.
 
 ## 5. Point the site at your project
-Edit `listings-config.js` (public values only):
-```js
-window.STREAMCLOUD_SUPABASE = { url: "https://husydmiujigyonlxbuuj.supabase.co", anonKey: "এপিয়াই" };
-```
-Replace `এপিয়াই` in `listings-config.js` with your Supabase publishable key, then commit and push. Until you replace it, Add Listing intentionally stays disabled and the public catalogue does not query Supabase.
+The repository's `listings-config.js` is already configured with the project's public publishable key. That key is designed to be visible in frontend code; its access is limited by database RLS. Never place the Supabase secret/service-role key in this file. Only change this configuration if you deliberately move the app to another Supabase project.
 
 ## How it is protected
-- PIN is compared on the server against `ADMIN_PIN`; it is not in any file in this repo.
+- The PIN is verified server-side against a bcrypt hash in the private `admin_credentials` table; no PIN or PIN hash belongs in the repository.
 - 5 wrong PINs from one IP, or 30 across all IPs, lock logins for 15 minutes.
-- Login returns a 30-minute HMAC-signed token; every create/update/delete/detect call checks it.
+- Login issues an eight-hour Secure, HttpOnly, SameSite=None session cookie. Admin endpoints validate its opaque token hash against the private `admin_sessions` table; logout and PIN changes revoke sessions.
 - `listings` has row-level security: the public can only `select` published rows; there is no
   insert/update/delete policy, so writes only happen through the functions (service role).
+- Site settings are publicly readable but only writable through the authenticated admin function. Activity and session tables have no public access policy.
 - URLs must be public `https://` addresses (private/internal hosts are blocked), pages are fetched with
   size/time limits, and APK links are only marked verified when the file really starts with the APK/ZIP signature.
 
 ## Notes
-- A 4-digit PIN is weak by nature. Rate limiting makes guessing slow, but a longer PIN is safer
-  (`supabase secrets set ADMIN_PIN=...`; the field accepts any text). The global lock also means someone
-  who keeps guessing can temporarily lock you out.
+- A 4-digit PIN is weak by nature. Change it to a longer private PIN from the dashboard's Change PIN tab. The global lock means repeated guessing attempts can temporarily lock logins for everyone.
 - Ad level, popularity, smoothness and language scores are editorial: new listings use 70/70/70 and an
   ad level you choose in the form.
-- Music Websites appear in Music Apps; Movies and Web Series appear in Movies & Series.
+- Static catalog entries remain in the repository; new admin-managed listings and public layout settings are stored persistently in Supabase.
 
 ## Tests
 ```bash
