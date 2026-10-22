@@ -223,7 +223,7 @@ try {
   assert.equal(await page.locator('select[aria-label="AI provider for summary"]').count(), 0, "AI Studio should not require manual AI-provider selection");
   assert.ok(await page.getByText("AI provider: Automatic — task-aware routing and fallback are enabled.").count() > 0, "AI Studio should explain automatic routing");
   await page.getByLabel("Movie / web-series title").fill("Example Film");
-  await page.getByLabel("Release year (optional)").fill("2024");
+  await page.locator('.scx-grid input[type="number"]').fill("2024");
 
   await page.getByRole("button", { name: "Find verified metadata" }).click();
   await page.getByText("Verified test synopsis.").waitFor({ timeout: 8000 });
