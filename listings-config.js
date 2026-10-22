@@ -8,7 +8,7 @@ window.STREAMCLOUD_SUPABASE = {
 
 /* Admin Ultra layer (steppers, live-preview dock, Catalogue Pro, AI tools) */
 
-/* Load admin enhancements in dependency order: Admin Ultra first, then AI Copilot. */
+/* Load admin enhancements in dependency order: Ultra, AI Copilot, Polish, then Aurora Glass theme last. */
 (function () {
   function load(src, done) {
     var s = document.createElement("script");
@@ -17,5 +17,5 @@ window.STREAMCLOUD_SUPABASE = {
     if (done) s.addEventListener("load", done, { once: true });
     document.head.appendChild(s);
   }
-  load("./admin-ultra.js", function () { load("./admin-ai-plus.js", function () { load("./admin-polish.js"); }); });
+  load("./admin-ultra.js", function () { load("./admin-ai-plus.js", function () { load("./admin-polish.js", function () { load("./admin-theme.js"); }); }); });
 })();
