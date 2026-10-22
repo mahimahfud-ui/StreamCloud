@@ -4,7 +4,7 @@ const CACHE_NAME = "streamcloud-shell-v14";
 const SHELL_PATHS = [
   "./", "./index.html", "./s-logo-v1.svg", "./manifest.webmanifest", "./link-status.json",
   "./logo-manifest.js",
-  "./titles.css", "./titles.js", "./listings-config.js", "./admin-listings.js", "./premium.css", "./data/recommendations.json",
+  "./titles.css", "./titles.js", "./listings-config.js", "./admin-listings.js", "./premium.css", "./polish.css", "./data/recommendations.json",
   "./cinema/cinema.css",
   "./cinema/portal.css",
   "./cinema/premium.css",
