@@ -1,5 +1,5 @@
-# Our functions verify their own short-lived admin token (HMAC), so the
-# platform JWT check is off. This also works with new-style publishable keys.
+# Admin functions verify a revocable random session token against Supabase.
+# Platform JWT verification is disabled because the app uses a private x-admin-token header.
 [functions.admin-login]
 verify_jwt = false
 
