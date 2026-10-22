@@ -1,8 +1,7 @@
-// Opaque server-tracked admin sessions. The browser only receives an HttpOnly cookie.
+// Opaque, revocable admin sessions. Only token hashes are stored in Supabase.
 import { serviceClient } from "./db.ts";
 
 export const SESSION_TTL_SECONDS = 8 * 60 * 60;
-const COOKIE_NAME = "sc_admin";
 
 export async function sha256Hex(v: string): Promise<string> {
   return [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(v)))]
@@ -10,29 +9,15 @@ export async function sha256Hex(v: string): Promise<string> {
 }
 
 export async function issueToken(): Promise<{ token: string; tokenHash: string; expiresAt: number }> {
-  const token = [...crypto.getRandomValues(new Uint8Array(32))].map((b) => b.toString(16).padStart(2, "0")).join("");
+  const token = [...crypto.getRandomValues(new Uint8Array(32))]
+    .map((b) => b.toString(16).padStart(2, "0")).join("");
   const expiresAt = Date.now() + SESSION_TTL_SECONDS * 1000;
   return { token, tokenHash: await sha256Hex(token), expiresAt };
 }
 
-export function sessionCookie(token: string, maxAge = SESSION_TTL_SECONDS): string {
-  return `${COOKIE_NAME}=${token}; Max-Age=${maxAge}; Path=/functions/v1; HttpOnly; Secure; SameSite=None`;
-}
-
-export function clearSessionCookie(): string {
-  return `${COOKIE_NAME}=; Max-Age=0; Path=/functions/v1; HttpOnly; Secure; SameSite=None`;
-}
-
 export function getSessionToken(req: Request): string | null {
-  const cookieHeader = req.headers.get("cookie") ?? "";
-  for (const part of cookieHeader.split(";")) {
-    const [rawName, ...rawValue] = part.trim().split("=");
-    if (rawName === COOKIE_NAME) {
-      const token = rawValue.join("=").trim();
-      return /^[a-f0-9]{64}$/.test(token) ? token : null;
-    }
-  }
-  return null;
+  const token = (req.headers.get("x-admin-token") ?? "").trim();
+  return /^[a-f0-9]{64}$/.test(token) ? token : null;
 }
 
 export async function requireAdmin(req: Request): Promise<boolean> {
