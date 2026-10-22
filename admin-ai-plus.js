@@ -305,7 +305,7 @@
           o.section = c[1]; o.category = c[0];
           if (m === "titles") {
             if (!o.name) throw new Error("No verified title match returned.");
-            if (!isHttps(o.url) && o.imdb_id) o.url = "https://www.imdb.com/title/" + String(o.imdb_id).match(/tt\d{5,10}/)[0] + "/";
+            var idMatch = String(o.imdb_id || "").match(/tt\d{5,10}/); if (!isHttps(o.url) && idMatch) o.url = "https://www.imdb.com/title/" + idMatch[0] + "/";
             if (!isHttps(o.url)) throw new Error("No valid IMDb link was returned.");
           } else {
             o.url = ln;
