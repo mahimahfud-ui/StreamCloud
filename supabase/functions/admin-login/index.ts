@@ -1,5 +1,5 @@
 import { json, preflight, readJson } from "../_shared/http.ts";
-import { issueToken, sessionCookie, SESSION_TTL_SECONDS, sha256Hex } from "../_shared/auth.ts";
+import { issueToken, SESSION_TTL_SECONDS, sha256Hex } from "../_shared/auth.ts";
 import { serviceClient } from "../_shared/db.ts";
 
 // 5 wrong PINs per IP -> 15 min lock; 30 wrong PINs globally -> 15 min lock.
@@ -46,9 +46,7 @@ Deno.serve(async (req) => {
       entity_type: "session",
       entity_name: "Admin login",
     });
-    return json(req, { ok: true, expiresAt: session.expiresAt, ttl: SESSION_TTL_SECONDS }, 200, {
-      "Set-Cookie": sessionCookie(session.token),
-    });
+    return json(req, { ok: true, token: session.token, expiresAt: session.expiresAt, ttl: SESSION_TTL_SECONDS });
   }
 
   await new Promise((r) => setTimeout(r, 400));
