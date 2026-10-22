@@ -32,6 +32,97 @@ try {
   await waitForServer();
   browser = await chromium.launch({ headless: true, args: ["--no-sandbox"] });
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: "reduce" });
+  const mockToken = "a".repeat(64);
+  const mockListingId = "11111111-1111-4111-8111-111111111111";
+  const mockState = {
+    settings: {
+      schemaVersion: 1, site: {}, appearance: {},
+      sections: {
+        sites: { visible: true, title: "Movie Websites" },
+        apps: { visible: true, title: "Movie Apps" },
+        music: { visible: true, title: "Music Apps" },
+        recs: { visible: true, title: "Recommendations" },
+        order: ["sites", "apps", "music", "recs"]
+      },
+      content: { overrides: {}, hidden: [], order: {} }
+    },
+    listings: [{
+      id: mockListingId, section: "sites", category: "General", name: "Smoke test listing",
+      url: "https://example.com/", url_key: "example.com/", description: "Mock listing for browser tests",
+      published: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), position: 0, ads: 1
+    }],
+    activity: [],
+    calls: []
+  };
+  await context.route("https://husydmiujigyonlxbuuj.supabase.co/**", async (route) => {
+    const req = route.request();
+    const reqUrl = new URL(req.url());
+    const requestHeaders = req.headers();
+    const origin = requestHeaders.origin || ORIGIN;
+    const cors = {
+      "access-control-allow-origin": origin,
+      "access-control-allow-headers": "content-type, x-admin-token, apikey, authorization",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
+      "access-control-max-age": "600",
+      "vary": "Origin",
+      "content-type": "application/json",
+    };
+    const reply = (body, status = 200) => route.fulfill({
+      status, headers: cors, body: JSON.stringify(body)
+    });
+    if (req.method() === "OPTIONS") {
+      await route.fulfill({ status: 204, headers: cors, body: "" });
+      return;
+    }
+    if (reqUrl.pathname.startsWith("/rest/v1/site_settings")) {
+      await reply([{ settings: mockState.settings, updated_at: new Date().toISOString() }]);
+      return;
+    }
+    if (reqUrl.pathname.startsWith("/rest/v1/listings")) {
+      await reply([]);
+      return;
+    }
+    if (reqUrl.pathname === "/functions/v1/admin-login") {
+      const body = req.postDataJSON();
+      if (body.pin !== "smoke-pin") { await reply({ error: "Wrong PIN." }, 401); return; }
+      await reply({ ok: true, token: mockToken, expiresAt: Date.now() + 8 * 60 * 60 * 1000, ttl: 8 * 60 * 60 });
+      return;
+    }
+    if (reqUrl.pathname === "/functions/v1/admin-listings") {
+      const body = req.postDataJSON();
+      mockState.calls.push(body);
+      if (body.action !== "logout" && requestHeaders["x-admin-token"] !== mockToken) {
+        await reply({ error: "Admin session expired." }, 401);
+        return;
+      }
+      if (body.action === "overview") {
+        await reply({
+          counts: { all: mockState.listings.length, published: mockState.listings.filter((x) => x.published).length, hidden: mockState.listings.filter((x) => !x.published).length, sites: 1, apps: 0, music: 0, movie: 0, series: 0 },
+          activity: mockState.activity, settings: mockState.settings, settingsUpdatedAt: null
+        });
+        return;
+      }
+      if (body.action === "list") { await reply({ listings: mockState.listings }); return; }
+      if (body.action === "settings-get") { await reply({ settings: mockState.settings, updatedAt: null }); return; }
+      if (body.action === "settings-save") { mockState.settings = body.settings; await reply({ ok: true, settings: mockState.settings }); return; }
+      if (body.action === "activity-list") { await reply({ activity: mockState.activity }); return; }
+      if (body.action === "bulk") {
+        const ids = body.ids || [];
+        if (body.operation === "delete") mockState.listings = mockState.listings.filter((x) => !ids.includes(x.id));
+        if (body.operation === "hide" || body.operation === "publish") mockState.listings.forEach((x) => { if (ids.includes(x.id)) x.published = body.operation === "publish"; });
+        if (body.operation === "move") mockState.listings.forEach((x) => { if (ids.includes(x.id)) { x.section = body.section; x.category = body.category; } });
+        await reply({ ok: true, affected: ids.length });
+        return;
+      }
+      if (body.action === "delete") { mockState.listings = mockState.listings.filter((x) => x.id !== body.id); await reply({ ok: true }); return; }
+      if (body.action === "pin-change") { await reply({ ok: true, reLoginRequired: true }); return; }
+      if (body.action === "logout") { await reply({ ok: true }); return; }
+      if (body.action === "import") { await reply({ ok: true, added: 0, skipped: 0, errors: [] }); return; }
+      await reply({ error: "Unknown mock action." }, 400);
+      return;
+    }
+    await reply({ error: "Unexpected mocked Supabase endpoint." }, 404);
+  });
   const page = await context.newPage();
   page.on("pageerror", (error) => failures.push("Uncaught page error: " + error.message));
   page.on("response", (response) => {
@@ -95,6 +186,33 @@ try {
   await page.locator("#wlList li").filter({ hasText: "StreamCloud automated smoke test" }).locator('[data-act="del"]').click();
   await page.locator("#wlList li").filter({ hasText: "StreamCloud automated smoke test" }).locator('[data-act="del"]').click();
   assert.equal(await page.locator("#wlList").getByText("StreamCloud automated smoke test").count(), 0, "Watchlist should delete the test item");
+
+  // Exercise the admin dashboard using a mocked backend so tests never change production data.
+  await page.locator("#adminIcon").click();
+  await page.locator('input[aria-label="Admin PIN"]').fill("smoke-pin");
+  await page.getByRole("button", { name: "Unlock" }).click();
+  await page.getByText("Recent admin activity").waitFor({ timeout: 8000 });
+  assert.ok(mockState.calls.some((x) => x.action === "overview"), "Admin overview API should be called after PIN login");
+
+  await page.getByRole("button", { name: "Content" }).click();
+  await page.getByText("Smoke test listing").waitFor({ timeout: 8000 });
+  await page.locator('input[data-listing-id="' + mockListingId + '"]').check();
+  await page.getByRole("button", { name: "Hide", exact: true }).first().click();
+  await page.getByText("Bulk action saved.").waitFor({ timeout: 8000 });
+  assert.ok(mockState.calls.some((x) => x.action === "bulk" && x.operation === "hide" && x.ids.includes(mockListingId)), "Bulk hide should use the protected admin API");
+  assert.equal(mockState.listings[0].published, false, "Bulk hide should persist the visibility change");
+
+  await page.getByRole("button", { name: "Cards & Layout" }).click();
+  await page.getByText("Edit and arrange cards").waitFor({ timeout: 8000 });
+  await page.getByRole("button", { name: "Save section and grid settings" }).waitFor({ timeout: 8000 });
+  await page.getByRole("button", { name: "Appearance" }).click();
+  await page.locator('.scx-in[type="color"]').first().waitFor({ timeout: 8000 });
+  await page.getByRole("button", { name: "Site settings" }).click();
+  await page.getByRole("button", { name: "Save site settings" }).waitFor({ timeout: 8000 });
+  await page.getByRole("button", { name: "Log out" }).click();
+  await page.locator('input[aria-label="Admin PIN"]').waitFor({ timeout: 8000 });
+  assert.ok(mockState.calls.some((x) => x.action === "logout"), "Admin logout should revoke the current session");
+
   await context.close();
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
