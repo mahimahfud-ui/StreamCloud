@@ -221,9 +221,9 @@ try {
 
   await page.getByRole("button", { name: "AI Studio" }).click();
   assert.ok(await page.getByLabel("AI provider for summary").locator('option[value="groq"]').count() === 1, "AI Studio should offer GroqCloud summaries");
-  await page.getByLabel("AI provider for summary").selectOption("groq");
   await page.getByLabel("Movie / web-series title").fill("Example Film");
   await page.getByLabel("Release year (optional)").fill("2024");
+  await page.getByLabel("AI provider for summary").selectOption("groq");
   await page.getByRole("button", { name: "Find verified metadata" }).click();
   await page.getByText("Verified test synopsis.").waitFor({ timeout: 8000 });
   assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.title === "Example Film"), "AI Studio should request metadata through the admin-detect endpoint");
