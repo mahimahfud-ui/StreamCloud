@@ -52,6 +52,8 @@
     /* fields */
     O + ".scx-f{gap:6px;font-size:11.5px;font-weight:650;letter-spacing:.03em;color:#9c9fab}" +
     O + ".scx-in,.scx-box input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]),.scx-box select,.scx-box textarea{background:" + F + ";border:1px solid rgba(255,255,255,.11);border-radius:12px;padding:10px 13px;color:#fff;font-size:13.5px}" +
+    O + ".scx-box select{color-scheme:dark}" +
+    O + ".scx-box select option,.scx-box select optgroup{background-color:#1a1a1a;color:#fff}" +
     O + ".scx-box input[type=color]{height:42px;padding:3px;border-radius:12px;background:" + F + ";border:1px solid rgba(255,255,255,.11);cursor:pointer}" +
     O + ".scx-in:focus,.scx-box input:focus,.scx-box select:focus,.scx-box textarea:focus{border-color:rgba(255,77,109,.7);background:rgba(255,255,255,.06);box-shadow:0 0 0 3px rgba(255,77,109,.14)}" +
     O + ".ux-step input{border-radius:0!important}" +
