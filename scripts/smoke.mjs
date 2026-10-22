@@ -219,7 +219,7 @@ try {
   await page.getByText("Recent admin activity").waitFor({ timeout: 8000 });
   assert.ok(mockState.calls.some((x) => x.action === "overview"), "Admin overview API should be called after PIN login");
 
-  await page.getByRole("button", { name: "Title lookup" }).click();
+  await page.getByRole("button", { name: "Title lookup", exact: true }).click();
   assert.equal(await page.locator('select[aria-label*="provider" i]').count(), 0, "Title lookup should not expose AI-provider selectors");
   assert.equal(await page.getByText(/AI provider|GroqCloud|Gemini AI|OpenAI GPT/i).count(), 0, "Title lookup should not reveal provider names");
   await page.getByLabel("Movie / web-series title").fill("Example Film");
@@ -237,7 +237,7 @@ try {
   await page.waitForFunction(() => Array.from(document.querySelectorAll("input.scx-in")).some((el) => el.value === "Detected by OpenAI"));
   assert.ok(mockState.calls.some((x) => x.url && x.aiProvider === "auto"), "Add item should use server-side routing");
 
-  await page.getByRole("button", { name: "Content" }).click();
+  await page.getByRole("button", { name: "Content", exact: true }).click();
   await page.getByText("Smoke test listing").waitFor({ timeout: 8000 });
   assert.equal(await page.locator(".scx-tabs").evaluate((el) => getComputedStyle(el).display), "grid", "Admin features should display as a responsive card grid");
   assert.equal(await page.getByRole("button", { name: "Delete selected", exact: true }).count(), 1, "Content should show only one shared delete action");
@@ -256,12 +256,12 @@ try {
   assert.ok(mockState.calls.some((x) => x.action === "bulk" && x.operation === "delete" && x.ids.includes(mockListingId)), "The shared delete button should delete one selected listing");
   assert.equal(mockState.listings.some((x) => x.id === mockListingId), false, "Bulk delete should remove the selected listing");
 
-  await page.getByRole("button", { name: "Cards & Layout" }).click();
+  await page.getByRole("button", { name: "Cards & Layout", exact: true }).click();
   await page.getByText("Edit and arrange cards").waitFor({ timeout: 8000 });
   await page.getByRole("button", { name: "Save section and grid settings" }).waitFor({ timeout: 8000 });
-  await page.getByRole("button", { name: "Appearance" }).click();
+  await page.getByRole("button", { name: "Appearance", exact: true }).click();
   await page.locator('.scx-in[type="color"]').first().waitFor({ timeout: 8000 });
-  await page.getByRole("button", { name: "Site settings" }).click();
+  await page.getByRole("button", { name: "Site settings", exact: true }).click();
   await page.getByLabel("Show announcement to visitors").check();
   await page.getByLabel("Announcement message").fill("Smoke-test announcement");
   await page.getByRole("button", { name: "Save site controls" }).click();
@@ -269,7 +269,7 @@ try {
   assert.equal(mockState.settings.site.announcement, "Smoke-test announcement", "Site settings should persist announcement content");
   assert.equal(mockState.settings.site.announcementEnabled, true, "Site settings should persist announcement visibility");
   assert.equal(await page.locator("#streamcloud-announcement").textContent().then((t) => t.includes("Smoke-test announcement")), true, "Announcement should render on the public page after saving");
-  await page.getByRole("button", { name: "Log out" }).click();
+  await page.getByRole("button", { name: "Log out", exact: true }).click();
   await page.locator('input[aria-label="Admin PIN"]').waitFor({ timeout: 8000 });
   assert.ok(mockState.calls.some((x) => x.action === "logout"), "Admin logout should revoke the current session");
 
