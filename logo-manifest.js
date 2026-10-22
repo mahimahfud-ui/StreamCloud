@@ -56,5 +56,9 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "music:spotube": "./assets/logos/sites/spotube.png",
   "music:meld": "./assets/logos/sites/meld.png",
   "music:outertune": "./assets/logos/sites/outertune.png",
-  "music:lastwave": "./assets/logos/sites/lastwave.png"
+  "music:lastwave": "./assets/logos/sites/lastwave.png",
+  "movie:flix-vision": "./assets/logos/movie-apps/flix-vision.png",
+  "movie:cinema-hq": "./assets/logos/movie-apps/cinema-hq.ico",
+  "movie:cineplus": "./assets/logos/movie-apps/cineplus.png",
+  "movie:reezn": "./assets/logos/movie-apps/reezn.jpg"
 };
