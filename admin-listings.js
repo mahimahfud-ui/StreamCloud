@@ -624,7 +624,7 @@
     return {
       schemaVersion: 1, site: {}, appearance: {},
       sections: { sites: { visible: true, title: "Movie Websites" }, apps: { visible: true, title: "Movie Apps" }, recs: { visible: true, title: "Recommendations" }, order: ["sites", "apps", "recs"] },
-      content: { overrides: {}, hidden: [], order: {} }
+      content: { overrides: {}, hidden: [], deleted: [], order: {} }
     };
   }
   function normalizeClientSettings(s) {
@@ -635,6 +635,7 @@
     s.content = s.content && typeof s.content === "object" ? s.content : {};
     s.content.overrides = s.content.overrides && typeof s.content.overrides === "object" ? s.content.overrides : {};
     s.content.hidden = Array.isArray(s.content.hidden) ? s.content.hidden : [];
+    s.content.deleted = Array.isArray(s.content.deleted) ? s.content.deleted : [];
     s.content.order = s.content.order && typeof s.content.order === "object" ? s.content.order : {};
     return s;
   }
@@ -901,7 +902,7 @@
       });
     }
     function buildOptions() {
-      var rows = getRegistry(group.value);
+      var rows = getRegistry(group.value).filter(function (item) { return settings.content.deleted.indexOf(catalogKey(group.value, item)) < 0; });
       var saved = currentOrder(settings, group.value);
       rows.sort(function (a, b) { return saved.indexOf(catalogKey(group.value, a)) - saved.indexOf(catalogKey(group.value, b)); });
       options(itemSelect, rows.map(function (it) {
@@ -914,9 +915,43 @@
       var next = cloneSettings(settings); next.content.order[group.value] = keys;
       saveSettings(next, msg, function (finalSettings) { settings = finalSettings; buildOptions(); });
     }
+    function deleteCard(key, item, section) {
+      var name = String(item && (item.name || item.title) || key);
+      var isDatabaseListing = !!(item && item.listingId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(item.listingId)));
+      var promptText = isDatabaseListing
+        ? "Permanently delete \"" + name + "\" from the database? This cannot be undone."
+        : "Remove \"" + name + "\" from the public catalog? This is saved in site settings; the original source file will not be edited.";
+      if (!confirm(promptText)) return;
+
+      function saveRemoval() {
+        var next = cloneSettings(settings);
+        next.content.deleted = Array.isArray(next.content.deleted) ? next.content.deleted : [];
+        if (next.content.deleted.indexOf(key) < 0) next.content.deleted.push(key);
+        next.content.hidden = next.content.hidden.filter(function (x) { return x !== key; });
+        delete next.content.overrides[key];
+        if (Array.isArray(next.content.order[section])) {
+          next.content.order[section] = next.content.order[section].filter(function (x) { return x !== key; });
+        }
+        saveSettings(next, msg, function (finalSettings) {
+          settings = finalSettings;
+          refreshPublic().then(function () {
+            buildOptions();
+            say(msg, "ok", "Card removed from the public catalog.");
+          });
+        });
+      }
+
+      if (isDatabaseListing) {
+        api("admin-listings", { action: "delete", id: item.listingId }).then(saveRemoval).catch(function (e) {
+          if (!expired(e)) say(msg, "err", e.message || "Could not delete this listing.");
+        });
+      } else {
+        saveRemoval();
+      }
+    }
     function buildOrderList() {
       orderList.textContent = "";
-      var section = group.value, rows = getRegistry(section), keys = currentOrder(settings, section);
+      var section = group.value, rows = getRegistry(section).filter(function (item) { return settings.content.deleted.indexOf(catalogKey(section, item)) < 0; }), keys = currentOrder(settings, section);
       var lookup = new Map(rows.map(function (r) { return [catalogKey(section, r), r]; }));
       var dragging = "";
       keys.filter(function (k) { return lookup.has(k); }).forEach(function (key) {
@@ -930,7 +965,8 @@
             next.content.hidden = next.content.hidden.filter(function (x) { return x !== key; });
             if (!hidden) next.content.hidden.push(key);
             saveSettings(next, msg, function (finalSettings) { settings = finalSettings; buildOptions(); });
-          } })
+          } }),
+          h("button", { class: "scx-btn dng scx-small", type: "button", text: "Delete", onclick: function () { deleteCard(key, item, section); } })
         ]);
         row.addEventListener("dragstart", function (e) { dragging = key; row.classList.add("dragging"); e.dataTransfer.setData("text/plain", key); e.dataTransfer.effectAllowed = "move"; });
         row.addEventListener("dragend", function () { row.classList.remove("dragging"); });
