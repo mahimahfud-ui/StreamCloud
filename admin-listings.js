@@ -156,7 +156,6 @@
 
   /* ---------- styles ---------- */
   var style = h("style", { text:
-    ".scx-fab{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:60;width:46px;height:46px;border-radius:50%;border:1px solid #404040;background:rgba(36,36,36,.94);color:#fff;font-size:26px;line-height:1;display:grid;place-items:center;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.4);transition:background .2s,transform .15s}.scx-fab:hover{background:var(--red,#e50914)}.scx-fab:active{transform:scale(.94)}.scx-fab:focus-visible{outline:2px solid #fff;outline-offset:3px}" +
     ".scx-ov{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:16px;overflow:auto}.scx-ov[hidden]{display:none}" +
     ".scx-box{width:min(1040px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--panel,#181818);color:var(--text,#fff);border:1px solid var(--border,#343434);border-radius:14px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.55)}" +
     ".scx-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px}.scx-head h2{margin:0;font-size:19px}" +
@@ -1201,10 +1200,8 @@
     } })]));
   }
 
-  /* ---------- floating + button ---------- */
-  var fab = h("button", { class: "scx-fab", type: "button", "aria-label": "Admin: add listing", title: "Admin", text: "+", onclick: openModal });
+  /* ---------- admin panel entry point (header shield icon) ---------- */
   function mount() {
-    if (!fab.isConnected) document.body.appendChild(fab);
     var adminIcon = document.getElementById("adminIcon");
     if (adminIcon && !adminIcon.dataset.bound) { adminIcon.dataset.bound = "1"; adminIcon.addEventListener("click", openModal); }
   }
