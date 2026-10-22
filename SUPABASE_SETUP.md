@@ -2,14 +2,15 @@
 
 Everything secret lives in Supabase. The static site only holds the public URL and anon key.
 
-## 1. Create the database objects
-```bash
-npm i -g supabase            # or: brew install supabase/tap/supabase
-supabase login
-supabase link --project-ref <YOUR_PROJECT_REF>
-supabase db push             # applies the existing listings migration and the admin-control migration
-```
-(or paste that SQL file into Supabase -> SQL Editor).
+## 1. Database setup
+
+The existing StreamCloud production database already has the listings and admin-control tables. **Do not rerun the migrations on that production project.**
+
+For a **new** Supabase project, open SQL Editor and run these repository files in order:
+1. `supabase/migrations/20261022000000_listings.sql`
+2. `supabase/migrations/20261022170000_streamcloud_admin_control.sql`
+
+The existing production database's migration history was created through a managed/dashboard workflow and is not fully mirrored by the repository's CLI migration filenames. Avoid running `supabase db push` against that production project until its migration history is reconciled.
 
 ## 2. Set server-side API secrets (never commit these)
 
