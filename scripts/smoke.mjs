@@ -51,6 +51,14 @@ try {
   await page.waitForSelector("#sitesView .card", { timeout: 15000 });
   assert.ok(await page.locator("#sitesView .card").count() > 0, "Website catalog should render");
 
+  // The admin shortcut should open a PIN gate without changing or blocking the main UI.
+  assert.ok(await page.locator("#adminIcon").isVisible(), "Admin icon should render beside the social link");
+  await page.locator("#adminIcon").click();
+  await page.locator('input[aria-label="Admin PIN"]').waitFor({ timeout: 5000 });
+  assert.ok(await page.locator('input[aria-label="Admin PIN"]').isVisible(), "Admin icon should open the PIN gate");
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => document.querySelector(".scx-ov")?.hidden === true);
+
   // The page module injects and wires the Music Apps tab after the original page scripts.
   await page.locator('.mode[data-mode="music"]').waitFor({ timeout: 15000 });
   await page.locator('.mode[data-mode="apps"]').click();
