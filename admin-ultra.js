@@ -98,9 +98,9 @@
       else if (t === "font family" && /^[a-zA-Z0-9 ,"'_-]{1,80}$/.test(v)) { document.body.style.fontFamily = v; any = true; }
       else if (/^base font size/.test(t)) { document.body.style.fontSize = clamp(v, 12, 20, 14) + "px"; any = true; }
       else if (/image fit/.test(t) && /^(contain|cover|fill)$/.test(v)) { root.style.setProperty("--sc-image-fit", v); any = true; }
-      else if (/^desktop/.test(t) && /col/.test(t)) { root.style.setProperty("--sc-cols-d", clamp(v, 1, 8, 3)); any = true; }
-      else if (/^tablet/.test(t) && /col/.test(t)) { root.style.setProperty("--sc-cols-t", clamp(v, 1, 6, 2)); any = true; }
-      else if (/^mobile/.test(t) && /col/.test(t)) { root.style.setProperty("--sc-cols-m", clamp(v, 1, 3, 1)); any = true; }
+      else if (/desktop/.test(t) && /col/.test(t)) { root.style.setProperty("--sc-cols-d", clamp(v, 1, 8, 3)); any = true; }
+      else if (/tablet/.test(t) && /col/.test(t)) { root.style.setProperty("--sc-cols-t", clamp(v, 1, 6, 2)); any = true; }
+      else if (/mobile/.test(t) && /col/.test(t)) { root.style.setProperty("--sc-cols-m", clamp(v, 1, 3, 1)); any = true; }
       else if (/gap|spacing/.test(t)) { root.style.setProperty("--sc-gap", clamp(v, 0, 48, 22) + "px"); any = true; }
       else if (/radius|corner/.test(t)) { root.style.setProperty("--sc-radius", clamp(v, 0, 32, 4) + "px"); any = true; }
       else if (/aspect/.test(t) && /^(1 \/ 1|2 \/ 3|16 \/ 9|4 \/ 3)$/.test(v)) { root.style.setProperty("--sc-aspect", v); any = true; }
