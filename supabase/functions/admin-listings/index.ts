@@ -66,8 +66,12 @@ Deno.serve(async (req) => {
     if (token) {
       const db = serviceClient();
       const hash = await sha256Hex(token);
-      await db.from("admin_sessions").delete().eq("token_hash", hash);
-      await db.from("admin_activity").insert({ action: "admin.logout", entity_type: "session", entity_name: "Admin logout" });
+      const { data: revoked } = await db.from("admin_sessions")
+        .delete().eq("token_hash", hash).select("token_hash");
+      // Only a real, active session is allowed to create a logout audit entry.
+      if (revoked && revoked.length) {
+        await db.from("admin_activity").insert({ action: "admin.logout", entity_type: "session", entity_name: "Admin logout" });
+      }
     }
     return json(req, { ok: true }, 200, { "Set-Cookie": clearSessionCookie() });
   }
