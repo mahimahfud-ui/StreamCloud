@@ -85,7 +85,6 @@ Deno.serve(async (req) => {
       const notes: string[] = ["Core title metadata was matched through OMDb using an exact title" + (year ? " and year" : "") + "."];
       let description = d.plot;
       if (body.generateSummary === true && d.plot) {
-        try {
           const source: PageInfo = {
             html: "", title: d.title, siteName: null, description: d.plot,
             canonical: "https://www.imdb.com/title/" + d.imdbId + "/",
