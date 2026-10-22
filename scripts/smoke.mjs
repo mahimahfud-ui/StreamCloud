@@ -259,6 +259,9 @@ try {
   await page.getByRole("button", { name: "Cards & Layout", exact: true }).click();
   await page.getByText("Edit and arrange cards").waitFor({ timeout: 8000 });
   await page.getByRole("button", { name: "Save section and grid settings" }).waitFor({ timeout: 8000 });
+  await page.getByRole("button", { name: "Save card changes", exact: true }).click();
+  await page.getByText("Saved to the database. Changes apply to visitors after the page refreshes.").waitFor({ timeout: 8000 });
+  assert.ok(mockState.calls.some((x) => x.action === "settings-save" && x.settings?.content?.overrides), "Card field editing should persist through the settings API");
   await page.getByRole("button", { name: "Appearance", exact: true }).click();
   await page.locator('.scx-in[type="color"]').first().waitFor({ timeout: 8000 });
   await page.getByRole("button", { name: "Site settings", exact: true }).click();
