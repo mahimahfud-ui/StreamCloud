@@ -22,8 +22,18 @@ async function verifyImage(raw: string): Promise<boolean> {
 }
 
 async function pickLogo(page: PageInfo | null, origin: URL): Promise<string | null> {
-  const candidates = [...(page?.icons ?? []), new URL("/favicon.ico", origin).href];
-  for (const c of candidates.slice(0, 4)) if (parsePublicUrl(c) && await verifyImage(c)) return c;
+  // Prefer a real site icon; Open Graph/JSON-LD images are useful fallbacks for sites
+  // whose favicon is missing or unreadable.
+  const candidates = [...(page?.icons ?? []).slice(0, 4), ...(page?.images ?? []).slice(0, 8), new URL("/favicon.ico", origin).href];
+  for (const c of [...new Set(candidates)].slice(0, 10)) if (parsePublicUrl(c) && await verifyImage(c)) return c;
+  return null;
+}
+
+async function pickPageImage(page: PageInfo | null): Promise<string | null> {
+  if (!page) return null;
+  for (const c of (page.images ?? []).slice(0, 8)) {
+    if (parsePublicUrl(c) && await verifyImage(c)) return c;
+  }
   return null;
 }
 
@@ -81,12 +91,22 @@ Deno.serve(async (req) => {
   if (page) {
     try { ai = await askGemini(page, section); } catch (e) { notes.push(`AI analysis unavailable: ${(e as Error).message}`); }
   }
-  out.name = ai?.name || page?.siteName || page?.title || null;
-  out.description = ai?.description || page?.description || null;
-  out.year = ai?.year ?? null;
-  out.genres = ai?.genres ?? [];
-  out.platform = null; out.version = null;
-  if (isApp && ai) { out.platform = ai.platform ?? null; out.version = ai.version ?? null; }
+  // Keep usable page metadata as a fallback when Gemini cannot parse a page or
+  // returns only some fields. Many directory pages expose details in JSON-LD/OG tags.
+  const structured = page?.structured;
+  out.name = ai?.name || structured?.name || (isTitle ? page?.title : page?.siteName || page?.title) || null;
+  out.description = ai?.description || structured?.description || page?.description || null;
+  out.year = ai?.year ?? structured?.year ?? null;
+  out.genres = ai?.genres?.length ? ai.genres : structured?.genres ?? [];
+  out.platform = (isApp ? ai?.platform : null) || (isApp ? structured?.platform : null) || null;
+  out.version = (isApp ? ai?.version : null) || (isApp ? structured?.version : null) || null;
+
+  // A page's Open Graph/JSON-LD image is often its thumbnail/poster. Verify it
+  // before returning it, then let a verified OMDb poster take precedence.
+  if (isTitle) {
+    const pageImage = await pickPageImage(page);
+    if (pageImage) out.poster_url = pageImage;
+  }
 
   // 3. Movies / series: verify against OMDb (IMDb data). Nothing is guessed.
   if (isTitle) {
@@ -104,7 +124,7 @@ Deno.serve(async (req) => {
         const d = o.data;
         Object.assign(out, {
           name: d.title, year: d.year, genres: d.genres, imdb_id: d.imdbId, imdb_rating: d.rating,
-          poster_url: d.poster, description: d.plot ?? out.description,
+          poster_url: d.poster || out.poster_url || null, description: d.plot ?? out.description,
         });
         if (section === "series") { out.season_count = d.seasons; out.episode_count = d.episodes; if (d.episodes === null) notes.push("Episode count could not be verified."); }
         if (!imdbId) notes.push("Matched by exact title" + (out.year ? " and year" : "") + ". Check it is the right title.");
@@ -116,6 +136,7 @@ Deno.serve(async (req) => {
   if (isApp || section === "sites") {
     out.logo_url = await pickLogo(page, target);
     verified.logo = !!out.logo_url;
+    if (!out.description) out.description = page?.structured?.description || page?.description || null;
   }
   if (isApp) {
     let apkCandidate: string | null = looksApk ? target.href : null;
