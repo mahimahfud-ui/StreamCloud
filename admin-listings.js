@@ -143,6 +143,14 @@
         if (res.status === 401 && fn !== "admin-login") { setSession(null); res.data.expired = true; }
         if (res.status >= 400) { var err = new Error(res.data.error || "Request failed (" + res.status + ")."); err.info = res.data; err.status = res.status; throw err; }
         return res.data;
+      })
+      .catch(function (e) {
+        if (e && typeof e.status === "number") throw e;
+        var detail = "Could not contact Supabase. Request origin: " + (window.location.origin || "unknown") +
+          ". Check the connection or CORS allowlist for " + BASE + ".";
+        var err = new Error(detail);
+        err.network = true; err.cause = e;
+        throw err;
       });
   }
 
@@ -226,7 +234,7 @@
       }).catch(function (e) {
         pin.value = ""; go.disabled = false;
         var wait = e.info && e.info.retryAfter ? " Try again in about " + Math.ceil(e.info.retryAfter / 60) + " min." : "";
-        say(msg, "err", (e.status ? e.message : "Could not reach the server. Check your connection.") + wait);
+        say(msg, "err", (e.status || e.network ? e.message : "Could not reach the server. Check your connection.") + wait);
         pin.focus();
       });
     }

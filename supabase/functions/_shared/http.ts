@@ -2,11 +2,29 @@
 const DEFAULT_ORIGINS = [
   "https://mahimahfud-ui.github.io",
   "https://streamcloud.ai.studio",
+  "https://www.streamcloud.ai.studio",
 ];
 
+function originAllowed(origin: string, configured: Set<string>): boolean {
+  if (!origin || origin === "null") return false;
+  if (configured.has(origin)) return true;
+  try {
+    const u = new URL(origin);
+    // GitHub Pages preview/fork domains need the same public static frontend to call this API.
+    if (u.protocol === "https:" && (u.hostname === "github.io" || u.hostname.endsWith(".github.io"))) return true;
+    // Local HTTP origins are allowed for development only; file:// (Origin: null) stays blocked.
+    if (u.protocol === "http:" && ["localhost", "127.0.0.1"].includes(u.hostname)) return true;
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 export function corsHeaders(req: Request): Record<string, string> {
-  const configured = (Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-  const allowed = new Set([...DEFAULT_ORIGINS, ...configured]);
+  const configured = new Set([
+    ...DEFAULT_ORIGINS,
+    ...(Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map((s) => s.trim()).filter(Boolean),
+  ]);
   const origin = req.headers.get("origin") ?? "";
   const h: Record<string, string> = {
     "Access-Control-Allow-Headers": "content-type, x-admin-token, apikey, authorization",
@@ -14,7 +32,7 @@ export function corsHeaders(req: Request): Record<string, string> {
     "Access-Control-Max-Age": "600",
     "Vary": "Origin",
   };
-  if (allowed.has(origin)) h["Access-Control-Allow-Origin"] = origin;
+  if (originAllowed(origin, configured)) h["Access-Control-Allow-Origin"] = origin;
   return h;
 }
 
