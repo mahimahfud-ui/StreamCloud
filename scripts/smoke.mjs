@@ -88,6 +88,25 @@ try {
       await reply({ ok: true, token: mockToken, expiresAt: Date.now() + 8 * 60 * 60 * 1000, ttl: 8 * 60 * 60 });
       return;
     }
+    if (reqUrl.pathname === "/functions/v1/admin-detect") {
+      const body = req.postDataJSON();
+      mockState.calls.push(body);
+      if (requestHeaders["x-admin-token"] !== mockToken) { await reply({ error: "Admin session expired." }, 401); return; }
+      if (body.mode === "title-lookup") {
+        await reply({
+          detected: {
+            url: "https://www.imdb.com/title/tt1234567/", name: "Example Film", year: 2024,
+            genres: ["Drama"], imdb_id: "tt1234567", imdb_rating: 8.1,
+            poster_url: "https://image.tmdb.org/t/p/w500/test.jpg", description: "Verified test synopsis."
+          },
+          verified: { imdb: true, logo: false, download: false },
+          notes: ["Mock verified metadata for automated UI testing."]
+        });
+        return;
+      }
+      await reply({ error: "Unknown mock detection action." }, 400);
+      return;
+    }
     if (reqUrl.pathname === "/functions/v1/admin-listings") {
       const body = req.postDataJSON();
       mockState.calls.push(body);
@@ -196,6 +215,15 @@ try {
   await page.getByText("Recent admin activity").waitFor({ timeout: 8000 });
   assert.ok(mockState.calls.some((x) => x.action === "overview"), "Admin overview API should be called after PIN login");
 
+  await page.getByRole("button", { name: "AI Studio" }).click();
+  await page.getByLabel("Movie / web-series title").fill("Example Film");
+  await page.getByLabel("Release year (optional)").fill("2024");
+  await page.getByRole("button", { name: "Find verified metadata" }).click();
+  await page.getByText("Verified test synopsis.").waitFor({ timeout: 8000 });
+  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.title === "Example Film"), "AI Studio should request metadata through the admin-detect endpoint");
+  await page.getByRole("button", { name: "Use this title in Add item" }).click();
+  assert.ok(await page.locator("input.scx-in").evaluateAll((els) => els.some((el) => el.value === "Example Film")), "AI Studio metadata should transfer into Add item for review");
+
   await page.getByRole("button", { name: "Content" }).click();
   await page.getByText("Smoke test listing").waitFor({ timeout: 8000 });
   await page.locator('input[data-listing-id="' + mockListingId + '"]').check();
@@ -210,7 +238,13 @@ try {
   await page.getByRole("button", { name: "Appearance" }).click();
   await page.locator('.scx-in[type="color"]').first().waitFor({ timeout: 8000 });
   await page.getByRole("button", { name: "Site settings" }).click();
-  await page.getByRole("button", { name: "Save site settings" }).waitFor({ timeout: 8000 });
+  await page.getByLabel("Show announcement to visitors").check();
+  await page.getByLabel("Announcement message").fill("Smoke-test announcement");
+  await page.getByRole("button", { name: "Save site controls" }).click();
+  await page.getByText("Saved to the database. Changes apply to visitors after the page refreshes.").waitFor({ timeout: 8000 });
+  assert.equal(mockState.settings.site.announcement, "Smoke-test announcement", "Site settings should persist announcement content");
+  assert.equal(mockState.settings.site.announcementEnabled, true, "Site settings should persist announcement visibility");
+  assert.equal(await page.locator("#streamcloud-announcement").textContent().then((t) => t.includes("Smoke-test announcement")), true, "Announcement should render on the public page after saving");
   await page.getByRole("button", { name: "Log out" }).click();
   await page.locator('input[aria-label="Admin PIN"]').waitFor({ timeout: 8000 });
   assert.ok(mockState.calls.some((x) => x.action === "logout"), "Admin logout should revoke the current session");
@@ -229,7 +263,7 @@ try {
   await mobile.close();
 
   if (failures.length) throw new Error(failures.join("\n"));
-  console.log("StreamCloud browser smoke test passed: website/movie-app/music-app tabs, search autocomplete, recommendations/modal, watchlist CRUD, mobile width, and local requests.");
+  console.log("StreamCloud browser smoke test passed: catalog tabs, search autocomplete, recommendations/modal, watchlist CRUD, AI Studio title lookup, site announcement controls, mobile width, and local requests.");
 } finally {
   if (browser) await browser.close().catch(() => {});
   server.kill("SIGTERM");
