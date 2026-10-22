@@ -35,7 +35,13 @@ select public.admin_update_pin('YOUR_PRIVATE_PIN');
 ```
 The existing project database already has the requested initial PIN. Login returns a random, revocable eight-hour session token; the browser keeps it in sessionStorage and every admin request is checked server-side against its token hash. Login attempts are rate-limited server-side.
 
-## 4. Deploy the functions
+## 4. AI Studio and deployment
+
+The Admin Dashboard's **AI Studio** looks up Movie / Web Series metadata by exact title (optional release year) using `OMDB_API_KEY`. When available, Gemini can rewrite the verified OMDb plot into a short synopsis using `GEMINI_API_KEY`; if Gemini is unavailable, the verified plot is used instead. Ratings, posters, years, seasons and episode counts are never fabricated by title lookup. AI Studio only fills the Add item form; an administrator must review the destination URL and publish manually.
+
+The existing Add item URL detector still uses Gemini for page extraction, with OMDb/IMDb verification for movie and series metadata.
+
+Deploy the functions after changing them:
 ```bash
 for fn in admin-login admin-detect admin-listings; do supabase functions deploy "$fn"; done
 ```

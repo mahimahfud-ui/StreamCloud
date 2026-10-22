@@ -161,6 +161,7 @@
     ".scx-msg{margin:0 0 12px;padding:10px 12px;border-radius:10px;font-size:13px;border:1px solid var(--border,#343434);background:var(--card,#242424)}.scx-msg.err{border-color:#8e202d;color:#ff9a92}.scx-msg.ok{border-color:#2b7a45;color:var(--green,#46d369)}.scx-msg[hidden]{display:none}" +
     ".scx-notes{margin:0 0 12px;padding:0 0 0 18px;font-size:12px;color:var(--dim,#a7a7a7)}.scx-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}" +
     ".scx-list{display:flex;flex-direction:column;gap:8px}.scx-item{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--card,#242424)}.scx-item b{display:block;font-size:14px}.scx-item small{color:var(--dim,#a7a7a7)}" +
+    ".scx-ai-result{margin-top:10px}.scx-ai-head{display:flex;gap:14px;align-items:flex-start;padding:14px;border:1px solid var(--border,#343434);border-radius:12px;background:var(--card,#242424)}.scx-ai-head img{width:104px;max-width:30%;height:auto;max-height:160px;object-fit:cover;border-radius:8px;background:#111}.scx-ai-info{min-width:0;flex:1}.scx-ai-info b{display:block;font-size:16px}.scx-ai-info small{display:block;color:var(--dim,#a7a7a7);margin:6px 0}.scx-ai-info p{font-size:13px;line-height:1.5;color:#ddd;margin:8px 0 0}" +
     ".scx-sum{margin:0 0 14px;padding:12px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--card,#242424);font-size:13px;line-height:1.55}.scx-sum dt{color:var(--dim,#a7a7a7);font-size:11px}.scx-sum dd{margin:0 0 6px;word-break:break-word}" });
   document.head.appendChild(style);
   var dashboardStyle = h("style", { text:
@@ -243,7 +244,7 @@
     ui.view = tab; titleEl.textContent = "Admin Dashboard"; bodyEl.textContent = "";
     var tabs = h("div", { class: "scx-tabs", role: "tablist", "aria-label": "Admin controls" });
     [
-      ["overview", "Overview"], ["add", "Add item"], ["manage", "Content"],
+      ["overview", "Overview"], ["add", "Add item"], ["ai", "AI Studio"], ["manage", "Content"],
       ["layout", "Cards & Layout"], ["appearance", "Appearance"], ["site", "Site settings"],
       ["activity", "Activity"], ["data", "Backup"], ["pin", "Change PIN"], ["logout", "Log out"]
     ].forEach(function (item) {
@@ -265,6 +266,7 @@
     if (notice) say(msg, notice.kind, notice.text);
     if (tab === "manage") showManage(msg);
     else if (tab === "add") showAdd(msg);
+    else if (tab === "ai") showAiStudio(msg);
     else if (tab === "layout") showLayout(msg);
     else if (tab === "appearance") showAppearance(msg);
     else if (tab === "site") showSiteSettings(msg);
@@ -1026,19 +1028,101 @@
   function showSiteSettings(msg) {
     loadSettings().then(function (settings) {
       var site = settings.site || {};
+      bodyEl.appendChild(h("h3", { text: "SEO & identity" }));
       var title = field("Browser / site title", site.title || "StreamCloud", "text", { maxlength: "100" });
-      var desc = field("Site description", site.description || "Explore curated movie and web-series websites, streaming apps, and music apps—all in one place.", "textarea", { maxlength: "300", rows: "3" });
+      var desc = field("SEO description", site.description || "Explore curated movie and web-series websites, streaming apps, and music apps—all in one place.", "textarea", { maxlength: "300", rows: "3" });
+      var keywords = field("SEO keywords (comma-separated)", site.keywords || "movies, web series, streaming, music apps", "text", { maxlength: "300" });
       var instagram = field("Instagram URL", site.instagramUrl || "https://www.instagram.com/mahimahfud/", "url");
-      bodyEl.appendChild(title.wrap); bodyEl.appendChild(desc.wrap); bodyEl.appendChild(instagram.wrap);
-      bodyEl.appendChild(h("div", { class: "scx-actions" }, [h("button", { class: "scx-btn pri", type: "button", text: "Save site settings", onclick: function () {
-        if (instagram.input.value && !/^https:\/\//i.test(instagram.input.value.trim())) { say(msg, "err", "Instagram URL must use HTTPS."); return; }
+      var themeColor = field("Browser theme color", site.themeColor || "#141414", "color", { "aria-label": "Browser theme color" });
+      bodyEl.appendChild(title.wrap); bodyEl.appendChild(desc.wrap); bodyEl.appendChild(keywords.wrap);
+      bodyEl.appendChild(instagram.wrap); bodyEl.appendChild(themeColor.wrap);
+      bodyEl.appendChild(h("h3", { text: "Homepage hero" }));
+      var heroVisible = checkbox("Show the homepage hero", site.heroVisible !== false);
+      var eyebrow = field("Small hero heading", site.heroEyebrow || "Unlocking the Universe of", "text", { maxlength: "80" });
+      var heroTitle = field("Main hero heading", site.heroTitle || "Movies, Series & Music", "text", { maxlength: "100" });
+      var heroDescription = field("Hero description", site.heroDescription || site.description || "Explore curated movie and web-series websites, streaming apps, and music apps—all in one place.", "textarea", { maxlength: "300", rows: "3" });
+      bodyEl.appendChild(heroVisible.wrap); bodyEl.appendChild(eyebrow.wrap); bodyEl.appendChild(heroTitle.wrap); bodyEl.appendChild(heroDescription.wrap);
+      bodyEl.appendChild(h("h3", { text: "Announcement banner" }));
+      var announcementEnabled = checkbox("Show announcement to visitors", site.announcementEnabled === true);
+      var announcement = field("Announcement message", site.announcement || "", "textarea", { maxlength: "240", rows: "2", placeholder: "Example: New movie recommendations added today" });
+      var announcementLink = field("Optional announcement link (HTTPS)", site.announcementLink || "", "url", { placeholder: "https://…" });
+      var announcementLabel = field("Link label", site.announcementLabel || "Learn more", "text", { maxlength: "36" });
+      bodyEl.appendChild(announcementEnabled.wrap); bodyEl.appendChild(announcement.wrap); bodyEl.appendChild(announcementLink.wrap); bodyEl.appendChild(announcementLabel.wrap);
+      bodyEl.appendChild(h("p", { class: "scx-help", text: "Hero and banner text is inserted as plain text. Links must use HTTPS. Visitors can dismiss an announcement for their current browser session." }));
+      bodyEl.appendChild(h("div", { class: "scx-actions" }, [h("button", { class: "scx-btn pri", type: "button", text: "Save site controls", onclick: function () {
+        var igValue = instagram.input.value.trim(), bannerUrl = announcementLink.input.value.trim();
+        if (igValue && !/^https:\/\//i.test(igValue)) { say(msg, "err", "Instagram URL must use HTTPS."); return; }
+        if (bannerUrl && !isHttps(bannerUrl)) { say(msg, "err", "Announcement link must be a valid HTTPS URL."); return; }
+        if (announcementEnabled.input.checked && !announcement.input.value.trim()) { say(msg, "err", "Enter announcement text or turn the banner off."); return; }
+        if (!/^#[0-9a-f]{6}$/i.test(themeColor.input.value)) { say(msg, "err", "Choose a valid theme color."); return; }
         var next = cloneSettings(settings);
         next.site.title = title.input.value.trim().slice(0, 100);
         next.site.description = desc.input.value.trim().slice(0, 300);
-        next.site.instagramUrl = instagram.input.value.trim();
+        next.site.keywords = keywords.input.value.trim().slice(0, 300);
+        next.site.instagramUrl = igValue; next.site.themeColor = themeColor.input.value;
+        next.site.heroVisible = heroVisible.input.checked;
+        next.site.heroEyebrow = eyebrow.input.value.trim().slice(0, 80);
+        next.site.heroTitle = heroTitle.input.value.trim().slice(0, 100);
+        next.site.heroDescription = heroDescription.input.value.trim().slice(0, 300);
+        next.site.announcementEnabled = announcementEnabled.input.checked;
+        next.site.announcement = announcement.input.value.trim().slice(0, 240);
+        next.site.announcementLink = bannerUrl;
+        next.site.announcementLabel = announcementLabel.input.value.trim().slice(0, 36);
         saveSettings(next, msg);
       } })]));
     }).catch(function (e) { if (!expired(e)) say(msg, "err", e.message); });
+  }
+
+  function showAiStudio(msg) {
+    bodyEl.appendChild(h("p", { class: "scx-help", text: "Look up a movie or web series by title. IMDb rating, poster, release year, genres, and series counts are loaded only when OMDb verifies the match. Gemini can turn the verified plot into a short summary. Nothing is published until you review it in Add item." }));
+    var title = field("Movie / web-series title", "", "text", { maxlength: "160", placeholder: "Enter the exact title" });
+    var year = field("Release year (optional)", "", "number", { min: "1870", max: "2100", placeholder: "e.g. 2024" });
+    var type = h("select", { class: "scx-in", "aria-label": "Title type" });
+    options(type, [{ value: "movie", label: "Movie" }, { value: "series", label: "Web Series" }], "movie");
+    var typeWrap = h("label", { class: "scx-f" }, ["Type", type]);
+    var aiSummary = checkbox("Generate a short AI summary from the verified plot", true);
+    var lookup = h("button", { class: "scx-btn pri", type: "button", text: "Find verified metadata" });
+    var result = h("div", { class: "scx-ai-result" });
+    var resultMsg = h("p", { class: "scx-help", text: "Search results appear here after lookup." });
+    bodyEl.appendChild(h("div", { class: "scx-grid" }, [title.wrap, year.wrap, typeWrap]));
+    bodyEl.appendChild(aiSummary.wrap);
+    bodyEl.appendChild(h("div", { class: "scx-actions" }, [lookup]));
+    bodyEl.appendChild(resultMsg); bodyEl.appendChild(result);
+    function showResult(d) {
+      result.textContent = "";
+      var item = d.detected || {};
+      var head = h("div", { class: "scx-ai-head" });
+      if (item.poster_url && isHttps(item.poster_url)) head.appendChild(h("img", { src: item.poster_url, alt: item.name ? item.name + " poster" : "Title poster", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" }));
+      var info = h("div", { class: "scx-ai-info" });
+      info.appendChild(h("b", { text: item.name || "Untitled" }));
+      info.appendChild(h("small", { text: [item.year || "Year not listed", item.imdb_rating != null ? "IMDb " + item.imdb_rating + "/10" : "IMDb rating unavailable", item.genres && item.genres.length ? item.genres.join(", ") : ""].filter(Boolean).join(" · ") }));
+      info.appendChild(h("p", { text: item.description || "No verified plot was supplied." }));
+      if (item.season_count != null || item.episode_count != null) info.appendChild(h("small", { text: [item.season_count != null ? item.season_count + " seasons" : "", item.episode_count != null ? item.episode_count + " episodes" : ""].filter(Boolean).join(" · ") }));
+      head.appendChild(info); result.appendChild(head);
+      (d.notes || []).forEach(function (note) { result.appendChild(h("p", { class: "scx-help", text: note })); });
+      var use = h("button", { class: "scx-btn pri", type: "button", text: "Use this title in Add item" });
+      use.addEventListener("click", function () {
+        var sec = type.value;
+        resetAdd(); ui.catIndex = sec === "series" ? 1 : 0; ui.section = sec;
+        ui.form = Object.assign({ section: sec, category: sec === "series" ? "Web Series" : "Movie" }, item);
+        ui.form.section = sec; ui.form.category = sec === "series" ? "Web Series" : "Movie";
+        ui.form.url = item.url || (item.imdb_id ? "https://www.imdb.com/title/" + item.imdb_id + "/" : "");
+        ui.verified = d.verified || {}; ui.notes = d.notes || [];
+        showHome("add", { kind: "ok", text: "Metadata loaded. Review the destination URL and details before publishing." });
+      });
+      result.appendChild(h("div", { class: "scx-actions" }, [use]));
+    }
+    lookup.addEventListener("click", function () {
+      var name = title.input.value.trim();
+      if (name.length < 2) { say(msg, "err", "Enter at least two characters for the title."); title.input.focus(); return; }
+      lookup.disabled = true; lookup.textContent = "Looking up…"; say(msg, "", "");
+      result.textContent = ""; resultMsg.textContent = "Checking title, rating, poster and series details…";
+      api("admin-detect", { mode: "title-lookup", title: name, year: year.input.value ? Number(year.input.value) : null, section: type.value, generateSummary: aiSummary.input.checked })
+        .then(function (d) { showResult(d); resultMsg.textContent = "Metadata checked. Review every field before saving."; say(msg, "ok", "Lookup complete."); })
+        .catch(function (e) { resultMsg.textContent = ""; if (!expired(e)) say(msg, "err", e.message || "Title lookup failed."); })
+        .finally(function () { lookup.disabled = false; lookup.textContent = "Find verified metadata"; });
+    });
+    title.input.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); lookup.click(); } });
   }
   function showActivity(msg) {
     var list = h("div", { class: "scx-list" }, [h("p", { text: "Loading activity…" })]); bodyEl.appendChild(list);

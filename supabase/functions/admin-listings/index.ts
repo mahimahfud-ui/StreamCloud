@@ -35,7 +35,22 @@ function normalizeSettings(value: unknown): Record<string, unknown> | null {
   const content = v.content && typeof v.content === "object" && !Array.isArray(v.content) ? v.content as Record<string, unknown> : {};
   return {
     schemaVersion: 1,
-    site: { ...site, title: cleanText(site.title, 100), description: cleanText(site.description, 300), instagramUrl: cleanText(site.instagramUrl, 500) },
+    site: {
+      ...site,
+      title: cleanText(site.title, 100),
+      description: cleanText(site.description, 300),
+      keywords: cleanText(site.keywords, 300),
+      instagramUrl: cleanText(site.instagramUrl, 500),
+      themeColor: typeof site.themeColor === "string" && /^#[0-9a-f]{6}$/i.test(site.themeColor) ? site.themeColor : "",
+      heroVisible: site.heroVisible !== false,
+      heroEyebrow: cleanText(site.heroEyebrow, 80),
+      heroTitle: cleanText(site.heroTitle, 100),
+      heroDescription: cleanText(site.heroDescription, 300),
+      announcementEnabled: site.announcementEnabled === true,
+      announcement: cleanText(site.announcement, 240),
+      announcementLink: cleanText(site.announcementLink, 500),
+      announcementLabel: cleanText(site.announcementLabel, 36),
+    },
     appearance,
     sections,
     content,

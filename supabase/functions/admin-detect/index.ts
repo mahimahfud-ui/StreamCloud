@@ -64,9 +64,61 @@ Deno.serve(async (req) => {
   if (!(await requireAdmin(req))) return json(req, { error: "Admin session expired. Enter the PIN again." }, 401);
 
   const body = await readJson(req, 4_000);
-  const target = parsePublicUrl(body?.url);
+  if (!body) return json(req, { error: "Invalid request." }, 400);
+  const section = String(body.section ?? "sites");
+
+  if (body.mode === "title-lookup") {
+    if (section !== "movie" && section !== "series") return json(req, { error: "Choose Movie or Web Series." }, 422);
+    const title = typeof body.title === "string" ? body.title.trim().replace(/\s+/g, " ").slice(0, 160) : "";
+    const rawYear = body.year;
+    const year = rawYear === null || rawYear === "" || rawYear === undefined ? null : Number(rawYear);
+    if (title.length < 2) return json(req, { error: "Enter a title with at least two characters." }, 422);
+    if (year !== null && (!Number.isInteger(year) || year < 1870 || year > 2100)) return json(req, { error: "Release year must be between 1870 and 2100." }, 422);
+    try {
+      const match = await omdbLookup({ title, year, type: section === "series" ? "series" : "movie" });
+      if (match.status === "no-key") return json(req, { error: "OMDB_API_KEY is not configured on the server. Add it to Supabase Secrets to use title lookup." }, 503);
+      if (match.status === "not-found") return json(req, { error: "No exact title match was verified. Check spelling or add the IMDb URL and use Detect with AI." }, 404);
+      if (match.status === "type-mismatch") return json(req, { error: "IMDb identifies this as the other title type. Switch Movie / Web Series and try again." }, 422);
+      if (!match.data) return json(req, { error: "No verified metadata was returned." }, 502);
+      const d = match.data;
+      const notes: string[] = ["Core title metadata was matched through OMDb using an exact title" + (year ? " and year" : "") + "."];
+      let description = d.plot;
+      if (body.generateSummary === true && d.plot) {
+        try {
+          const source: PageInfo = {
+            html: "", title: d.title, siteName: null, description: d.plot,
+            canonical: "https://www.imdb.com/title/" + d.imdbId + "/",
+            icons: [], images: d.poster ? [d.poster] : [], imdbIds: [d.imdbId], apkLinks: [],
+            text: "Verified synopsis from OMDb: " + d.plot,
+            jsonLd: [],
+            structured: { name: d.title, description: d.plot, image: d.poster, year: d.year, genres: d.genres, platform: null, version: null },
+          };
+          const ai = await askGemini(source, section);
+          if (ai?.description && ai.description.length > 20) {
+            description = ai.description;
+            notes.push("Gemini generated a shorter synopsis using only the verified plot. Confirm it before publishing.");
+          } else notes.push("AI summary was unavailable; the verified OMDb plot is shown instead.");
+        } catch { notes.push("AI summary was unavailable; the verified OMDb plot is shown instead."); }
+      }
+      const imdbUrl = "https://www.imdb.com/title/" + d.imdbId + "/";
+      const detected: Detected = {
+        url: imdbUrl, name: d.title, year: d.year, genres: d.genres, imdb_id: d.imdbId,
+        imdb_rating: d.rating, poster_url: d.poster, description,
+      };
+      if (section === "series") {
+        detected.season_count = d.seasons;
+        detected.episode_count = d.episodes;
+        if (d.seasons === null) notes.push("Season count was not supplied by OMDb.");
+        if (d.episodes === null) notes.push("Episode count could not be verified from OMDb.");
+      }
+      return json(req, { detected, verified: { imdb: true, logo: false, download: false }, notes, source: "OMDb/IMDb" });
+    } catch (error) {
+      return json(req, { error: (error as Error).message || "Title lookup failed." }, 502);
+    }
+  }
+
+  const target = parsePublicUrl(body.url);
   if (!target) return json(req, { error: "Enter a valid public https:// URL." }, 400);
-  const section = String(body?.section ?? "sites");
   const notes: string[] = [];
   const out: Detected = { url: target.href };
   const verified = { imdb: false, download: false, logo: false };

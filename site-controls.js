@@ -20,6 +20,7 @@
   var registry = { sites: [], apps: [], music: [], movie: [], series: [] };
   var manual = { sites: false, apps: false, music: false };
   var styleNode = null;
+  var siteSettingsStyle = null;
 
   function slug(v) { return String(v || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
   function keyFor(section, item) {
@@ -139,6 +140,45 @@
       document.body.style.fontSize = fs + "px";
     }
   }
+  function applyAnnouncement() {
+    var site = settings.site || {};
+    var hero = document.getElementById("top");
+    if (!hero || !hero.parentNode) return;
+    var banner = document.getElementById("streamcloud-announcement");
+    if (!banner) {
+      banner = document.createElement("div");
+      banner.id = "streamcloud-announcement"; banner.setAttribute("role", "status"); banner.className = "sc-announcement";
+      hero.parentNode.insertBefore(banner, hero);
+    }
+    if (!siteSettingsStyle) {
+      siteSettingsStyle = document.createElement("style");
+      siteSettingsStyle.id = "streamcloud-admin-site-settings-css";
+      document.head.appendChild(siteSettingsStyle);
+    }
+    siteSettingsStyle.textContent = ".sc-site-hero-hidden{display:none!important}.sc-announcement{position:relative;z-index:10;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:66px 4% 0;padding:10px 14px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:linear-gradient(100deg,rgba(229,9,20,.20),rgba(36,36,36,.96));color:#fff;font-size:12px;line-height:1.5;text-align:center}.sc-announcement[hidden]{display:none!important}.sc-announcement a{font-weight:800;text-decoration:underline;text-underline-offset:3px}.sc-announcement-close{border:0;border-radius:50%;width:25px;height:25px;background:rgba(255,255,255,.12);color:#fff;font-size:18px;line-height:1}.sc-announcement-close:hover{background:rgba(255,255,255,.24)}@media(max-width:760px){.sc-announcement{margin:62px 3% 0;padding:9px 10px;font-size:11px;gap:8px}}";
+    var message = typeof site.announcement === "string" ? site.announcement.trim().slice(0, 240) : "";
+    if (site.announcementEnabled !== true || !message) { banner.hidden = true; banner.textContent = ""; return; }
+    banner.textContent = "";
+    var copy = document.createElement("span"); copy.textContent = message; banner.appendChild(copy);
+    var link = typeof site.announcementLink === "string" ? site.announcementLink.trim() : "";
+    if (/^https:\/\//i.test(link)) {
+      try {
+        var parsed = new URL(link);
+        if (parsed.protocol === "https:" && !parsed.username && !parsed.password) {
+          var a = document.createElement("a"); a.href = parsed.href; a.target = "_blank"; a.rel = "noopener noreferrer";
+          a.textContent = String(site.announcementLabel || "Learn more").slice(0, 36); banner.appendChild(a);
+        }
+      } catch (e) { /* Invalid optional link is omitted. */ }
+    }
+    var close = document.createElement("button");
+    close.type = "button"; close.className = "sc-announcement-close"; close.setAttribute("aria-label", "Dismiss announcement"); close.textContent = "×";
+    close.addEventListener("click", function () {
+      banner.hidden = true;
+      try { sessionStorage.setItem("streamcloud-announcement-dismissed", message); } catch (e) { /* Optional convenience only. */ }
+    });
+    banner.appendChild(close);
+    try { banner.hidden = sessionStorage.getItem("streamcloud-announcement-dismissed") === message; } catch (e) { banner.hidden = false; }
+  }
   function applySiteSettings() {
     var site = settings.site || {};
     if (typeof site.title === "string" && site.title.trim()) {
@@ -151,8 +191,24 @@
       var og = document.querySelector('meta[property="og:description"]');
       if (desc) desc.content = site.description.trim().slice(0, 300);
       if (og) og.content = site.description.trim().slice(0, 300);
-      var heroDesc = document.getElementById("heroDesc");
-      if (heroDesc) heroDesc.textContent = site.description.trim().slice(0, 300);
+    }
+    if (typeof site.keywords === "string" && site.keywords.trim()) {
+      var keywords = document.querySelector('meta[name="keywords"]');
+      if (!keywords) { keywords = document.createElement("meta"); keywords.name = "keywords"; document.head.appendChild(keywords); }
+      keywords.content = site.keywords.trim().slice(0, 300);
+    }
+    var eyebrow = document.querySelector("#top .hero-line.sm");
+    if (eyebrow && typeof site.heroEyebrow === "string" && site.heroEyebrow.trim()) eyebrow.textContent = site.heroEyebrow.trim().slice(0, 80);
+    var headline = document.querySelector("#top .hero-line.big");
+    if (headline && typeof site.heroTitle === "string" && site.heroTitle.trim()) headline.textContent = site.heroTitle.trim().slice(0, 100);
+    var heroDesc = document.getElementById("heroDesc");
+    if (heroDesc && typeof site.heroDescription === "string" && site.heroDescription.trim()) heroDesc.textContent = site.heroDescription.trim().slice(0, 300);
+    var hero = document.getElementById("top");
+    if (hero) hero.classList.toggle("sc-site-hero-hidden", site.heroVisible === false);
+    if (typeof site.themeColor === "string" && /^#[0-9a-f]{6}$/i.test(site.themeColor)) {
+      var themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.content = site.themeColor;
+      document.documentElement.style.setProperty("--sc-browser-theme", site.themeColor);
     }
     if (typeof site.instagramUrl === "string" && /^https:\/\//i.test(site.instagramUrl)) {
       var ig = document.querySelector(".hero-social-icons .ig-link");
@@ -220,6 +276,7 @@
     } catch (e) { console.warn("StreamCloud catalog controls could not be applied.", e); }
     applyAppearance();
     applySiteSettings();
+    applyAnnouncement();
     applySections();
     document.dispatchEvent(new CustomEvent("streamcloud-settings-applied", { detail: settings }));
   }
