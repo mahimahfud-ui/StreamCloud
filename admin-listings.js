@@ -249,7 +249,7 @@
   /* --- Home with tabs --- */
   function showHome(tab, notice) {
     ui.view = tab; titleEl.textContent = "Admin Dashboard"; bodyEl.textContent = "";
-    var tabs = h("div", { class: "scx-tabs", role: "tablist", "aria-label": "Admin controls" });
+    var tabs = h("nav", { class: "scx-tabs", "aria-label": "Admin features" });
     [
       { id: "overview", label: "Overview", icon: "▦", desc: "Totals and recent activity" },
       { id: "add", label: "Add item", icon: "＋", desc: "Add a movie, service or app" },
@@ -265,7 +265,7 @@
     ].forEach(function (item) {
       tabs.appendChild(h("button", {
         class: "scx-tab" + (tab === item.id ? " on" : ""),
-        type: "button", "aria-label": item.label, "aria-selected": String(tab === item.id),
+        type: "button", "aria-label": item.label, "aria-current": tab === item.id ? "page" : false,
         onclick: function () {
           if (item.id === "add") resetAdd();
           if (item.id === "logout") {
