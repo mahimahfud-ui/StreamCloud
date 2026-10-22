@@ -867,7 +867,7 @@
       save.addEventListener("click", function () {
         var next = cloneSettings(settings);
         var values = {};
-        Object.keys(fields).forEach(function (k) { if (fields[k] && "value" in fields[k]) values[k] = fields[k].value.trim(); });
+        Object.keys(fields).forEach(function (k) { var input = fields[k]; if (input && typeof input === "object" && "value" in input) values[k] = input.value.trim(); });
         if (rec) {
           values.year = values.year ? Number(values.year) : null;
           values.rating = values.rating ? { source: "IMDb", value: Number(values.rating) } : null;
@@ -892,7 +892,6 @@
         }
         delete values.hidden; delete values.section; delete values.key; delete values.isRec;
         next.content.overrides[key] = values;
-        next.content.hidden = next.content.hidden.filter(function (x) { return x !== key; });
         saveSettings(next, msg, function (finalSettings) { settings = finalSettings; buildOptions(); buildFields(); buildOrderList(); });
       });
       reset.addEventListener("click", function () {
