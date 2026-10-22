@@ -186,6 +186,8 @@ try {
   await page.locator("#wlList li").filter({ hasText: "StreamCloud automated smoke test" }).locator('[data-act="del"]').click();
   await page.locator("#wlList li").filter({ hasText: "StreamCloud automated smoke test" }).locator('[data-act="del"]').click();
   assert.equal(await page.locator("#wlList").getByText("StreamCloud automated smoke test").count(), 0, "Watchlist should delete the test item");
+  await page.locator("#wlModal .wl-x").click();
+  await page.waitForFunction(() => document.getElementById("wlModal")?.classList.contains("open") !== true);
 
   // Exercise the admin dashboard using a mocked backend so tests never change production data.
   await page.locator("#adminIcon").click();
