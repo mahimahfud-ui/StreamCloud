@@ -917,7 +917,9 @@
     }
     function deleteCard(key, item, section) {
       var name = String(item && (item.name || item.title) || key);
-      var isDatabaseListing = !!(item && item.listingId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(item.listingId)));
+      var listingId = item && item.listingId ? String(item.listingId) :
+        (item && typeof item.key === "string" && item.key.indexOf("db-") === 0 ? item.key.slice(3) : "");
+      var isDatabaseListing = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(listingId);
       var promptText = isDatabaseListing
         ? "Permanently delete \"" + name + "\" from the database? This cannot be undone."
         : "Remove \"" + name + "\" from the public catalog? This is saved in site settings; the original source file will not be edited.";
@@ -942,7 +944,7 @@
       }
 
       if (isDatabaseListing) {
-        api("admin-listings", { action: "delete", id: item.listingId }).then(saveRemoval).catch(function (e) {
+        api("admin-listings", { action: "delete", id: listingId }).then(saveRemoval).catch(function (e) {
           if (!expired(e)) say(msg, "err", e.message || "Could not delete this listing.");
         });
       } else {
