@@ -127,16 +127,17 @@
   var session = null;
   try {
     var saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null");
-    if (saved && saved.cookieAuth === true && saved.expiresAt > Date.now()) session = saved;
+    if (saved && typeof saved.token === "string" && saved.expiresAt > Date.now()) session = saved;
     else sessionStorage.removeItem(SESSION_KEY);
-  } catch (e) { /* ignore stale client-side session hints */ }
+  } catch (e) { /* ignore expired or stale session hints */ }
   function setSession(s) {
     session = s;
     try { if (s) sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)); else sessionStorage.removeItem(SESSION_KEY); } catch (e) { /* ignore */ }
   }
   function api(fn, body) {
     var headers = { "Content-Type": "application/json", apikey: CFG.anonKey };
-    return fetch(BASE + "/functions/v1/" + fn, { method: "POST", headers: headers, credentials: "include", body: JSON.stringify(body || {}) })
+    if (session && session.token) headers["x-admin-token"] = session.token;
+    return fetch(BASE + "/functions/v1/" + fn, { method: "POST", headers: headers, credentials: "omit", body: JSON.stringify(body || {}) })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (data) { return { status: r.status, data: data }; }); })
       .then(function (res) {
         if (res.status === 401 && fn !== "admin-login") { setSession(null); res.data.expired = true; }
@@ -220,7 +221,7 @@
       if (!pin.value) { say(msg, "err", "Enter the PIN."); return; }
       go.disabled = true; say(msg, "", "");
       api("admin-login", { pin: pin.value }).then(function (d) {
-        setSession({ cookieAuth: true, expiresAt: d.expiresAt }); showHome("overview");
+        setSession({ token: d.token, expiresAt: d.expiresAt }); showHome("overview");
       }).catch(function (e) {
         pin.value = ""; go.disabled = false;
         var wait = e.info && e.info.retryAfter ? " Try again in about " + Math.ceil(e.info.retryAfter / 60) + " min." : "";
