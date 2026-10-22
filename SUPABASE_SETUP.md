@@ -32,13 +32,13 @@ If setting up a fresh database, run this once in the Supabase SQL Editor and rep
 ```sql
 select public.admin_update_pin('YOUR_PRIVATE_PIN');
 ```
-The existing project database already has the requested initial PIN. Successful login uses an eight-hour HttpOnly session cookie and is rate-limited server-side.
+The existing project database already has the requested initial PIN. Login returns a random, revocable eight-hour session token; the browser keeps it in sessionStorage and every admin request is checked server-side against its token hash. Login attempts are rate-limited server-side.
 
 ## 4. Deploy the functions
 ```bash
 for fn in admin-login admin-detect admin-listings; do supabase functions deploy "$fn"; done
 ```
-`supabase/config.toml` turns off platform JWT verification because the functions authenticate the HttpOnly session cookie against the private `admin_sessions` table.
+`supabase/config.toml` turns off platform JWT verification because the functions authenticate the `x-admin-token` header against the private `admin_sessions` table.
 
 ## 5. Point the site at your project
 The repository's `listings-config.js` is already configured with the project's public publishable key. That key is designed to be visible in frontend code; its access is limited by database RLS. Never place the Supabase secret/service-role key in this file. Only change this configuration if you deliberately move the app to another Supabase project.
@@ -46,7 +46,7 @@ The repository's `listings-config.js` is already configured with the project's p
 ## How it is protected
 - The PIN is verified server-side against a bcrypt hash in the private `admin_credentials` table; no PIN or PIN hash belongs in the repository.
 - 5 wrong PINs from one IP, or 30 across all IPs, lock logins for 15 minutes.
-- Login issues an eight-hour Secure, HttpOnly, SameSite=None session cookie. Admin endpoints validate its opaque token hash against the private `admin_sessions` table; logout and PIN changes revoke sessions.
+- Login issues a random eight-hour session token. The browser stores it only in sessionStorage (not localStorage or a cookie); admin endpoints validate its opaque token hash against the private `admin_sessions` table. Logout revokes that session, and PIN changes revoke every active session.
 - `listings` has row-level security: the public can only `select` published rows; there is no
   insert/update/delete policy, so writes only happen through the functions (service role).
 - Site settings are publicly readable but only writable through the authenticated admin function. Activity and session tables have no public access policy.
