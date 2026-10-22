@@ -9,9 +9,8 @@ export function corsHeaders(req: Request): Record<string, string> {
   const allowed = new Set([...DEFAULT_ORIGINS, ...configured]);
   const origin = req.headers.get("origin") ?? "";
   const h: Record<string, string> = {
-    "Access-Control-Allow-Headers": "content-type, apikey, authorization",
+    "Access-Control-Allow-Headers": "content-type, x-admin-token, apikey, authorization",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Credentials": "true",
     "Access-Control-Max-Age": "600",
     "Vary": "Origin",
   };
@@ -19,10 +18,10 @@ export function corsHeaders(req: Request): Record<string, string> {
   return h;
 }
 
-export function json(req: Request, body: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
+export function json(req: Request, body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders(req), "Content-Type": "application/json", "Cache-Control": "no-store", ...extraHeaders },
+    headers: { ...corsHeaders(req), "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 }
 
