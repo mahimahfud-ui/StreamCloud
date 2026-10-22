@@ -50,14 +50,14 @@ window.STREAMCLOUD_ITEM_LOGOS = {
   "movie:anivortex": "./assets/logos/movie-apps/anivortex.webp",
   "music:demus": "./assets/logos/music-apps/demus.avif",
   "music:youtify": "./assets/logos/music-apps/youtify.webp",
-  "movie:cinema-hq": "./assets/logos/movie-apps/cinema-hq.ico",
   "music:echo-music": "./assets/logos/music-apps/echo-music.png",
-  "movie:reezn": "./assets/logos/movie-apps/reezn.jpg",
   "music:echo-nightly": "./assets/logos/music-apps/echo-nightly.webp",
+  "movie:cinema-hq": "./assets/logos/movie-apps/cinema-hq.ico",
   "music:spotube": "./assets/logos/music-apps/spotube.png",
+  "movie:reezn": "./assets/logos/movie-apps/reezn.jpg",
   "music:meld": "./assets/logos/music-apps/meld.png",
   "movie:freekz": "./assets/logos/movie-apps/freekz.png",
-  "music:outertune": "./assets/logos/music-apps/outertune.png",
   "music:lastwave": "./assets/logos/music-apps/lastwave.png",
-  "movie:cineplus": "./assets/logos/movie-apps/cineplus.png"
+  "movie:cineplus": "./assets/logos/movie-apps/cineplus.png",
+  "music:outertune": "./assets/logos/music-apps/outertune.png"
 };
