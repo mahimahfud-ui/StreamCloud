@@ -239,6 +239,13 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
 <link rel="stylesheet" href="./titles.css">
 <link rel="stylesheet" href="./polish.css">
 
+<style id="streamcloud-admin-icon-style">
+.hero-social-icons{display:flex;align-items:center;justify-content:center;gap:14px;margin:2px auto 18px}
+.hero-social-icons .ig-link{margin:0!important;flex:0 0 42px}
+.admin-icon{display:grid;place-items:center;width:42px;height:42px;padding:0;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;transition:transform .35s cubic-bezier(.22,1,.36,1),background .25s,border-color .25s}
+.admin-icon:hover{transform:translateY(-2px);background:rgba(229,9,20,.25);border-color:rgba(229,9,20,.65)}
+.admin-icon:focus-visible{outline:2px solid #fff;outline-offset:3px}
+</style>
 </head>
 <body>
 <div class="cinema-fallback" aria-hidden="true"></div>
@@ -261,7 +268,15 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
   <div class="hero-in">
     <h1><span class="hero-line sm">Unlocking the Universe of</span><span class="hero-line big">Movies, Series &amp; Music</span></h1>
     <p id="heroDesc" class="hero-line">Explore curated movie and web-series websites, streaming apps, and music apps—all in one place.</p>
+    <div class="hero-social-icons">
     <a class="ig-link" href="https://www.instagram.com/mahimahfud/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><defs><radialGradient id="igBgHero" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect x="2" y="2" width="20" height="20" rx="6" fill="url(#igBgHero)"/><rect x="6.3" y="6.3" width="11.4" height="11.4" rx="3.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="2.7" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="16.35" cy="7.65" r="1.05" fill="#fff"/></svg></a>
+    <button id="adminIcon" class="admin-icon" type="button" title="Admin Panel" aria-label="Admin Panel">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3 19 6v5.4c0 4.2-2.7 7.5-7 9.6-4.3-2.1-7-5.4-7-9.6V6l7-3Z"/>
+        <path d="m9 12 2 2 4-4"/>
+      </svg>
+    </button>
+  </div>
     
   </div>
   <a class="cue" href="#browse" aria-label="Browse websites and apps"><span>Browse</span><i></i></a>
@@ -296,6 +311,7 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
 <main>
   <div id="sitesView" class="view active"></div>
   <div id="appsView" class="view"></div>
+  <div id="musicView" class="view"></div>
   <p id="empty" class="empty">Nothing matched your search.</p>
 </main>
 
@@ -498,11 +514,14 @@ function appCard(it,i){
 }
 
 function renderView(type){
-  const el=document.getElementById(type==="sites"?"sitesView":"appsView");
-  const data=type==="sites"?S:A;
-  const sorted=data.slice().sort((a,b)=>qualityScore(b)-qualityScore(a));
+  const el=document.getElementById(type==="sites"?"sitesView":type==="music"?"musicView":"appsView");
+  const data=type==="sites"?S:type==="music"?M:A;
+  const manualOrder=window.STREAMCLOUD_ORDER_MANUAL||{};
+  const sorted=manualOrder[type]?data.slice():data.slice().sort((a,b)=>qualityScore(b)-qualityScore(a));
   if(type==="sites"){
     el.innerHTML=rowHTML("Movie Websites",sorted,{kind:"site",note:"Your curated StreamCloud collection"});
+  }else if(type==="music"){
+    el.innerHTML=rowHTML("Music Apps",sorted,{kind:"app",note:"Music apps and direct app links"});
   }else{
     el.innerHTML=rowHTML("Movie Apps",sorted,{kind:"app",note:"Direct APK links and app information"});
   }
@@ -510,6 +529,7 @@ function renderView(type){
 
 renderView("sites");
 renderView("apps");
+renderView("music");
 document.querySelectorAll('.track').forEach(function(t){t.querySelectorAll('.card').forEach(function(card,i){card.style.animationDelay=(Math.min(i,8)*55)+'ms'})});
 function svgPlay(){return "<svg viewBox='0 0 24 24' fill='currentColor'><path d='M6 4l14 8-14 8z'/></svg>"}
 function svgPlus(){return "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>"}
@@ -528,7 +548,9 @@ document.querySelectorAll(".mode").forEach(function(btn){
     btn.classList.add("active");btn.setAttribute("aria-selected","true");
     var mode=btn.dataset.mode;
     document.getElementById("sitesView").classList.toggle("active",mode==="sites");
-    document.getElementById("appsView").classList.toggle("active",mode!=="sites");
+    document.getElementById("appsView").classList.toggle("active",mode==="apps");
+    document.getElementById("musicView").classList.toggle("active",mode==="music");
+    renderView(mode);
     document.getElementById("q").value="";
     document.getElementById("empty").style.display="none";
       });
@@ -555,7 +577,8 @@ document.addEventListener("click",function(e){
   }
   if(cardEl && !e.target.closest("a,button")){
     var name=cardEl.dataset.name||"";
-    var current=(document.querySelector(".view.active")===document.getElementById("appsView"))?A:S;
+    var mode=(document.querySelector(".mode.active")||{}).dataset?.mode||"sites";
+    var current=mode==="music"?M:mode==="apps"?A:S;
     var item=current.find(function(x){return x.name.toLowerCase()===name;});
     if(item && item.url)window.open(item.url,"_blank","noopener,noreferrer");
   }
@@ -566,7 +589,8 @@ document.addEventListener("keydown",function(e){
   if(!cardEl || e.target.closest("a,button"))return;
   e.preventDefault();
   var name=cardEl.dataset.name||"";
-  var current=(document.querySelector(".view.active")===document.getElementById("appsView"))?A:S;
+  var mode=(document.querySelector(".mode.active")||{}).dataset?.mode||"sites";
+  var current=mode==="music"?M:mode==="apps"?A:S;
   var item=current.find(function(x){return x.name.toLowerCase()===name;});
   if(item && item.url)window.open(item.url,"_blank","noopener,noreferrer");
 });
@@ -955,6 +979,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
 <script type="module" src="./cinema/main.js"></script>
 <script src="./premium.js" defer></script>
 <script src="./listings-config.js" defer></script>
+<script src="./site-controls.js" defer></script>
 <script src="./admin-listings.js" defer></script>
 <script src="./titles.js" defer></script>
 </body>

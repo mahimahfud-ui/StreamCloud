@@ -330,8 +330,11 @@
     if (!response.ok) throw new Error("HTTP " + response.status);
     return response.json();
   }).then(function (source) {
-    /* Published admin listings (Supabase) are merged after the curated list. */
-    return Promise.resolve(window.STREAMCLOUD_TITLE_LISTINGS).then(function (extra) { return [source, extra || {}]; }, function () { return [source, {}]; });
+    /* Wait for persistent public settings and merge published database titles. */
+    return Promise.all([
+      Promise.resolve(window.STREAMCLOUD_TITLE_LISTINGS).catch(function () { return {}; }),
+      Promise.resolve(window.STREAMCLOUD_SETTINGS_READY).catch(function () { return window.STREAMCLOUD_SITE_SETTINGS || {}; })
+    ]).then(function (pair) { return [source, pair[0] || {}, pair[1] || {}]; });
   }).then(function (pair) {
     var source = pair[0], extra = pair[1];
     var movies = (Array.isArray(source.movies) ? source.movies : []).concat(Array.isArray(extra.movies) ? extra.movies : []).map(function (entry, index) {
@@ -340,6 +343,11 @@
     var series = (Array.isArray(source.series) ? source.series : []).concat(Array.isArray(extra.series) ? extra.series : []).map(function (entry, index) {
       return normalizeItem(entry, "series", index);
     }).filter(Boolean);
+    if (typeof window.STREAMCLOUD_CONTROL_RECOMMENDATIONS === "function") {
+      var controlled = window.STREAMCLOUD_CONTROL_RECOMMENDATIONS({ movies: movies, series: series });
+      movies = controlled.movies || movies;
+      series = controlled.series || series;
+    }
     items = movies.concat(series);
     sec.hidden = false;
     if (navLink) navLink.hidden = false;

@@ -84,6 +84,7 @@
       var item = toCatalog(r);
       (r.section === "sites" ? S : r.section === "music" ? M : A).push(item);
     });
+    if (typeof window.STREAMCLOUD_REFRESH_PUBLIC_CONTROLS === "function") window.STREAMCLOUD_REFRESH_PUBLIC_CONTROLS();
     var q = document.getElementById("q");
     if (q) q.dispatchEvent(new Event("input", { bubbles: true }));
   }
@@ -93,7 +94,12 @@
       series: list.filter(function (r) { return r.section === "series"; }).map(toTitle)
     };
   }
-  var initial = configured ? fetchRows().catch(function () { return []; }) : Promise.resolve([]);
+  var initial = configured
+    ? Promise.all([
+        fetchRows().catch(function () { return []; }),
+        Promise.resolve(window.STREAMCLOUD_SETTINGS_READY).catch(function () { return null; })
+      ]).then(function (pair) { return pair[0]; })
+    : Promise.resolve([]);
   window.STREAMCLOUD_TITLE_LISTINGS = initial.then(titleSource);
   initial.then(function (list) { rows = list; syncCatalog(list); });
   function refreshPublic() {
@@ -119,15 +125,18 @@
 
   /* ---------- admin session + API ---------- */
   var session = null;
-  try { var saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null"); if (saved && saved.expiresAt > Date.now()) session = saved; } catch (e) { /* ignore */ }
+  try {
+    var saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null");
+    if (saved && saved.cookieAuth === true && saved.expiresAt > Date.now()) session = saved;
+    else sessionStorage.removeItem(SESSION_KEY);
+  } catch (e) { /* ignore stale client-side session hints */ }
   function setSession(s) {
     session = s;
     try { if (s) sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)); else sessionStorage.removeItem(SESSION_KEY); } catch (e) { /* ignore */ }
   }
   function api(fn, body) {
     var headers = { "Content-Type": "application/json", apikey: CFG.anonKey };
-    if (session) headers["x-admin-token"] = session.token;
-    return fetch(BASE + "/functions/v1/" + fn, { method: "POST", headers: headers, body: JSON.stringify(body || {}) })
+    return fetch(BASE + "/functions/v1/" + fn, { method: "POST", headers: headers, credentials: "include", body: JSON.stringify(body || {}) })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (data) { return { status: r.status, data: data }; }); })
       .then(function (res) {
         if (res.status === 401 && fn !== "admin-login") { setSession(null); res.data.expired = true; }
@@ -140,7 +149,7 @@
   var style = h("style", { text:
     ".scx-fab{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:60;width:46px;height:46px;border-radius:50%;border:1px solid #404040;background:rgba(36,36,36,.94);color:#fff;font-size:26px;line-height:1;display:grid;place-items:center;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.4);transition:background .2s,transform .15s}.scx-fab:hover{background:var(--red,#e50914)}.scx-fab:active{transform:scale(.94)}.scx-fab:focus-visible{outline:2px solid #fff;outline-offset:3px}" +
     ".scx-ov{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:16px;overflow:auto}.scx-ov[hidden]{display:none}" +
-    ".scx-box{width:min(620px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--panel,#181818);color:var(--text,#fff);border:1px solid var(--border,#343434);border-radius:14px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.55)}" +
+    ".scx-box{width:min(1040px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--panel,#181818);color:var(--text,#fff);border:1px solid var(--border,#343434);border-radius:14px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.55)}" +
     ".scx-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px}.scx-head h2{margin:0;font-size:19px}" +
     ".scx-x{border:0;background:transparent;color:var(--dim,#a7a7a7);font-size:24px;line-height:1;cursor:pointer;padding:4px 8px}.scx-x:hover{color:#fff}" +
     ".scx-tabs{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}.scx-tab,.scx-btn{border:1px solid var(--border,#343434);background:var(--card,#242424);color:#fff;border-radius:10px;padding:10px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s}.scx-tab:hover,.scx-btn:hover{border-color:#555}.scx-tab.on,.scx-btn.pri{background:var(--red,#e50914);border-color:var(--red,#e50914)}.scx-btn.pri:hover{filter:brightness(1.1)}.scx-btn.dng{border-color:#8e202d;color:#ff7166}.scx-btn:disabled{opacity:.55;cursor:default}.scx-tab:focus-visible,.scx-btn:focus-visible,.scx-in:focus-visible{outline:2px solid #fff;outline-offset:2px}" +
@@ -153,6 +162,10 @@
     ".scx-list{display:flex;flex-direction:column;gap:8px}.scx-item{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--card,#242424)}.scx-item b{display:block;font-size:14px}.scx-item small{color:var(--dim,#a7a7a7)}" +
     ".scx-sum{margin:0 0 14px;padding:12px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--card,#242424);font-size:13px;line-height:1.55}.scx-sum dt{color:var(--dim,#a7a7a7);font-size:11px}.scx-sum dd{margin:0 0 6px;word-break:break-word}" });
   document.head.appendChild(style);
+  var dashboardStyle = h("style", { text:
+    ".scx-tabs{max-height:none}.scx-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0 0 16px}.scx-stat{padding:14px;border:1px solid var(--border,#343434);border-radius:12px;background:var(--card,#242424)}.scx-stat strong{display:block;font-size:24px;margin:0 0 4px;color:#fff}.scx-stat span{display:block;font-size:11px;color:var(--dim,#a7a7a7)}.scx-help{font-size:12px;color:var(--dim,#a7a7a7);line-height:1.5}.scx-divider{height:1px;background:var(--border,#343434);margin:17px 0}.scx-order-list{display:flex;flex-direction:column;gap:7px;margin:10px 0}.scx-order-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 11px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--card,#242424)}.scx-order-row[draggable=true]{cursor:grab}.scx-order-row.dragging{opacity:.4;border-color:var(--red,#e50914)}.scx-order-title{flex:1;min-width:110px;font-size:13px;font-weight:700}.scx-status{font-size:10px;color:var(--dim,#a7a7a7)}.scx-small{font-size:11px;padding:6px 9px}.scx-two{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}@media(max-width:640px){.scx-two{grid-template-columns:1fr}.scx-box{padding:14px}.scx-tabs{gap:5px}.scx-tab{padding:8px 9px;font-size:12px}}.scx-field-note{font-size:11px;color:var(--dim,#a7a7a7);margin-top:4px}.scx-count{font-size:11px;color:var(--dim,#a7a7a7)}"
+  });
+  document.head.appendChild(dashboardStyle);
 
   /* ---------- admin modal ---------- */
   var overlay, box, titleEl, bodyEl, lastFocus = null;
@@ -184,7 +197,7 @@
     lastFocus = document.activeElement;
     overlay.hidden = false;
     document.body.style.overflow = "hidden";
-    if (session && session.expiresAt > Date.now()) showHome("add"); else { setSession(null); showPin(); }
+    if (session && session.expiresAt > Date.now()) showHome("overview"); else { setSession(null); showPin(); }
   }
   function closeModal() {
     if (!overlay || overlay.hidden) return;
@@ -207,7 +220,7 @@
       if (!pin.value) { say(msg, "err", "Enter the PIN."); return; }
       go.disabled = true; say(msg, "", "");
       api("admin-login", { pin: pin.value }).then(function (d) {
-        setSession({ token: d.token, expiresAt: d.expiresAt }); showHome("add");
+        setSession({ cookieAuth: true, expiresAt: d.expiresAt }); showHome("overview");
       }).catch(function (e) {
         pin.value = ""; go.disabled = false;
         var wait = e.info && e.info.retryAfter ? " Try again in about " + Math.ceil(e.info.retryAfter / 60) + " min." : "";
@@ -226,16 +239,38 @@
 
   /* --- Home with tabs --- */
   function showHome(tab, notice) {
-    ui.view = tab; titleEl.textContent = "Admin"; bodyEl.textContent = "";
-    var tabs = h("div", { class: "scx-tabs" }, [
-      h("button", { class: "scx-tab" + (tab === "add" ? " on" : ""), type: "button", text: "Add listing", onclick: function () { resetAdd(); showHome("add"); } }),
-      h("button", { class: "scx-tab" + (tab === "manage" ? " on" : ""), type: "button", text: "Manage", onclick: function () { showHome("manage"); } }),
-      h("button", { class: "scx-tab", type: "button", text: "Lock", onclick: function () { setSession(null); showPin(); } })
-    ]);
+    ui.view = tab; titleEl.textContent = "Admin Dashboard"; bodyEl.textContent = "";
+    var tabs = h("div", { class: "scx-tabs", role: "tablist", "aria-label": "Admin controls" });
+    [
+      ["overview", "Overview"], ["add", "Add item"], ["manage", "Content"],
+      ["layout", "Cards & Layout"], ["appearance", "Appearance"], ["site", "Site settings"],
+      ["activity", "Activity"], ["data", "Backup"], ["pin", "Change PIN"], ["logout", "Log out"]
+    ].forEach(function (item) {
+      tabs.appendChild(h("button", {
+        class: "scx-tab" + (tab === item[0] ? " on" : ""),
+        type: "button", text: item[1], "aria-selected": String(tab === item[0]),
+        onclick: function () {
+          if (item[0] === "add") resetAdd();
+          if (item[0] === "logout") {
+            api("admin-listings", { action: "logout" }).catch(function () {}).finally(function () { setSession(null); showPin(); });
+            return;
+          }
+          showHome(item[0]);
+        }
+      }));
+    });
     bodyEl.appendChild(tabs);
     var msg = msgBox(); bodyEl.appendChild(msg);
     if (notice) say(msg, notice.kind, notice.text);
-    if (tab === "manage") showManage(msg); else showAdd(msg);
+    if (tab === "manage") showManage(msg);
+    else if (tab === "add") showAdd(msg);
+    else if (tab === "layout") showLayout(msg);
+    else if (tab === "appearance") showAppearance(msg);
+    else if (tab === "site") showSiteSettings(msg);
+    else if (tab === "activity") showActivity(msg);
+    else if (tab === "data") showBackup(msg);
+    else if (tab === "pin") showPinChange(msg);
+    else showOverview(msg);
   }
   function expired(e, msg) {
     if (e && e.info && e.info.expired) { showPin(); var m = bodyEl.querySelector(".scx-msg"); if (m) say(m, "err", "Session expired. Enter the PIN again."); return true; }
@@ -483,8 +518,493 @@
     }).catch(function (e) { list.textContent = ""; if (!expired(e)) say(msg, "err", e.status ? e.message : "Could not reach the server."); });
   }
 
+
+  /* ---------- persistent site control dashboard ---------- */
+  function defaultSettings() {
+    return {
+      schemaVersion: 1, site: {}, appearance: {},
+      sections: { sites: { visible: true, title: "Movie Websites" }, apps: { visible: true, title: "Movie Apps" }, recs: { visible: true, title: "Recommendations" }, order: ["sites", "apps", "recs"] },
+      content: { overrides: {}, hidden: [], order: {} }
+    };
+  }
+  function normalizeClientSettings(s) {
+    s = s && typeof s === "object" ? s : defaultSettings();
+    s.site = s.site && typeof s.site === "object" ? s.site : {};
+    s.appearance = s.appearance && typeof s.appearance === "object" ? s.appearance : {};
+    s.sections = s.sections && typeof s.sections === "object" ? s.sections : {};
+    s.content = s.content && typeof s.content === "object" ? s.content : {};
+    s.content.overrides = s.content.overrides && typeof s.content.overrides === "object" ? s.content.overrides : {};
+    s.content.hidden = Array.isArray(s.content.hidden) ? s.content.hidden : [];
+    s.content.order = s.content.order && typeof s.content.order === "object" ? s.content.order : {};
+    return s;
+  }
+  function cloneSettings(s) { return JSON.parse(JSON.stringify(normalizeClientSettings(s))); }
+  function sectionObject(s, key, title) {
+    if (!s.sections[key] || typeof s.sections[key] !== "object") s.sections[key] = { visible: true, title: title };
+    if (typeof s.sections[key].visible !== "boolean") s.sections[key].visible = true;
+    if (typeof s.sections[key].title !== "string") s.sections[key].title = title;
+    return s.sections[key];
+  }
+  function loadSettings() {
+    return api("admin-listings", { action: "settings-get" }).then(function (d) { return normalizeClientSettings(d.settings); });
+  }
+  function saveSettings(s, msg, done) {
+    api("admin-listings", { action: "settings-save", settings: s }).then(function (d) {
+      var finalSettings = normalizeClientSettings(d.settings || s);
+      if (typeof window.STREAMCLOUD_APPLY_SETTINGS === "function") window.STREAMCLOUD_APPLY_SETTINGS(finalSettings);
+      if (typeof window.STREAMCLOUD_RELOAD_TITLES === "function") window.STREAMCLOUD_RELOAD_TITLES();
+      say(msg, "ok", "Saved to the database. Changes apply to visitors after the page refreshes.");
+      if (done) done(finalSettings);
+    }).catch(function (e) {
+      if (!expired(e)) say(msg, "err", e.message || "Could not save settings.");
+    });
+  }
+  function field(labelText, value, type, attrs) {
+    attrs = attrs || {};
+    var input = h(type === "textarea" ? "textarea" : "input", Object.assign({
+      class: "scx-in", type: type === "textarea" ? undefined : (type || "text"),
+      value: value == null ? "" : String(value)
+    }, attrs));
+    if (type === "textarea") { input.value = value == null ? "" : String(value); input.rows = attrs.rows || 3; }
+    var label = h("label", { class: "scx-f" }, [labelText, input]);
+    return { wrap: label, input: input };
+  }
+  function checkbox(labelText, checked) {
+    var input = h("input", { type: "checkbox" });
+    input.checked = !!checked;
+    var wrap = h("label", { class: "scx-f", style: "display:flex;flex-direction:row;align-items:center;gap:9px" }, [input, labelText]);
+    return { wrap: wrap, input: input };
+  }
+  function options(select, items, selected) {
+    select.textContent = "";
+    items.forEach(function (item) {
+      var o = h("option", { value: item.value, text: item.label });
+      select.appendChild(o);
+    });
+    if (selected != null) select.value = selected;
+  }
+  function statCard(label, value) {
+    return h("div", { class: "scx-stat" }, [h("strong", { text: String(value) }), h("span", { text: label })]);
+  }
+  function showOverview(msg) {
+    var stats = h("div", { class: "scx-stat-grid" }, [h("p", { text: "Loading dashboard…" })]);
+    bodyEl.appendChild(stats);
+    api("admin-listings", { action: "overview" }).then(function (data) {
+      stats.textContent = "";
+      var counts = data.counts || {};
+      var registry = window.STREAMCLOUD_CARD_REGISTRY || {};
+      var recMovies = (registry.movie || []).length, recSeries = (registry.series || []).length;
+      [
+        ["Websites", (registry.sites || (typeof S !== "undefined" ? S : [])).length],
+        ["Movie apps", (registry.apps || (typeof A !== "undefined" ? A : [])).length],
+        ["Music apps", (registry.music || (typeof M !== "undefined" ? M : [])).length],
+        ["Movies", recMovies], ["Web series", recSeries],
+        ["Database items", counts.all || 0], ["Published DB items", counts.published || 0], ["Hidden DB items", counts.hidden || 0]
+      ].forEach(function (p) { stats.appendChild(statCard(p[0], p[1])); });
+      var desc = h("p", { class: "scx-help", text: "Edits to database listings are saved in Supabase. Card order, visibility, section names, and appearance are stored in the shared site settings." });
+      bodyEl.appendChild(desc);
+      bodyEl.appendChild(h("div", { class: "scx-divider" }));
+      bodyEl.appendChild(h("h3", { text: "Recent admin activity" }));
+      var list = h("div", { class: "scx-list" });
+      (data.activity || []).forEach(function (a) {
+        list.appendChild(h("div", { class: "scx-item" }, [
+          h("div", {}, [h("b", { text: a.action || "Admin action" }), h("small", { text: (a.entity_name || a.entity_type || "") + " · " + new Date(a.created_at).toLocaleString() })])
+        ]));
+      });
+      if (!list.children.length) list.appendChild(h("p", { class: "scx-help", text: "No admin activity recorded yet." }));
+      bodyEl.appendChild(list);
+    }).catch(function (e) { stats.textContent = ""; say(msg, "err", e.message || "Could not load dashboard."); });
+  }
+  function catalogKey(section, item) {
+    if (typeof window.STREAMCLOUD_CARD_KEY === "function") return window.STREAMCLOUD_CARD_KEY(section, item);
+    if (item && item.listingId) return "db:" + item.listingId;
+    if (section === "movie" || section === "series") return section + ":" + (item.imdbId || String(item.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+    return section + ":" + String(item.domain || item.name || "").toLowerCase().replace(/^www\./, "");
+  }
+  function getRegistry(section) {
+    var registry = window.STREAMCLOUD_CARD_REGISTRY || {};
+    return (registry[section] || []).slice();
+  }
+  function currentOrder(settings, section) {
+    var rows = getRegistry(section);
+    var keys = rows.map(function (r) { return catalogKey(section, r); });
+    var saved = settings.content.order[section];
+    if (Array.isArray(saved) && saved.length) {
+      var seen = new Set(saved);
+      keys = saved.filter(function (k) { return keys.indexOf(k) >= 0; }).concat(keys.filter(function (k) { return !seen.has(k); }));
+    }
+    return keys;
+  }
+  function itemForKey(section, key) {
+    return getRegistry(section).find(function (r) { return catalogKey(section, r) === key; }) || null;
+  }
+  function getOverride(settings, key, section, item) {
+    var old = settings.content.overrides[key];
+    if (old && typeof old === "object") {
+      if (section === "movie" || section === "series") {
+        return {
+          title: old.title != null ? old.title : item.title || "",
+          url: old.links && old.links[0] && old.links[0].url || (item.links && item.links[0] && item.links[0].url) || (item.imdbId ? "https://www.imdb.com/title/" + item.imdbId + "/" : ""),
+          year: old.year != null ? old.year : item.year || "",
+          poster: old.poster != null ? old.poster : item.poster || "",
+          overview: old.overview != null ? old.overview : item.overview || "",
+          genres: Array.isArray(old.genres) ? old.genres.join(", ") : (old.genres || (item.genres || []).join(", ")),
+          rating: old.rating && typeof old.rating === "object" ? old.rating.value : (old.rating != null ? old.rating : item.rating && item.rating.value || ""),
+          seasonCount: old.seasonCount != null ? old.seasonCount : item.seasonCount || "",
+          episodeCount: old.episodeCount != null ? old.episodeCount : item.episodeCount || "",
+          imdbId: old.imdbId != null ? old.imdbId : item.imdbId || "",
+          industry: old.industry != null ? old.industry : item.industry || ""
+        };
+      }
+      return Object.assign({
+        name: item.name || "", url: item.url || "", description: item.desc || "",
+        logoUrl: (item.logoSources || [])[0] || "", downloadUrl: item.downloadUrl || "",
+        downloadDirect: item.downloadDirect !== false, domain: item.domain || ""
+      }, old);
+    }
+    if (section === "movie" || section === "series") {
+      return {
+        title: item.title || "", url: (item.links && item.links[0] && item.links[0].url) || (item.imdbId ? "https://www.imdb.com/title/" + item.imdbId + "/" : ""),
+        year: item.year || "", poster: item.poster || "", overview: item.overview || "",
+        genres: (item.genres || []).join(", "), rating: item.rating && item.rating.value != null ? item.rating.value : "",
+        seasonCount: item.seasonCount || "", episodeCount: item.episodeCount || "", imdbId: item.imdbId || "", industry: item.industry || ""
+      };
+    }
+    return {
+      name: item.name || "", url: item.url || "", description: item.desc || "",
+      logoUrl: (item.logoSources || [])[0] || "", downloadUrl: item.downloadUrl || "",
+      downloadDirect: item.downloadDirect !== false, domain: item.domain || ""
+    };
+  }
+  function readCatalogControls(msg, settings) {
+    settings = cloneSettings(settings);
+    var wrap = h("div", {});
+    bodyEl.appendChild(wrap);
+
+    wrap.appendChild(h("h3", { text: "Section visibility and order" }));
+    var sectionFields = {};
+    [["sites", "Movie Websites"], ["apps", "Movie Apps"], ["music", "Music Apps"], ["recs", "Recommendations"]].forEach(function (p) {
+      var sec = sectionObject(settings, p[0], p[1]);
+      var show = checkbox("Show " + p[1], sec.visible !== false);
+      var title = field(p[1] + " title", sec.title || p[1], "text", { maxlength: "100" });
+      wrap.appendChild(h("div", { class: "scx-row" }, [show.wrap, title.wrap]));
+      sectionFields[p[0]] = { show: show.input, title: title.input };
+    });
+    var savedOrder = Array.isArray(settings.sections.order) ? settings.sections.order.slice() : ["sites", "apps", "music", "recs"];
+    if (savedOrder.indexOf("music") < 0) { var recIndex = savedOrder.indexOf("recs"); savedOrder.splice(recIndex < 0 ? savedOrder.length : recIndex, 0, "music"); }
+    ["sites", "apps", "recs"].forEach(function (key) { if (savedOrder.indexOf(key) < 0) savedOrder.push(key); });
+    var secOrder = field("Section order (comma-separated: sites, apps, music, recs)", savedOrder.join(", "), "text");
+    wrap.appendChild(secOrder.wrap);
+
+    wrap.appendChild(h("div", { class: "scx-divider" }));
+    wrap.appendChild(h("h3", { text: "Grid sizing" }));
+    var appearance = settings.appearance;
+    var colsD = field("Desktop columns", appearance.desktopColumns == null ? 3 : appearance.desktopColumns, "number", { min: "1", max: "8" });
+    var colsT = field("Tablet columns", appearance.tabletColumns == null ? 2 : appearance.tabletColumns, "number", { min: "1", max: "6" });
+    var colsM = field("Mobile columns", appearance.mobileColumns == null ? 1 : appearance.mobileColumns, "number", { min: "1", max: "3" });
+    var gap = field("Card gap (px)", appearance.gap == null ? 22 : appearance.gap, "number", { min: "0", max: "48" });
+    var radius = field("Card corner radius (px)", appearance.radius == null ? 4 : appearance.radius, "number", { min: "0", max: "32" });
+    var aspect = h("select", { class: "scx-in", "aria-label": "Card aspect ratio" });
+    options(aspect, [{value:"1 / 1",label:"Square (1:1)"},{value:"2 / 3",label:"Portrait (2:3)"},{value:"16 / 9",label:"Wide (16:9)"},{value:"4 / 3",label:"Landscape (4:3)"}], appearance.aspectRatio || "1 / 1");
+    var aspectWrap = h("label", { class: "scx-f" }, ["Card aspect ratio", aspect]);
+    [colsD.wrap, colsT.wrap, colsM.wrap, gap.wrap, radius.wrap, aspectWrap].forEach(function (el) { wrap.appendChild(el); });
+
+    wrap.appendChild(h("div", { class: "scx-divider" }));
+    wrap.appendChild(h("h3", { text: "Edit and arrange cards" }));
+    wrap.appendChild(h("p", { class: "scx-help", text: "Choose a card to edit its fields. Use the list below to reorder by dragging rows or to hide/show an item. These settings affect the public catalog on every device." }));
+    var group = h("select", { class: "scx-in", "aria-label": "Card category" });
+    options(group, [
+      { value: "sites", label: "Websites" }, { value: "apps", label: "Movie Apps" },
+      { value: "music", label: "Music Apps" }, { value: "movie", label: "Movies" }, { value: "series", label: "Web Series" }
+    ], ui.controlSection || "sites");
+    var itemSelect = h("select", { class: "scx-in", "aria-label": "Select card" });
+    var selectRow = h("div", { class: "scx-row" }, [
+      h("label", { class: "scx-f" }, ["Category", group]),
+      h("label", { class: "scx-f" }, ["Card", itemSelect])
+    ]);
+    wrap.appendChild(selectRow);
+    var form = h("div", { class: "scx-two" });
+    wrap.appendChild(form);
+    var orderList = h("div", { class: "scx-order-list" });
+    wrap.appendChild(orderList);
+    var fields = {};
+    function buildFields() {
+      form.textContent = "";
+      var key = itemSelect.value, section = group.value, item = itemForKey(section, key);
+      fields = {};
+      if (!item) { form.appendChild(h("p", { class: "scx-help", text: "No cards found in this category yet." })); return; }
+      var vals = getOverride(settings, key, section, item);
+      var rec = section === "movie" || section === "series";
+      function add(name, label, type, val, attrs) {
+        var f = field(label, val, type || "text", attrs || {});
+        form.appendChild(f.wrap); fields[name] = f.input;
+      }
+      add(rec ? "title" : "name", "Title / name", "text", rec ? vals.title : vals.name, { maxlength: "160" });
+      add("url", rec ? "Title detail / external link" : "Homepage URL", "url", vals.url || "", { placeholder: "https://…" });
+      add(rec ? "poster" : "logoUrl", rec ? "Poster image URL" : "Logo image URL", "url", rec ? vals.poster : vals.logoUrl, { placeholder: "https://…" });
+      add(rec ? "overview" : "description", "Description", "textarea", rec ? vals.overview : vals.description, { rows: "3", maxlength: "1500" });
+      if (!rec && (section === "apps" || section === "music")) {
+        add("downloadUrl", "Download URL", "url", vals.downloadUrl || "", { placeholder: "https://…" });
+        var direct = checkbox("Direct APK/package URL verified", vals.downloadDirect === true);
+        form.appendChild(direct.wrap); fields.downloadDirect = direct.input;
+      }
+      if (rec) {
+        add("year", "Release year", "number", vals.year || "", { min: "1870", max: "2100" });
+        add("rating", "IMDb rating / 10", "number", vals.rating || "", { min: "0", max: "10", step: "0.1" });
+        add("genres", "Genres (comma-separated)", "text", vals.genres || "", { maxlength: "500" });
+        if (section === "series") {
+          add("seasonCount", "Season count", "number", vals.seasonCount || "", { min: "1", max: "5000" });
+          add("episodeCount", "Episode count", "number", vals.episodeCount || "", { min: "1", max: "100000" });
+        }
+        add("imdbId", "IMDb ID", "text", vals.imdbId || item.imdbId || "", { placeholder: "tt1234567" });
+        add("industry", "Industry / region", "text", vals.industry || "", { maxlength: "80" });
+      }
+      var hidden = checkbox("Hide this card from visitors", settings.content.hidden.indexOf(key) >= 0);
+      form.appendChild(hidden.wrap); fields.hidden = hidden.input; fields.section = section; fields.key = key; fields.isRec = rec;
+      var actions = h("div", { class: "scx-actions" });
+      var save = h("button", { class: "scx-btn pri", type: "button", text: "Save card changes" });
+      var reset = h("button", { class: "scx-btn", type: "button", text: "Reset overrides" });
+      actions.appendChild(save); actions.appendChild(reset); form.appendChild(actions);
+      save.addEventListener("click", function () {
+        var next = cloneSettings(settings);
+        var values = {};
+        Object.keys(fields).forEach(function (k) { if (fields[k] && "value" in fields[k]) values[k] = fields[k].value.trim(); });
+        if (rec) {
+          values.year = values.year ? Number(values.year) : null;
+          values.rating = values.rating ? { source: "IMDb", value: Number(values.rating) } : null;
+          values.genres = values.genres ? values.genres.split(",").map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 12) : [];
+          if (section === "series") {
+            values.seasonCount = values.seasonCount ? Number(values.seasonCount) : null;
+            values.episodeCount = values.episodeCount ? Number(values.episodeCount) : null;
+          }
+          values.title = String(values.title || "").slice(0, 160);
+          values.overview = String(values.overview || "").slice(0, 1500);
+          values.poster = String(values.poster || "");
+          values.imdbId = String(values.imdbId || "");
+          values.industry = String(values.industry || "");
+          values.links = values.url ? [{ label: "Open title", url: values.url }] : [];
+          delete values.url;
+        } else {
+          values.name = String(values.name || "").slice(0, 160);
+          values.description = String(values.description || "").slice(0, 1500);
+          values.domain = values.url ? (function () { try { return new URL(values.url).hostname.replace(/^www\./, ""); } catch (e) { return ""; } })() : "";
+          if (section === "apps" || section === "music") values.downloadDirect = fields.downloadDirect ? fields.downloadDirect.checked : false;
+          delete values.hidden;
+        }
+        delete values.hidden; delete values.section; delete values.key; delete values.isRec;
+        next.content.overrides[key] = values;
+        next.content.hidden = next.content.hidden.filter(function (x) { return x !== key; });
+        if (fields.hidden.checked) next.content.hidden.push(key);
+        saveSettings(next, msg, function (finalSettings) { settings = finalSettings; buildOptions(); buildFields(); buildOrderList(); });
+      });
+      reset.addEventListener("click", function () {
+        if (!confirm("Reset saved field overrides for this card?")) return;
+        var next = cloneSettings(settings); delete next.content.overrides[key];
+        next.content.hidden = next.content.hidden.filter(function (x) { return x !== key; });
+        saveSettings(next, msg, function (finalSettings) { settings = finalSettings; buildOptions(); buildFields(); buildOrderList(); });
+      });
+    }
+    function buildOptions() {
+      var rows = getRegistry(group.value);
+      var saved = currentOrder(settings, group.value);
+      rows.sort(function (a, b) { return saved.indexOf(catalogKey(group.value, a)) - saved.indexOf(catalogKey(group.value, b)); });
+      options(itemSelect, rows.map(function (it) {
+        var key = catalogKey(group.value, it);
+        return { value: key, label: (settings.content.hidden.indexOf(key) >= 0 ? "◌ " : "") + (it.name || it.title || key) };
+      }), itemSelect.value || (rows[0] ? catalogKey(group.value, rows[0]) : ""));
+      buildFields(); buildOrderList();
+    }
+    function persistOrder(keys) {
+      var next = cloneSettings(settings); next.content.order[group.value] = keys;
+      saveSettings(next, msg, function (finalSettings) { settings = finalSettings; buildOptions(); });
+    }
+    function buildOrderList() {
+      orderList.textContent = "";
+      var section = group.value, rows = getRegistry(section), keys = currentOrder(settings, section);
+      var lookup = new Map(rows.map(function (r) { return [catalogKey(section, r), r]; }));
+      var dragging = "";
+      keys.filter(function (k) { return lookup.has(k); }).forEach(function (key) {
+        var item = lookup.get(key), hidden = settings.content.hidden.indexOf(key) >= 0;
+        var row = h("div", { class: "scx-order-row", draggable: "true", "data-key": key }, [
+          h("span", { class: "scx-order-title", text: (item.name || item.title || key) }),
+          h("span", { class: "scx-status", text: hidden ? "Hidden" : "Visible" }),
+          h("button", { class: "scx-btn scx-small", type: "button", text: "Edit", onclick: function () { itemSelect.value = key; buildFields(); } }),
+          h("button", { class: "scx-btn scx-small", type: "button", text: hidden ? "Show" : "Hide", onclick: function () {
+            var next = cloneSettings(settings);
+            next.content.hidden = next.content.hidden.filter(function (x) { return x !== key; });
+            if (!hidden) next.content.hidden.push(key);
+            saveSettings(next, msg, function (finalSettings) { settings = finalSettings; buildOptions(); });
+          } })
+        ]);
+        row.addEventListener("dragstart", function (e) { dragging = key; row.classList.add("dragging"); e.dataTransfer.setData("text/plain", key); e.dataTransfer.effectAllowed = "move"; });
+        row.addEventListener("dragend", function () { row.classList.remove("dragging"); });
+        row.addEventListener("dragover", function (e) { e.preventDefault(); e.dataTransfer.dropEffect = "move"; });
+        row.addEventListener("drop", function (e) {
+          e.preventDefault();
+          var from = e.dataTransfer.getData("text/plain") || dragging, to = key;
+          if (!from || from === to) return;
+          var nextKeys = keys.slice().filter(function (k) { return lookup.has(k); });
+          nextKeys.splice(nextKeys.indexOf(from), 1);
+          nextKeys.splice(Math.max(0, nextKeys.indexOf(to)), 0, from);
+          persistOrder(nextKeys);
+        });
+        orderList.appendChild(row);
+      });
+      if (!orderList.children.length) orderList.appendChild(h("p", { class: "scx-help", text: "No items in this category yet. Add an item using the Add item tab." }));
+    }
+    group.addEventListener("change", function () { ui.controlSection = group.value; buildOptions(); });
+    itemSelect.addEventListener("change", buildFields);
+    if (typeof window.STREAMCLOUD_SETTINGS_READY === "object") {
+      Promise.resolve(window.STREAMCLOUD_SETTINGS_READY).then(function () {
+        if (typeof window.STREAMCLOUD_RELOAD_TITLES === "function") window.STREAMCLOUD_RELOAD_TITLES();
+      });
+    }
+    Promise.all([
+      fetch("./data/recommendations.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }),
+      Promise.resolve(window.STREAMCLOUD_TITLE_LISTINGS).catch(function () { return {}; })
+    ]).then(function (pair) {
+      var source = pair[0] || {}, extra = pair[1] || {};
+      source.movies = (source.movies || []).concat(extra.movies || []);
+      source.series = (source.series || []).concat(extra.series || []);
+      if (typeof window.STREAMCLOUD_CONTROL_RECOMMENDATIONS === "function") window.STREAMCLOUD_CONTROL_RECOMMENDATIONS(source);
+      buildOptions();
+    }).catch(buildOptions);
+    buildOptions();
+
+    var saveSection = h("button", { class: "scx-btn pri", type: "button", text: "Save section and grid settings", onclick: function () {
+      var next = cloneSettings(settings);
+      [["sites", "Movie Websites"], ["apps", "Movie Apps"], ["music", "Music Apps"], ["recs", "Recommendations"]].forEach(function (p) {
+        var f = sectionFields[p[0]];
+        next.sections[p[0]] = { visible: f.show.checked, title: f.title.value.trim().slice(0, 100) || p[1] };
+      });
+      var order = secOrder.input.value.split(",").map(function (x) { return x.trim().toLowerCase(); }).filter(function (x) { return ["sites", "apps", "music", "recs"].indexOf(x) >= 0; });
+      if (new Set(order).size !== 4 || ["sites", "apps", "music", "recs"].some(function (x) { return order.indexOf(x) < 0; })) { say(msg, "err", "Section order must contain sites, apps, music, and recs exactly once."); return; }
+      next.sections.order = order;
+      next.appearance.desktopColumns = Number(colsD.input.value);
+      next.appearance.tabletColumns = Number(colsT.input.value);
+      next.appearance.mobileColumns = Number(colsM.input.value);
+      next.appearance.gap = Number(gap.input.value);
+      next.appearance.radius = Number(radius.input.value);
+      next.appearance.aspectRatio = aspect.value;
+      saveSettings(next, msg, function (finalSettings) { settings = finalSettings; });
+    } });
+    wrap.appendChild(h("div", { class: "scx-actions" }, [saveSection]));
+  }
+  function showLayout(msg) {
+    bodyEl.appendChild(h("p", { class: "scx-help", text: "Card fields, visibility, section order, desktop/tablet/mobile grid columns, card spacing and ordering are stored in Supabase and shared with visitors." }));
+    loadSettings().then(function (settings) { readCatalogControls(msg, settings); }).catch(function (e) { if (!expired(e)) say(msg, "err", e.message); });
+  }
+  function showAppearance(msg) {
+    loadSettings().then(function (settings) {
+      var a = settings.appearance || {};
+      var grid = h("div", { class: "scx-two" });
+      var fields = {};
+      [["background", "Background", "#141414"], ["panel", "Panel", "#181818"], ["card", "Card", "#242424"], ["text", "Text", "#ffffff"], ["dim", "Muted text", "#a7a7a7"], ["accent", "Accent", "#e50914"], ["border", "Border", "#343434"]].forEach(function (p) {
+        var f = field(p[1], a[p[0]] || p[2], "color"); grid.appendChild(f.wrap); fields[p[0]] = f.input;
+      });
+      var font = field("Font family", a.fontFamily || "Inter, system-ui, sans-serif", "text", { maxlength: "80" });
+      var size = field("Base font size (px)", a.fontSize || 14, "number", { min: "12", max: "20" });
+      var imageFit = h("select", { class: "scx-in", "aria-label": "Image fit" });
+      options(imageFit, [{value:"contain",label:"Contain (show full logo/poster)"},{value:"cover",label:"Cover (fill card)"},{value:"fill",label:"Fill card"}], a.imageFit || "contain");
+      var fitWrap = h("label", { class: "scx-f" }, ["Image fit", imageFit]);
+      grid.appendChild(font.wrap); grid.appendChild(size.wrap); grid.appendChild(fitWrap); bodyEl.appendChild(grid);
+      bodyEl.appendChild(h("p", { class: "scx-help", text: "These appearance settings only adjust existing design tokens. The site's dark StreamCloud identity and card components remain in place." }));
+      bodyEl.appendChild(h("div", { class: "scx-actions" }, [h("button", { class: "scx-btn pri", type: "button", text: "Save appearance", onclick: function () {
+        var next = cloneSettings(settings);
+        Object.keys(fields).forEach(function (key) { next.appearance[key] = fields[key].value; });
+        next.appearance.fontFamily = font.input.value.trim().slice(0, 80);
+        next.appearance.fontSize = Number(size.input.value);
+        next.appearance.imageFit = imageFit.value;
+        saveSettings(next, msg);
+      } })]));
+    }).catch(function (e) { if (!expired(e)) say(msg, "err", e.message); });
+  }
+  function showSiteSettings(msg) {
+    loadSettings().then(function (settings) {
+      var site = settings.site || {};
+      var title = field("Browser / site title", site.title || "StreamCloud", "text", { maxlength: "100" });
+      var desc = field("Site description", site.description || "Explore curated movie and web-series websites, streaming apps, and music apps—all in one place.", "textarea", { maxlength: "300", rows: "3" });
+      var instagram = field("Instagram URL", site.instagramUrl || "https://www.instagram.com/mahimahfud/", "url");
+      bodyEl.appendChild(title.wrap); bodyEl.appendChild(desc.wrap); bodyEl.appendChild(instagram.wrap);
+      bodyEl.appendChild(h("div", { class: "scx-actions" }, [h("button", { class: "scx-btn pri", type: "button", text: "Save site settings", onclick: function () {
+        if (instagram.input.value && !/^https:\/\//i.test(instagram.input.value.trim())) { say(msg, "err", "Instagram URL must use HTTPS."); return; }
+        var next = cloneSettings(settings);
+        next.site.title = title.input.value.trim().slice(0, 100);
+        next.site.description = desc.input.value.trim().slice(0, 300);
+        next.site.instagramUrl = instagram.input.value.trim();
+        saveSettings(next, msg);
+      } })]));
+    }).catch(function (e) { if (!expired(e)) say(msg, "err", e.message); });
+  }
+  function showActivity(msg) {
+    var list = h("div", { class: "scx-list" }, [h("p", { text: "Loading activity…" })]); bodyEl.appendChild(list);
+    api("admin-listings", { action: "activity-list" }).then(function (d) {
+      list.textContent = "";
+      (d.activity || []).forEach(function (a) {
+        list.appendChild(h("div", { class: "scx-item" }, [
+          h("div", {}, [h("b", { text: a.action }), h("small", { text: (a.entity_name || a.entity_type || "") + " · " + new Date(a.created_at).toLocaleString() })]),
+          h("small", { text: JSON.stringify(a.details || {}) })
+        ]));
+      });
+      if (!list.children.length) list.appendChild(h("p", { class: "scx-help", text: "No admin activity recorded yet." }));
+    }).catch(function (e) { list.textContent = ""; if (!expired(e)) say(msg, "err", e.message); });
+  }
+  function showBackup(msg) {
+    var note = h("p", { class: "scx-help", text: "Export database listings and persistent site settings to a JSON file. Import is additive: duplicate or invalid listings are skipped; existing data is not silently replaced." });
+    bodyEl.appendChild(note);
+    var area = field("Import JSON", "", "textarea", { rows: "9", placeholder: '{"listings":[],"settings":{}}' });
+    bodyEl.appendChild(area.wrap);
+    var exportBtn = h("button", { class: "scx-btn", type: "button", text: "Export JSON" });
+    var importBtn = h("button", { class: "scx-btn pri", type: "button", text: "Validate and import" });
+    bodyEl.appendChild(h("div", { class: "scx-actions" }, [exportBtn, importBtn]));
+    exportBtn.addEventListener("click", function () {
+      Promise.all([
+        api("admin-listings", { action: "list" }),
+        api("admin-listings", { action: "settings-get" }),
+        fetch("./data/recommendations.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; })
+      ]).then(function (pair) {
+        var data = { schema: "streamcloud-admin-v1", exportedAt: new Date().toISOString(), listings: pair[0].listings || [], settings: pair[1].settings || {}, curatedRecommendationsSnapshot: pair[2] };
+        var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        var url = URL.createObjectURL(blob), a = h("a", { href: url, download: "streamcloud-admin-backup.json" });
+        document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+        say(msg, "ok", "Backup exported. Curated recommendations are included as a reference snapshot.");
+      }).catch(function (e) { if (!expired(e)) say(msg, "err", e.message); });
+    });
+    importBtn.addEventListener("click", function () {
+      var data;
+      try { data = JSON.parse(area.input.value); } catch (e) { say(msg, "err", "The JSON syntax is invalid."); return; }
+      if (!data || typeof data !== "object" || (!Array.isArray(data.listings) && !data.settings)) { say(msg, "err", "Expected a backup with listings and/or settings."); return; }
+      var count = Array.isArray(data.listings) ? data.listings.length : 0;
+      if (!confirm("Import up to " + count + " database listings and the supplied site settings? Duplicate listings will be skipped. Existing listings will not be replaced.")) return;
+      importBtn.disabled = true;
+      api("admin-listings", { action: "import", listings: data.listings || [], settings: data.settings || null }).then(function (result) {
+        say(msg, "ok", "Import finished: " + result.added + " added, " + result.skipped + " skipped. Curated recommendation snapshots are not written to the repository by browser import.");
+        area.input.value = "";
+        if (typeof window.STREAMCLOUD_APPLY_SETTINGS === "function" && result.settings) window.STREAMCLOUD_APPLY_SETTINGS(result.settings);
+      }).catch(function (e) { if (!expired(e)) say(msg, "err", e.message); }).finally(function () { importBtn.disabled = false; });
+    });
+  }
+  function showPinChange(msg) {
+    var pin = field("New admin PIN (4–64 characters)", "", "password", { autocomplete: "new-password", maxlength: "64" });
+    var confirmPin = field("Confirm new PIN", "", "password", { autocomplete: "new-password", maxlength: "64" });
+    bodyEl.appendChild(pin.wrap); bodyEl.appendChild(confirmPin.wrap);
+    bodyEl.appendChild(h("p", { class: "scx-help", text: "The PIN is verified and hashed server-side. Saving it revokes all existing admin sessions, so you will need to log in again." }));
+    bodyEl.appendChild(h("div", { class: "scx-actions" }, [h("button", { class: "scx-btn pri", type: "button", text: "Change PIN", onclick: function () {
+      if (pin.input.value.length < 4 || pin.input.value.length > 64) { say(msg, "err", "PIN must be 4–64 characters."); return; }
+      if (pin.input.value !== confirmPin.input.value) { say(msg, "err", "PIN confirmation does not match."); return; }
+      if (!confirm("Change the admin PIN and revoke every active admin session?")) return;
+      api("admin-listings", { action: "pin-change", pin: pin.input.value }).then(function () {
+        setSession(null); showPin(); var target = bodyEl.querySelector(".scx-msg"); if (target) say(target, "ok", "PIN changed. Log in with the new PIN.");
+      }).catch(function (e) { if (!expired(e)) say(msg, "err", e.message); });
+    } })]));
+  }
+
   /* ---------- floating + button ---------- */
   var fab = h("button", { class: "scx-fab", type: "button", "aria-label": "Admin: add listing", title: "Admin", text: "+", onclick: openModal });
-  function mount() { if (!fab.isConnected) document.body.appendChild(fab); }
+  function mount() {
+    if (!fab.isConnected) document.body.appendChild(fab);
+    var adminIcon = document.getElementById("adminIcon");
+    if (adminIcon && !adminIcon.dataset.bound) { adminIcon.dataset.bound = "1"; adminIcon.addEventListener("click", openModal); }
+  }
   if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
 })();

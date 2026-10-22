@@ -11,30 +11,37 @@ supabase db push             # runs supabase/migrations/20261022000000_listings.
 ```
 (or paste that SQL file into Supabase -> SQL Editor).
 
-## 2. Set the server-side secrets (never commit these)
+## 2. Set server-side API secrets (never commit these)
 
-Replace the literal `এপিয়াই` with your real provider key before running the command. Do not commit real Gemini, OMDb, GitHub, PIN, session-secret or Supabase secret-key values to GitHub.
+Set only the provider keys you actually use. These remain in Supabase Edge Function secrets; no provider secret belongs in public JavaScript.
 ```bash
 supabase secrets set \
-  ADMIN_PIN='replace-with-your-private-pin' \
-  ADMIN_SESSION_SECRET="$(openssl rand -hex 32)" \
-  GEMINI_API_KEY='এপিয়াই' \
-  OMDB_API_KEY='এপিয়াই' \
-  ALLOWED_ORIGINS=https://mahimahfud-ui.github.io
-# Optional only if you need authenticated GitHub release lookups; replace এপিয়াই before use:
-# GITHUB_TOKEN='এপিয়াই'
-# Optional model override: GEMINI_MODEL (default gemini-2.5-flash)
+  GEMINI_API_KEY='YOUR_PRIVATE_GEMINI_KEY' \
+  OMDB_API_KEY='YOUR_PRIVATE_OMDB_KEY' \
+  ALLOWED_ORIGINS='https://mahimahfud-ui.github.io,https://streamcloud.ai.studio'
+# Optional if you need authenticated GitHub release lookups:
+# GITHUB_TOKEN='YOUR_PRIVATE_GITHUB_TOKEN'
+# Optional model override:
+# GEMINI_MODEL='gemini-2.5-flash'
 ```
-Add `http://localhost:8080` to `ALLOWED_ORIGINS` (comma separated) only for local testing.
 
-## 3. Deploy the functions
+## 3. Initialize the admin PIN privately
+
+The PIN is stored only as a bcrypt hash in the private Supabase database. Do not put the PIN or a PIN hash in GitHub.
+If setting up a fresh database, run this once in the Supabase SQL Editor and replace the placeholder privately:
+```sql
+select public.admin_update_pin('YOUR_PRIVATE_PIN');
+```
+The existing project database already has the requested initial PIN. Successful login uses an eight-hour HttpOnly session cookie and is rate-limited server-side.
+
+## 4. Deploy the functions
 ```bash
 for fn in admin-login admin-detect admin-listings; do supabase functions deploy "$fn"; done
 ```
 `supabase/config.toml` turns off the platform JWT check because the functions verify their own
 short-lived admin token.
 
-## 4. Point the site at your project
+## 5. Point the site at your project
 Edit `listings-config.js` (public values only):
 ```js
 window.STREAMCLOUD_SUPABASE = { url: "https://husydmiujigyonlxbuuj.supabase.co", anonKey: "এপিয়াই" };
