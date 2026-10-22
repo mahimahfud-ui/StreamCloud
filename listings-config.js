@@ -5,3 +5,6 @@ window.STREAMCLOUD_SUPABASE = {
   url: "https://husydmiujigyonlxbuuj.supabase.co",
   anonKey: "sb_publishable_S20xF3_NWiQjA727-mG6oQ_Rxst1YQM"  // Public publishable key; RLS protects database access
 };
+
+/* Admin Ultra layer (steppers, live-preview dock, Catalogue Pro, AI tools) */
+(function () { var s = document.createElement("script"); s.src = "./admin-ultra.js"; s.defer = true; document.head.appendChild(s); })();
