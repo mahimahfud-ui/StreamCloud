@@ -239,11 +239,22 @@ try {
 
   await page.getByRole("button", { name: "Content" }).click();
   await page.getByText("Smoke test listing").waitFor({ timeout: 8000 });
+  assert.equal(await page.locator(".scx-tabs").evaluate((el) => getComputedStyle(el).display), "grid", "Admin features should display as a responsive card grid");
+  assert.equal(await page.getByRole("button", { name: "Delete selected", exact: true }).count(), 1, "Content should show only one shared delete action");
+  assert.equal(await page.getByRole("button", { name: "Delete", exact: true }).count(), 0, "Listing rows should not duplicate the shared delete action");
+  assert.equal(await page.getByRole("button", { name: "Hide", exact: true }).count(), 1, "Visibility should use the shared bulk action instead of per-row duplicates");
+  assert.equal(await page.locator(".scx-item .scx-actions button").count(), 1, "Each listing row should keep only its Edit action");
   await page.locator('input[data-listing-id="' + mockListingId + '"]').check();
-  await page.getByRole("button", { name: "Hide", exact: true }).first().click();
+  await page.getByRole("button", { name: "Hide", exact: true }).click();
   await page.getByText("Bulk action saved.").waitFor({ timeout: 8000 });
   assert.ok(mockState.calls.some((x) => x.action === "bulk" && x.operation === "hide" && x.ids.includes(mockListingId)), "Bulk hide should use the protected admin API");
   assert.equal(mockState.listings[0].published, false, "Bulk hide should persist the visibility change");
+  await page.locator('input[data-listing-id="' + mockListingId + '"]').check();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Delete selected", exact: true }).click();
+  await page.waitForFunction((id) => !Array.from(document.querySelectorAll("input[data-listing-id]")).some((el) => el.dataset.listingId === id), mockListingId, { timeout: 8000 });
+  assert.ok(mockState.calls.some((x) => x.action === "bulk" && x.operation === "delete" && x.ids.includes(mockListingId)), "The shared delete button should delete one selected listing");
+  assert.equal(mockState.listings.some((x) => x.id === mockListingId), false, "Bulk delete should remove the selected listing");
 
   await page.getByRole("button", { name: "Cards & Layout" }).click();
   await page.getByText("Edit and arrange cards").waitFor({ timeout: 8000 });
