@@ -78,6 +78,8 @@ Deno.test("omdbLookup: no key, exact match only, episode sum", async () => {
   try {
     Deno.env.delete("OMDB_API_KEY");
     assertEquals((await omdbLookup({ title: "X", year: null, type: "movie" })).status, "no-key");
+    Deno.env.set("OMDB_API_KEY", "এপিয়াই");
+    assertEquals((await omdbLookup({ title: "X", year: null, type: "movie" })).status, "no-key");
     Deno.env.set("OMDB_API_KEY", "k");
     globalThis.fetch = (u: string | URL | Request) => {
       const q = new URL(String(u)).searchParams;

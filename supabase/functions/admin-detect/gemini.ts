@@ -18,7 +18,7 @@ const SCHEMA = {
 
 export async function askGemini(page: PageInfo, section: string): Promise<GeminiResult | null> {
   const key = Deno.env.get("GEMINI_API_KEY");
-  if (!key) throw new Error("GEMINI_API_KEY is not set on the server.");
+  if (!key || key.trim() === "এপিয়াই") throw new Error("GEMINI_API_KEY is not set on the server.");
   const model = Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash";
   const prompt = [
     `You extract listing details for a directory (type: ${section}) from ONE public web page.`,

@@ -11,8 +11,9 @@ Deno.serve(async (req) => {
   if (early) return early;
 
   const pinSecret = Deno.env.get("ADMIN_PIN");
-  if (!pinSecret || !Deno.env.get("ADMIN_SESSION_SECRET")) {
-    return json(req, { error: "Admin access is not configured on the server." }, 500);
+  const sessionSecret = Deno.env.get("ADMIN_SESSION_SECRET");
+  if (!pinSecret || pinSecret.trim() === "এপিয়াই" || !sessionSecret || sessionSecret.trim() === "এপিয়াই" || sessionSecret.length < 32) {
+    return json(req, { error: "Admin access is not configured. Set ADMIN_PIN and an ADMIN_SESSION_SECRET of at least 32 characters." }, 500);
   }
   const body = await readJson(req, 2_000);
   const pin = typeof body?.pin === "string" ? body.pin : "";
@@ -20,7 +21,7 @@ Deno.serve(async (req) => {
 
   const db = serviceClient();
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown";
-  const ipKey = "ip:" + (await sha256Hex(ip + ":" + Deno.env.get("ADMIN_SESSION_SECRET"))).slice(0, 32);
+  const ipKey = "ip:" + (await sha256Hex(ip + ":" + sessionSecret)).slice(0, 32);
 
   for (const key of [ipKey, "global"]) {
     const { data, error } = await db.rpc("admin_lock_status", { p_key: key });
@@ -33,7 +34,8 @@ Deno.serve(async (req) => {
   }
 
   if (await safeEqual(pin, pinSecret)) {
-    await db.rpc("admin_clear_failures", { p_key: ipKey });
+    const { error: clearError } = await db.rpc("admin_clear_failures", { p_key: ipKey });
+    if (clearError) return json(req, { error: "Server database is not set up. Run the SQL migration first." }, 500);
     const { token, expiresAt } = await issueToken();
     return json(req, { token, expiresAt, ttl: SESSION_TTL_SECONDS });
   }
@@ -41,6 +43,7 @@ Deno.serve(async (req) => {
   await new Promise((r) => setTimeout(r, 400));
   const l1 = await db.rpc("admin_record_failure", { p_key: ipKey, p_max: IP_LIMIT.max, p_window_secs: IP_LIMIT.windowSecs, p_lock_secs: IP_LIMIT.lockSecs });
   const l2 = await db.rpc("admin_record_failure", { p_key: "global", p_max: GLOBAL_LIMIT.max, p_window_secs: GLOBAL_LIMIT.windowSecs, p_lock_secs: GLOBAL_LIMIT.lockSecs });
+  if (l1.error || l2.error) return json(req, { error: "Server database is not set up. Run the SQL migration first." }, 500);
   if (l1.data || l2.data) return json(req, { error: "Too many wrong attempts. Try again later.", retryAfter: 900 }, 429);
   return json(req, { error: "Wrong PIN." }, 401);
 });

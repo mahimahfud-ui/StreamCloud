@@ -12,14 +12,18 @@ supabase db push             # runs supabase/migrations/20261022000000_listings.
 (or paste that SQL file into Supabase -> SQL Editor).
 
 ## 2. Set the server-side secrets (never commit these)
+
+Replace the literal `এপিয়াই` with your real provider key before running the command. Do not commit real Gemini, OMDb, GitHub, PIN, session-secret or Supabase secret-key values to GitHub.
 ```bash
 supabase secrets set \
   ADMIN_PIN='replace-with-your-private-pin' \
   ADMIN_SESSION_SECRET="$(openssl rand -hex 32)" \
-  GEMINI_API_KEY='এপিআই' \
-  OMDB_API_KEY='এপিআই' \
+  GEMINI_API_KEY='এপিয়াই' \
+  OMDB_API_KEY='এপিয়াই' \
   ALLOWED_ORIGINS=https://mahimahfud-ui.github.io
-# optional: GEMINI_MODEL (default gemini-2.5-flash), GITHUB_TOKEN (higher GitHub API limit)
+# Optional only if you need authenticated GitHub release lookups; replace এপিয়াই before use:
+# GITHUB_TOKEN='এপিয়াই'
+# Optional model override: GEMINI_MODEL (default gemini-2.5-flash)
 ```
 Add `http://localhost:8080` to `ALLOWED_ORIGINS` (comma separated) only for local testing.
 
@@ -33,9 +37,9 @@ short-lived admin token.
 ## 4. Point the site at your project
 Edit `listings-config.js` (public values only):
 ```js
-window.STREAMCLOUD_SUPABASE = { url: "https://<ref>.supabase.co", anonKey: "<anon/publishable key>" };
+window.STREAMCLOUD_SUPABASE = { url: "https://husydmiujigyonlxbuuj.supabase.co", anonKey: "এপিয়াই" };
 ```
-Commit and push. The `+` button then works on GitHub Pages.
+Replace `এপিয়াই` in `listings-config.js` with your Supabase publishable key, then commit and push. Until you replace it, Add Listing intentionally stays disabled and the public catalogue does not query Supabase.
 
 ## How it is protected
 - PIN is compared on the server against `ADMIN_PIN`; it is not in any file in this repo.

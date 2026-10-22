@@ -17,7 +17,7 @@ async function call(params: Record<string, string>, key: string) {
 
 export async function omdbLookup(q: { imdbId?: string; title: string; year: number | null; type: "movie" | "series" }): Promise<Result> {
   const key = Deno.env.get("OMDB_API_KEY");
-  if (!key) return { status: "no-key" };
+  if (!key || key.trim() === "এপিয়াই") return { status: "no-key" };
   let d;
   if (q.imdbId) d = await call({ i: q.imdbId, plot: "short" }, key);
   else {

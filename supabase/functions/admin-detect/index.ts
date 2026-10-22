@@ -32,7 +32,7 @@ async function githubApk(u: URL, notes: string[]) {
   const m = u.pathname.match(/^\/([\w.-]+)\/([\w.-]+)/);
   if (!m) return null;
   const headers: Record<string, string> = { Accept: "application/vnd.github+json", "User-Agent": "StreamCloudBot/1.0" };
-  const gh = Deno.env.get("GITHUB_TOKEN"); if (gh) headers.Authorization = `Bearer ${gh}`;
+  const gh = Deno.env.get("GITHUB_TOKEN"); if (gh && gh.trim() !== "এপিয়াই") headers.Authorization = `Bearer ${gh}`;
   try {
     const repo = await (await fetch(`https://api.github.com/repos/${m[1]}/${m[2]}`, { headers, signal: AbortSignal.timeout(8000) })).json();
     const rel = await fetch(`https://api.github.com/repos/${m[1]}/${m[2]}/releases/latest`, { headers, signal: AbortSignal.timeout(8000) });

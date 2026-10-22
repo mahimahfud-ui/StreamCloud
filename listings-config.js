@@ -3,5 +3,5 @@
    NEVER put the service-role key, ADMIN_PIN, Gemini or OMDb keys in this file. */
 window.STREAMCLOUD_SUPABASE = {
   url: "https://husydmiujigyonlxbuuj.supabase.co",
-  anonKey: "sb_publishable_S20xF3_NWiQjA727-mG6oQ_Rxst1YQM"  // Replace এপিআই with your Supabase anon/publishable API key
+  anonKey: "এপিয়াই"  // Supabase publishable key: replace এপিয়াই before enabling Add Listing
 };

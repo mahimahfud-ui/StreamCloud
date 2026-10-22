@@ -7,7 +7,7 @@
   "use strict";
   var CFG = window.STREAMCLOUD_SUPABASE || {};
   var BASE = String(CFG.url || "").replace(/\/+$/, "");
-  var configured = /^https:\/\//.test(BASE) && !!CFG.anonKey;
+  var configured = /^https:\/\//.test(BASE) && !!CFG.anonKey && String(CFG.anonKey).trim() !== "এপিয়াই";
   var SESSION_KEY = "streamcloud-admin-session";
   var SECTION_LABEL = { movie: "Movies", series: "Web Series", sites: "Websites", apps: "Movie Apps", music: "Music Apps" };
   var CATEGORIES = [
