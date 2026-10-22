@@ -208,9 +208,10 @@
   function askPanel(root) {
     var inp = h("input", { class: "scx-in", type: "text", placeholder: "e.g. hidden movies without poster · series rating above 8 · duplicates · apps without download", "aria-label": "Ask your catalogue" });
     var out = h("div", {}), go = h("button", { class: "scx-btn pri", type: "button", text: "Ask" });
+    var readyNote = h("p", { class: "scx-help", text: "Loading catalogue…" }); out.appendChild(readyNote);
     function ready() {
       go.disabled = !catalogueLoaded;
-      if (!out.childNodes.length) out.appendChild(h("p", { class: "scx-help", text: catalogueLoaded ? "Catalogue loaded. Enter a query." : catalogueError || "Loading catalogue…" }));
+      if (readyNote.parentNode === out) readyNote.textContent = catalogueLoaded ? "Catalogue loaded. Enter a query." : catalogueError || "Loading catalogue…";
     }
     function run() {
       if (!catalogueLoaded) { out.textContent = catalogueError || "Catalogue is still loading."; return; }
@@ -266,6 +267,7 @@
     function hint() { return mode.value === "titles" ? "One title per line. Optional year: Dune | 2021" : "One public https:// link per line"; }
     var ta = h("textarea", { class: "scx-in", rows: "5", placeholder: hint(), "aria-label": "Items to add" });
     var run = h("button", { class: "scx-btn pri", type: "button", text: "✦ Analyse with AI" }), out = h("div", {});
+    var readyNote = h("p", { class: "scx-help", text: "Loading catalogue…" }); out.appendChild(readyNote);
     fillCats();
     mode.addEventListener("change", function () { fillCats(); ta.placeholder = hint(); });
 
@@ -328,7 +330,7 @@
     ]));
     return function ready() {
       run.disabled = !catalogueLoaded;
-      if (!out.childNodes.length) out.appendChild(h("p", { class: "scx-help", text: catalogueLoaded ? "Catalogue loaded. Ready to analyse." : catalogueError || "Loading catalogue…" }));
+      if (readyNote.parentNode === out) readyNote.textContent = catalogueLoaded ? "Catalogue loaded. Ready to analyse." : catalogueError || "Loading catalogue…";
     };
   }
 
