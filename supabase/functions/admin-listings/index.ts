@@ -1,5 +1,5 @@
 import { json, preflight, readJson } from "../_shared/http.ts";
-import { clearSessionCookie, getSessionToken, requireAdmin, sha256Hex } from "../_shared/auth.ts";
+import { getSessionToken, requireAdmin, sha256Hex } from "../_shared/auth.ts";
 import { serviceClient } from "../_shared/db.ts";
 import { validateListing, SECTIONS } from "../_shared/listing.ts";
 import { verifyApk } from "../_shared/apk.ts";
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
         await db.from("admin_activity").insert({ action: "admin.logout", entity_type: "session", entity_name: "Admin logout" });
       }
     }
-    return json(req, { ok: true }, 200, { "Set-Cookie": clearSessionCookie() });
+    return json(req, { ok: true });
   }
 
   if (!(await requireAdmin(req))) return json(req, { error: "Admin session expired. Enter the PIN again." }, 401);
@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
     const { error } = await db.rpc("admin_update_pin", { p_pin: pin });
     if (error) return json(req, { error: "Could not update the admin PIN." }, 500);
     await logActivity(db, "admin.pin_changed", "security", "admin", "Admin PIN");
-    return json(req, { ok: true, reLoginRequired: true }, 200, { "Set-Cookie": clearSessionCookie() });
+    return json(req, { ok: true, reLoginRequired: true });
   }
 
   if (action === "bulk") {
