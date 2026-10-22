@@ -251,7 +251,7 @@
     ui.view = tab; titleEl.textContent = "Admin Dashboard"; bodyEl.textContent = "";
     var tabs = h("div", { class: "scx-tabs", role: "tablist", "aria-label": "Admin controls" });
     [
-      ["overview", "Overview"], ["add", "Add item"], ["ai", "AI Studio"], ["manage", "Content"],
+      ["overview", "Overview"], ["add", "Add item"], ["ai", "Title lookup"], ["manage", "Content"],
       ["layout", "Cards & Layout"], ["appearance", "Appearance"], ["site", "Site settings"],
       ["activity", "Activity"], ["data", "Backup"], ["pin", "Change PIN"], ["logout", "Log out"]
     ].forEach(function (item) {
@@ -317,8 +317,7 @@
       }
       var secSel = ui.form ? null : sectionSelect(ui.section);
       var urlIn = h("input", { class: "scx-in", type: "url", placeholder: "https://…", "aria-label": "Public URL", value: ui.form ? ui.form.url || "" : "" });
-      var aiProviderInfo = h("span", { class: "scx-help", text: "AI provider: Automatic (task-based with fallback)" });
-      var detect = h("button", { class: "scx-btn pri", type: "button", text: "Detect with AI" });
+      var detect = h("button", { class: "scx-btn pri", type: "button", text: "Detect details" });
       var urlMsg = h("span", { class: "scx-err" });
       if (secSel) secSel.addEventListener("change", function () { ui.section = secSel.value; });
       var runDetect = function () {
@@ -333,7 +332,7 @@
           ui.verified = d.verified || {}; ui.notes = d.notes || [];
           showHome("add");
         }).catch(function (e) {
-          detect.disabled = false; detect.textContent = "Detect with AI";
+          detect.disabled = false; detect.textContent = "Detect details";
           if (!expired(e)) say(msg, "err", e.status ? e.message : "Could not reach the server. Check your connection.");
         });
       };
@@ -342,7 +341,7 @@
       wrap.appendChild(h("div", { class: "scx-row" }, [
         secSel ? h("label", { class: "scx-f" }, ["Show in", secSel]) : null,
         h("label", { class: "scx-f", style: "flex:3 1 260px" }, ["URL", urlIn]),
-        aiProviderInfo, detect
+        detect
       ]));
       wrap.appendChild(urlMsg);
       if (!ui.form) { urlIn.focus(); return; }
@@ -1082,18 +1081,17 @@
   }
 
   function showAiStudio(msg) {
-    bodyEl.appendChild(h("p", { class: "scx-help", text: "Look up a movie or web series by title. IMDb rating, poster, release year, genres, and series counts are loaded only when OMDb verifies the match. AI automatically selects a task-appropriate provider and switches to the next configured provider if one fails. Nothing is published until you review it in Add item." }));
+    bodyEl.appendChild(h("p", { class: "scx-help", text: "Look up a movie or web series by title. IMDb rating, poster, release year, genres, and series counts are loaded only when the match is verified. Nothing is published until you review it in Add item." }));
     var title = field("Movie / web-series title", "", "text", { maxlength: "160", placeholder: "Enter the exact title" });
     var year = field("Release year (optional)", "", "number", { min: "1870", max: "2100", placeholder: "e.g. 2024" });
     var type = h("select", { class: "scx-in", "aria-label": "Title type" });
     options(type, [{ value: "movie", label: "Movie" }, { value: "series", label: "Web Series" }], "movie");
     var typeWrap = h("label", { class: "scx-f" }, ["Type", type]);
-    var summaryProviderInfo = h("p", { class: "scx-help", text: "AI provider: Automatic — task-aware routing and fallback are enabled." });
-    var aiSummary = checkbox("Generate a short AI summary from the verified plot", true);
+    var aiSummary = checkbox("Create a short summary from the verified plot", true);
     var lookup = h("button", { class: "scx-btn pri", type: "button", text: "Find verified metadata" });
     var result = h("div", { class: "scx-ai-result" });
     var resultMsg = h("p", { class: "scx-help", text: "Search results appear here after lookup." });
-    bodyEl.appendChild(h("div", { class: "scx-grid" }, [title.wrap, year.wrap, typeWrap, summaryProviderInfo]));
+    bodyEl.appendChild(h("div", { class: "scx-grid" }, [title.wrap, year.wrap, typeWrap]));
     bodyEl.appendChild(aiSummary.wrap);
     bodyEl.appendChild(h("div", { class: "scx-actions" }, [lookup]));
     bodyEl.appendChild(resultMsg); bodyEl.appendChild(result);

@@ -15,12 +15,6 @@ type AIResult = {
   imdbId: string | null;
 };
 
-const LABEL: Record<Provider, string> = {
-  gemini: "Gemini AI",
-  groq: "GroqCloud",
-  openai: "OpenAI GPT",
-};
-
 const ENV_KEY: Record<Provider, string> = {
   gemini: "GEMINI_API_KEY",
   groq: "GROQ_API_KEY",
@@ -62,11 +56,9 @@ export async function askAutoAI(
 ): Promise<{ result: AIResult | null; provider: Provider | null; note: string }> {
   const order = orderFor(section, task);
   const failures: string[] = [];
-  let configuredCount = 0;
 
   for (const provider of order) {
     if (!isConfigured(provider)) continue;
-    configuredCount++;
     try {
       let result: AIResult | null;
       if (provider === "gemini") result = await askGemini(page, section);
@@ -74,25 +66,20 @@ export async function askAutoAI(
       else result = await askOpenAI(page, section);
 
       if (!useful(result, task)) {
-        failures.push(LABEL[provider] + " returned no usable result");
+        failures.push("no usable result");
         continue;
       }
 
-      const note = failures.length
-        ? "Auto AI switched to " + LABEL[provider] + " after " + failures.join("; ") + "."
-        : "Auto AI selected " + LABEL[provider] + " for this task.";
+      const note = "Details processed successfully.";
       return { result, provider, note };
     } catch (error) {
-      failures.push(LABEL[provider] + " failed (" + shortError(error) + ")");
+      failures.push(shortError(error));
     }
   }
 
-  const reason = configuredCount === 0
-    ? "No AI provider API key is configured."
-    : "All configured providers failed: " + failures.join("; ") + ".";
   return {
     result: null,
     provider: null,
-    note: "Auto AI unavailable: " + reason + " Add one or more provider keys in Supabase Edge Function Secrets. The site will use verified/source metadata where possible.",
+    note: "Some details could not be filled automatically. Available source metadata has been kept; please review the fields before saving.",
   };
 }

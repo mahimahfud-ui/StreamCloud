@@ -219,23 +219,23 @@ try {
   await page.getByText("Recent admin activity").waitFor({ timeout: 8000 });
   assert.ok(mockState.calls.some((x) => x.action === "overview"), "Admin overview API should be called after PIN login");
 
-  await page.getByRole("button", { name: "AI Studio" }).click();
-  assert.equal(await page.locator('select[aria-label="AI provider for summary"]').count(), 0, "AI Studio should not require manual AI-provider selection");
-  assert.ok(await page.getByText("AI provider: Automatic — task-aware routing and fallback are enabled.").count() > 0, "AI Studio should explain automatic routing");
+  await page.getByRole("button", { name: "Title lookup" }).click();
+  assert.equal(await page.locator('select[aria-label*="provider" i]').count(), 0, "Title lookup should not expose AI-provider selectors");
+  assert.equal(await page.getByText(/AI provider|GroqCloud|Gemini AI|OpenAI GPT/i).count(), 0, "Title lookup should not reveal provider names");
   await page.getByLabel("Movie / web-series title").fill("Example Film");
   await page.locator('.scx-grid input[type="number"]').fill("2024");
 
   await page.getByRole("button", { name: "Find verified metadata" }).click();
   await page.getByText("Verified test synopsis.").waitFor({ timeout: 8000 });
-  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.title === "Example Film"), "AI Studio should request metadata through the admin-detect endpoint");
-  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.aiProvider === "auto"), "AI Studio should delegate provider routing to the server");
+  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.title === "Example Film"), "Title lookup should request metadata through the admin-detect endpoint");
+  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.aiProvider === "auto"), "Title lookup should delegate routing to the server");
   await page.getByRole("button", { name: "Use this title in Add item" }).click();
   assert.ok(await page.locator("input.scx-in").evaluateAll((els) => els.some((el) => el.value === "Example Film")), "AI Studio metadata should transfer into Add item for review");
-  assert.equal(await page.locator('select[aria-label="AI provider"]').count(), 0, "Add item should not require manual AI-provider selection");
-  assert.ok(await page.getByText("AI provider: Automatic (task-based with fallback)").count() > 0, "Add item should explain automatic routing");
-  await page.getByRole("button", { name: "Detect with AI" }).click();
+  assert.equal(await page.locator('select[aria-label*="provider" i]').count(), 0, "Add item should not expose AI-provider selectors");
+  assert.equal(await page.getByText(/Detect with AI|AI provider|GroqCloud|Gemini AI|OpenAI GPT/i).count(), 0, "Add item should not reveal AI/provider details");
+  await page.getByRole("button", { name: "Detect details" }).click();
   await page.waitForFunction(() => Array.from(document.querySelectorAll("input.scx-in")).some((el) => el.value === "Detected by OpenAI"));
-  assert.ok(mockState.calls.some((x) => x.url && x.aiProvider === "auto"), "Add item should delegate provider routing to the server");
+  assert.ok(mockState.calls.some((x) => x.url && x.aiProvider === "auto"), "Add item should use server-side routing");
 
   await page.getByRole("button", { name: "Content" }).click();
   await page.getByText("Smoke test listing").waitFor({ timeout: 8000 });

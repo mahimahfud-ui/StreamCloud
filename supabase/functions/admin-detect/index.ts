@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
     try {
       const match = await omdbLookup({ title, year, type: section === "series" ? "series" : "movie" });
       if (match.status === "no-key") return json(req, { error: "OMDB_API_KEY is not configured on the server. Add it to Supabase Secrets to use title lookup." }, 503);
-      if (match.status === "not-found") return json(req, { error: "No exact title match was verified. Check spelling or add the IMDb URL and use Detect with AI." }, 404);
+      if (match.status === "not-found") return json(req, { error: "No exact title match was verified. Check the spelling or add the IMDb URL and use Detect details." }, 404);
       if (match.status === "type-mismatch") return json(req, { error: "IMDb identifies this as the other title type. Switch Movie / Web Series and try again." }, 422);
       if (!match.data) return json(req, { error: "No verified metadata was returned." }, 502);
       const d = match.data;
@@ -97,8 +97,8 @@ Deno.serve(async (req) => {
           notes.push(auto.note);
           if (auto.result?.description && auto.result.description.length > 20) {
             description = auto.result.description;
-            notes.push("AI generated a shorter synopsis using only the verified plot. Confirm it before publishing.");
-          } else notes.push("AI summary was unavailable; the verified OMDb plot is shown instead.");
+            notes.push("A shorter synopsis was created from the verified plot. Confirm it before publishing.");
+          } else notes.push("The verified source synopsis is shown instead.");
       }
       const imdbUrl = "https://www.imdb.com/title/" + d.imdbId + "/";
       const detected: Detected = {
