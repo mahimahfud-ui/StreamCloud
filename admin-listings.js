@@ -319,7 +319,7 @@
       var secSel = ui.form ? null : sectionSelect(ui.section);
       var urlIn = h("input", { class: "scx-in", type: "url", placeholder: "https://…", "aria-label": "Public URL", value: ui.form ? ui.form.url || "" : "" });
       var aiProvider = h("select", { class: "scx-in", "aria-label": "AI provider" });
-      options(aiProvider, [{ value: "gemini", label: "Gemini AI" }, { value: "openai", label: "OpenAI GPT" }], "gemini");
+      options(aiProvider, [{ value: "gemini", label: "Gemini AI" }, { value: "openai", label: "OpenAI GPT" }, { value: "groq", label: "GroqCloud" }], "gemini");
       var aiProviderWrap = h("label", { class: "scx-f" }, ["AI provider", aiProvider]);
       var detect = h("button", { class: "scx-btn pri", type: "button", text: "Detect with AI" });
       var urlMsg = h("span", { class: "scx-err" });
@@ -1085,14 +1085,14 @@
   }
 
   function showAiStudio(msg) {
-    bodyEl.appendChild(h("p", { class: "scx-help", text: "Look up a movie or web series by title. IMDb rating, poster, release year, genres, and series counts are loaded only when OMDb verifies the match. Choose Gemini AI or OpenAI GPT for the optional short summary. Nothing is published until you review it in Add item." }));
+    bodyEl.appendChild(h("p", { class: "scx-help", text: "Look up a movie or web series by title. IMDb rating, poster, release year, genres, and series counts are loaded only when OMDb verifies the match. Choose Gemini AI, OpenAI GPT or GroqCloud for the optional short summary. Nothing is published until you review it in Add item." }));
     var title = field("Movie / web-series title", "", "text", { maxlength: "160", placeholder: "Enter the exact title" });
     var year = field("Release year (optional)", "", "number", { min: "1870", max: "2100", placeholder: "e.g. 2024" });
     var type = h("select", { class: "scx-in", "aria-label": "Title type" });
     options(type, [{ value: "movie", label: "Movie" }, { value: "series", label: "Web Series" }], "movie");
     var typeWrap = h("label", { class: "scx-f" }, ["Type", type]);
     var summaryProvider = h("select", { class: "scx-in", "aria-label": "AI provider for summary" });
-    options(summaryProvider, [{ value: "gemini", label: "Gemini AI" }, { value: "openai", label: "OpenAI GPT" }], "gemini");
+    options(summaryProvider, [{ value: "gemini", label: "Gemini AI" }, { value: "openai", label: "OpenAI GPT" }, { value: "groq", label: "GroqCloud" }], "gemini");
     var summaryProviderWrap = h("label", { class: "scx-f" }, ["Summary AI provider", summaryProvider]);
     var aiSummary = checkbox("Generate a short AI summary from the verified plot", true);
     var lookup = h("button", { class: "scx-btn pri", type: "button", text: "Find verified metadata" });
