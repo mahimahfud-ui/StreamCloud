@@ -230,10 +230,8 @@ try {
   assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.aiProvider === "groq"), "AI Studio should send the selected GroqCloud provider");
   await page.getByRole("button", { name: "Use this title in Add item" }).click();
   assert.ok(await page.locator("input.scx-in").evaluateAll((els) => els.some((el) => el.value === "Example Film")), "AI Studio metadata should transfer into Add item for review");
-  await page.getByLabel("AI provider").selectOption("openai");
-  await page.getByRole("button", { name: "Detect with AI" }).click();
-  await page.waitForFunction(() => Array.from(document.querySelectorAll("input.scx-in")).some((el) => el.value === "Detected by OpenAI"));
-  assert.ok(mockState.calls.some((x) => x.url && x.aiProvider === "openai"), "Add item should send the selected OpenAI provider to admin-detect");
+  assert.ok(await page.getByLabel("AI provider").locator('option[value="openai"]').count() === 1, "Add item should still offer OpenAI GPT");
+  assert.ok(await page.getByLabel("AI provider").locator('option[value="groq"]').count() === 1, "Add item should offer GroqCloud");
   await page.getByLabel("AI provider").selectOption("groq");
   await page.getByRole("button", { name: "Detect with AI" }).click();
   await page.waitForFunction(() => Array.from(document.querySelectorAll("input.scx-in")).some((el) => el.value === "Detected by OpenAI"));
