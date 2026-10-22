@@ -483,39 +483,142 @@
   /* --- Manage --- */
   function showManage(msg) {
     var list = h("div", { class: "scx-list" }, [h("p", { text: "Loading…" })]);
+    var all = [];
+    var search = h("input", { class: "scx-in", type: "search", placeholder: "Search database items…", "aria-label": "Search listings" });
+    var statusFilter = h("select", { class: "scx-in", "aria-label": "Filter by visibility" });
+    options(statusFilter, [
+      { value: "all", label: "All visibility states" },
+      { value: "published", label: "Published only" },
+      { value: "hidden", label: "Hidden only" }
+    ], "all");
+    var sectionFilter = h("select", { class: "scx-in", "aria-label": "Filter by section" });
+    options(sectionFilter, [
+      { value: "all", label: "All sections" },
+      { value: "sites", label: "Websites" },
+      { value: "apps", label: "Movie Apps" },
+      { value: "music", label: "Music Apps" },
+      { value: "movie", label: "Movies" },
+      { value: "series", label: "Web Series" }
+    ], "all");
+    bodyEl.appendChild(h("div", { class: "scx-two" }, [
+      h("label", { class: "scx-f" }, ["Search", search]),
+      h("label", { class: "scx-f" }, ["Visibility", statusFilter]),
+      h("label", { class: "scx-f" }, ["Section", sectionFilter])
+    ]));
+    var selectAll = h("input", { type: "checkbox", "aria-label": "Select all filtered listings" });
+    var bulkSection = h("select", { class: "scx-in", "aria-label": "Bulk destination section" });
+    options(bulkSection, [
+      { value: "sites", label: "Websites" }, { value: "apps", label: "Movie Apps" },
+      { value: "music", label: "Music Apps" }, { value: "movie", label: "Movies" },
+      { value: "series", label: "Web Series" }
+    ], "sites");
+    var bulkCategory = h("input", { class: "scx-in", type: "text", value: "General", maxlength: "60", "aria-label": "Bulk destination category" });
+    var toolbar = h("div", { class: "scx-actions" }, [
+      h("label", { class: "scx-help" }, [selectAll, " Select all filtered"]),
+      h("button", { class: "scx-btn", type: "button", text: "Publish", onclick: function () { runBulk("publish"); } }),
+      h("button", { class: "scx-btn", type: "button", text: "Hide", onclick: function () { runBulk("hide"); } }),
+      h("button", { class: "scx-btn", type: "button", text: "Move selected", onclick: function () { runBulk("move"); } }),
+      h("button", { class: "scx-btn dng", type: "button", text: "Delete selected", onclick: function () { runBulk("delete"); } })
+    ]);
+    bodyEl.appendChild(toolbar);
+    bodyEl.appendChild(h("div", { class: "scx-row" }, [bulkSection, bulkCategory]));
     bodyEl.appendChild(list);
-    api("admin-listings", { action: "list" }).then(function (d) {
+
+    function selectedIds() {
+      return Array.prototype.map.call(list.querySelectorAll("input[data-listing-id]:checked"), function (x) { return x.dataset.listingId; });
+    }
+    function runBulk(operation) {
+      var ids = selectedIds();
+      if (!ids.length) { say(msg, "err", "Select at least one listing first."); return; }
+      if (operation === "delete" && !confirm("Permanently delete " + ids.length + " selected listing(s)? This cannot be undone.")) return;
+      var payload = { action: "bulk", operation: operation, ids: ids };
+      if (operation === "move") {
+        payload.section = bulkSection.value;
+        payload.category = bulkCategory.value.trim();
+        if (!payload.category) { say(msg, "err", "Enter a category for the selected listings."); return; }
+      }
+      var buttons = toolbar.querySelectorAll("button");
+      buttons.forEach(function (b) { b.disabled = true; });
+      api("admin-listings", payload).then(function (result) {
+        say(msg, "ok", "Bulk action complete. Updated " + result.affected + " item(s).");
+        return refreshPublic();
+      }).then(function () {
+        showHome("manage", { kind: "ok", text: "Bulk action saved." });
+      }).catch(function (e) {
+        if (!expired(e)) say(msg, "err", e.message || "Bulk action failed.");
+        buttons.forEach(function (b) { b.disabled = false; });
+      });
+    }
+    function filteredRows() {
+      var q = search.value.trim().toLowerCase();
+      return all.filter(function (r) {
+        if (sectionFilter.value !== "all" && r.section !== sectionFilter.value) return false;
+        if (statusFilter.value === "published" && !r.published) return false;
+        if (statusFilter.value === "hidden" && r.published) return false;
+        return !q || [r.name, r.category, r.url, r.section, r.description].join(" ").toLowerCase().indexOf(q) >= 0;
+      });
+    }
+    function renderRows() {
       list.textContent = "";
-      var all = d.listings || [];
-      if (!all.length) { list.appendChild(h("p", { text: "No listings yet. Use Add listing to publish one." })); return; }
-      all.forEach(function (r) {
+      selectAll.checked = false;
+      var filtered = filteredRows();
+      if (!filtered.length) {
+        list.appendChild(h("p", { class: "scx-help", text: all.length ? "No listings match these filters." : "No database listings yet. Use Add item to publish one." }));
+        return;
+      }
+      filtered.forEach(function (r) {
+        var check = h("input", { type: "checkbox", "data-listing-id": r.id, "aria-label": "Select " + r.name });
         var del = h("button", { class: "scx-btn dng", type: "button", text: "Delete" });
         var edit = h("button", { class: "scx-btn", type: "button", text: "Edit" });
+        var visibility = h("button", { class: "scx-btn", type: "button", text: r.published ? "Hide" : "Publish" });
         var item = h("div", { class: "scx-item" }, [
-          h("div", {}, [h("b", { text: r.name }), h("small", { text: r.category + " · " + (SECTION_LABEL[r.section] || r.section) })]),
-          h("div", { class: "scx-actions" }, [edit, del])
+          h("div", {}, [
+            check,
+            h("b", { text: r.name }),
+            h("small", { text: r.category + " · " + (SECTION_LABEL[r.section] || r.section) + " · " + (r.published ? "Published" : "Hidden") })
+          ]),
+          h("div", { class: "scx-actions" }, [edit, visibility, del])
         ]);
         edit.addEventListener("click", function () {
           resetAdd(); ui.editingId = r.id;
           ui.form = Object.assign({}, r); ui.section = r.section; ui.verified = {}; ui.notes = [];
           showHome("add");
         });
+        visibility.addEventListener("click", function () {
+          visibility.disabled = true;
+          api("admin-listings", { action: "bulk", operation: r.published ? "hide" : "publish", ids: [r.id] })
+            .then(function () { return refreshPublic(); })
+            .then(function () { showHome("manage", { kind: "ok", text: r.published ? "Listing hidden." : "Listing published." }); })
+            .catch(function (e) { if (!expired(e)) { visibility.disabled = false; say(msg, "err", e.message); } });
+        });
         del.addEventListener("click", function () {
           var yes = h("button", { class: "scx-btn dng", type: "button", text: "Yes, delete" });
           var keep = h("button", { class: "scx-btn", type: "button", text: "Keep" });
-          var ask = h("div", { class: "scx-actions" }, [h("span", { text: "Delete “" + r.name + "”?" }), yes, keep]);
+          var ask = h("div", { class: "scx-actions" }, [h("span", { text: "Delete “" + r.name + "”? " }), yes, keep]);
           item.replaceChild(ask, item.lastChild); yes.focus();
-          keep.addEventListener("click", function () { item.replaceChild(h("div", { class: "scx-actions" }, [edit, del]), ask); });
+          keep.addEventListener("click", function () { item.replaceChild(h("div", { class: "scx-actions" }, [edit, visibility, del]), ask); });
           yes.addEventListener("click", function () {
             yes.disabled = true;
             api("admin-listings", { action: "delete", id: r.id }).then(function () {
-              rows = rows.filter(function (x) { return x.id !== r.id; }); refreshPublic();
+              rows = rows.filter(function (x) { return x.id !== r.id; });
+              return refreshPublic();
+            }).then(function () {
               showHome("manage", { kind: "ok", text: "Deleted." });
             }).catch(function (e) { if (!expired(e)) { yes.disabled = false; say(msg, "err", e.message); } });
           });
         });
         list.appendChild(item);
       });
+    }
+    [search, statusFilter, sectionFilter].forEach(function (control) {
+      control.addEventListener(control === search ? "input" : "change", renderRows);
+    });
+    selectAll.addEventListener("change", function () {
+      list.querySelectorAll("input[data-listing-id]").forEach(function (x) { x.checked = selectAll.checked; });
+    });
+    api("admin-listings", { action: "list" }).then(function (d) {
+      all = d.listings || [];
+      renderRows();
     }).catch(function (e) { list.textContent = ""; if (!expired(e)) say(msg, "err", e.status ? e.message : "Could not reach the server."); });
   }
 
