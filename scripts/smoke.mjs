@@ -220,22 +220,22 @@ try {
   assert.ok(mockState.calls.some((x) => x.action === "overview"), "Admin overview API should be called after PIN login");
 
   await page.getByRole("button", { name: "AI Studio" }).click();
-  assert.ok(await page.getByLabel("AI provider for summary").locator('option[value="groq"]').count() === 1, "AI Studio should offer GroqCloud summaries");
+  assert.equal(await page.locator('select[aria-label="AI provider for summary"]').count(), 0, "AI Studio should not require manual AI-provider selection");
+  assert.ok(await page.getByText("AI provider: Automatic — task-aware routing and fallback are enabled.").count() > 0, "AI Studio should explain automatic routing");
   await page.getByLabel("Movie / web-series title").fill("Example Film");
   await page.getByLabel("Release year (optional)").fill("2024");
-  await page.getByLabel("AI provider for summary").selectOption("groq");
+
   await page.getByRole("button", { name: "Find verified metadata" }).click();
   await page.getByText("Verified test synopsis.").waitFor({ timeout: 8000 });
   assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.title === "Example Film"), "AI Studio should request metadata through the admin-detect endpoint");
-  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.aiProvider === "groq"), "AI Studio should send the selected GroqCloud provider");
+  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.aiProvider === "auto"), "AI Studio should delegate provider routing to the server");
   await page.getByRole("button", { name: "Use this title in Add item" }).click();
   assert.ok(await page.locator("input.scx-in").evaluateAll((els) => els.some((el) => el.value === "Example Film")), "AI Studio metadata should transfer into Add item for review");
-  assert.ok(await page.getByLabel("AI provider").locator('option[value="openai"]').count() === 1, "Add item should still offer OpenAI GPT");
-  assert.ok(await page.getByLabel("AI provider").locator('option[value="groq"]').count() === 1, "Add item should offer GroqCloud");
-  await page.getByLabel("AI provider").selectOption("groq");
+  assert.equal(await page.locator('select[aria-label="AI provider"]').count(), 0, "Add item should not require manual AI-provider selection");
+  assert.ok(await page.getByText("AI provider: Automatic (task-based with fallback)").count() > 0, "Add item should explain automatic routing");
   await page.getByRole("button", { name: "Detect with AI" }).click();
   await page.waitForFunction(() => Array.from(document.querySelectorAll("input.scx-in")).some((el) => el.value === "Detected by OpenAI"));
-  assert.ok(mockState.calls.some((x) => x.url && x.aiProvider === "groq"), "Add item should send the selected GroqCloud provider to admin-detect");
+  assert.ok(mockState.calls.some((x) => x.url && x.aiProvider === "auto"), "Add item should delegate provider routing to the server");
 
   await page.getByRole("button", { name: "Content" }).click();
   await page.getByText("Smoke test listing").waitFor({ timeout: 8000 });

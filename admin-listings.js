@@ -317,9 +317,7 @@
       }
       var secSel = ui.form ? null : sectionSelect(ui.section);
       var urlIn = h("input", { class: "scx-in", type: "url", placeholder: "https://…", "aria-label": "Public URL", value: ui.form ? ui.form.url || "" : "" });
-      var aiProvider = h("select", { class: "scx-in", "aria-label": "AI provider" });
-      options(aiProvider, [{ value: "gemini", label: "Gemini AI" }, { value: "openai", label: "OpenAI GPT" }, { value: "groq", label: "GroqCloud" }], "gemini");
-      var aiProviderWrap = h("label", { class: "scx-f" }, ["AI provider", aiProvider]);
+      var aiProviderInfo = h("span", { class: "scx-help", text: "AI provider: Automatic (task-based with fallback)" });
       var detect = h("button", { class: "scx-btn pri", type: "button", text: "Detect with AI" });
       var urlMsg = h("span", { class: "scx-err" });
       if (secSel) secSel.addEventListener("change", function () { ui.section = secSel.value; });
@@ -329,7 +327,7 @@
         if (cat.custom && !name) { urlMsg.textContent = "Enter the custom category name first."; return; }
         if (!isHttps(urlIn.value)) { urlMsg.textContent = "Enter a valid public https:// URL."; return; }
         detect.disabled = true; detect.textContent = "Detecting…"; say(msg, "", "");
-        api("admin-detect", { url: urlIn.value.trim(), section: ui.section, category: name, aiProvider: aiProvider.value }).then(function (d) {
+        api("admin-detect", { url: urlIn.value.trim(), section: ui.section, category: name, aiProvider: "auto" }).then(function (d) {
           ui.form = Object.assign({ section: ui.section, category: name, url: urlIn.value.trim() }, d.detected || {});
           ui.form.section = ui.section; ui.form.category = name; ui.form.url = urlIn.value.trim();
           ui.verified = d.verified || {}; ui.notes = d.notes || [];
@@ -344,7 +342,7 @@
       wrap.appendChild(h("div", { class: "scx-row" }, [
         secSel ? h("label", { class: "scx-f" }, ["Show in", secSel]) : null,
         h("label", { class: "scx-f", style: "flex:3 1 260px" }, ["URL", urlIn]),
-        aiProviderWrap, detect
+        aiProviderInfo, detect
       ]));
       wrap.appendChild(urlMsg);
       if (!ui.form) { urlIn.focus(); return; }
@@ -1084,20 +1082,18 @@
   }
 
   function showAiStudio(msg) {
-    bodyEl.appendChild(h("p", { class: "scx-help", text: "Look up a movie or web series by title. IMDb rating, poster, release year, genres, and series counts are loaded only when OMDb verifies the match. Choose Gemini AI, OpenAI GPT or GroqCloud for the optional short summary. Nothing is published until you review it in Add item." }));
+    bodyEl.appendChild(h("p", { class: "scx-help", text: "Look up a movie or web series by title. IMDb rating, poster, release year, genres, and series counts are loaded only when OMDb verifies the match. AI automatically selects a task-appropriate provider and switches to the next configured provider if one fails. Nothing is published until you review it in Add item." }));
     var title = field("Movie / web-series title", "", "text", { maxlength: "160", placeholder: "Enter the exact title" });
     var year = field("Release year (optional)", "", "number", { min: "1870", max: "2100", placeholder: "e.g. 2024" });
     var type = h("select", { class: "scx-in", "aria-label": "Title type" });
     options(type, [{ value: "movie", label: "Movie" }, { value: "series", label: "Web Series" }], "movie");
     var typeWrap = h("label", { class: "scx-f" }, ["Type", type]);
-    var summaryProvider = h("select", { class: "scx-in", "aria-label": "AI provider for summary" });
-    options(summaryProvider, [{ value: "gemini", label: "Gemini AI" }, { value: "openai", label: "OpenAI GPT" }, { value: "groq", label: "GroqCloud" }], "gemini");
-    var summaryProviderWrap = h("label", { class: "scx-f" }, ["Summary AI provider", summaryProvider]);
+    var summaryProviderInfo = h("p", { class: "scx-help", text: "AI provider: Automatic — task-aware routing and fallback are enabled." });
     var aiSummary = checkbox("Generate a short AI summary from the verified plot", true);
     var lookup = h("button", { class: "scx-btn pri", type: "button", text: "Find verified metadata" });
     var result = h("div", { class: "scx-ai-result" });
     var resultMsg = h("p", { class: "scx-help", text: "Search results appear here after lookup." });
-    bodyEl.appendChild(h("div", { class: "scx-grid" }, [title.wrap, year.wrap, typeWrap, summaryProviderWrap]));
+    bodyEl.appendChild(h("div", { class: "scx-grid" }, [title.wrap, year.wrap, typeWrap, summaryProviderInfo]));
     bodyEl.appendChild(aiSummary.wrap);
     bodyEl.appendChild(h("div", { class: "scx-actions" }, [lookup]));
     bodyEl.appendChild(resultMsg); bodyEl.appendChild(result);
@@ -1130,7 +1126,7 @@
       if (name.length < 2) { say(msg, "err", "Enter at least two characters for the title."); title.input.focus(); return; }
       lookup.disabled = true; lookup.textContent = "Looking up…"; say(msg, "", "");
       result.textContent = ""; resultMsg.textContent = "Checking title, rating, poster and series details…";
-      api("admin-detect", { mode: "title-lookup", title: name, year: year.input.value ? Number(year.input.value) : null, section: type.value, generateSummary: aiSummary.input.checked, aiProvider: summaryProvider.value })
+      api("admin-detect", { mode: "title-lookup", title: name, year: year.input.value ? Number(year.input.value) : null, section: type.value, generateSummary: aiSummary.input.checked, aiProvider: "auto" })
         .then(function (d) { showResult(d); resultMsg.textContent = "Metadata checked. Review every field before saving."; say(msg, "ok", "Lookup complete."); })
         .catch(function (e) { resultMsg.textContent = ""; if (!expired(e)) say(msg, "err", e.message || "Title lookup failed."); })
         .finally(function () { lookup.disabled = false; lookup.textContent = "Find verified metadata"; });

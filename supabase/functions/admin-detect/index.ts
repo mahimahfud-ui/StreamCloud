@@ -4,8 +4,7 @@ import { baseDomain, parsePublicUrl, readLimited, safeFetch } from "../_shared/u
 import { verifyApk } from "../_shared/apk.ts";
 import { extractPage, type PageInfo } from "./page.ts";
 import { askGemini } from "./gemini.ts";
-import { askOpenAI } from "./openai.ts";
-import { askGroq } from "./groq.ts";
+import { askAutoAI } from "./ai-router.ts";
 import { omdbLookup } from "./omdb.ts";
 
 type Detected = Record<string, unknown>;
@@ -68,10 +67,6 @@ Deno.serve(async (req) => {
   const body = await readJson(req, 4_000);
   if (!body) return json(req, { error: "Invalid request." }, 400);
   const section = String(body.section ?? "sites");
-  const aiProvider: "gemini" | "openai" | "groq" = body.aiProvider === "openai" ? "openai" : body.aiProvider === "groq" ? "groq" : "gemini";
-  const aiProviderLabel = aiProvider === "openai" ? "OpenAI GPT" : aiProvider === "groq" ? "GroqCloud" : "Gemini AI";
-  const askSelectedAI = (page: PageInfo, section: string) =>
-    aiProvider === "openai" ? askOpenAI(page, section) : aiProvider === "groq" ? askGroq(page, section) : askGemini(page, section);
 
   if (body.mode === "title-lookup") {
     if (section !== "movie" && section !== "series") return json(req, { error: "Choose Movie or Web Series." }, 422);
@@ -99,12 +94,12 @@ Deno.serve(async (req) => {
             jsonLd: [],
             structured: { name: d.title, description: d.plot, image: d.poster, year: d.year, genres: d.genres, platform: null, version: null },
           };
-          const ai = await askSelectedAI(source, section);
-          if (ai?.description && ai.description.length > 20) {
-            description = ai.description;
-            notes.push(aiProviderLabel + " generated a shorter synopsis using only the verified plot. Confirm it before publishing.");
-          } else notes.push(aiProviderLabel + " summary was unavailable; the verified OMDb plot is shown instead.");
-        } catch (error) { notes.push(aiProviderLabel + " summary was unavailable: " + ((error as Error).message || "unknown error") + ". The verified OMDb plot is shown instead."); }
+          const auto = await askAutoAI(source, section, "summary");
+          notes.push(auto.note);
+          if (auto.result?.description && auto.result.description.length > 20) {
+            description = auto.result.description;
+            notes.push("AI generated a shorter synopsis using only the verified plot. Confirm it before publishing.");
+          } else notes.push("AI summary was unavailable; the verified OMDb plot is shown instead.");
       }
       const imdbUrl = "https://www.imdb.com/title/" + d.imdbId + "/";
       const detected: Detected = {
@@ -144,13 +139,15 @@ Deno.serve(async (req) => {
     } catch (e) { notes.push(`The page could not be read: ${(e as Error).message}. Fill the fields manually.`); }
   }
 
-  // 2. Analyze the page with the selected AI provider (keys stay server-side).
+  // 2. Automatically select an AI provider for this task and fail over on errors.
   let ai: Awaited<ReturnType<typeof askGemini>> = null;
   if (page) {
-    try { ai = await askSelectedAI(page, section); } catch (e) { notes.push(`${aiProviderLabel} analysis unavailable: ${(e as Error).message}`); }
+    const auto = await askAutoAI(page, section, "metadata");
+    ai = auto.result;
+    notes.push(auto.note);
   }
-  // Keep usable page metadata as a fallback when Gemini cannot parse a page or
-  // returns only some fields. Many directory pages expose details in JSON-LD/OG tags.
+  // Keep usable page metadata as a fallback when AI providers fail or return
+  // only some fields. Many directory pages expose details in JSON-LD/OG tags.
   const structured = page?.structured;
   out.name = ai?.name || structured?.name || (isTitle ? page?.title : page?.siteName || page?.title) || null;
   out.description = ai?.description || structured?.description || page?.description || null;
