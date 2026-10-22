@@ -19,9 +19,31 @@ const SCHEMA = {
 export async function askGemini(page: PageInfo, section: string): Promise<GeminiResult | null> {
   const key = Deno.env.get("GEMINI_API_KEY");
   if (!key || key.trim() === "এপিয়াই") throw new Error("GEMINI_API_KEY is not set on the server.");
-  const preferredModel = (Deno.env.get("GEMINI_MODEL") ?? "").trim() || "gemini-3.8-flash";
-  // Older Gemini 2.5 models were shut down in October 2026; keep compatible current fallbacks.
-  const models = [...new Set([preferredModel, "gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"])];
+  // Discover models enabled for this API key instead of assuming a fixed model name.
+  const models: string[] = [];
+  try {
+    const listRes = await fetch("https://generativelanguage.googleapis.com/v1beta/models", {
+      headers: { "x-goog-api-key": key },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (listRes.ok) {
+      const listing = await listRes.json();
+      const available = (listing.models ?? [])
+        .filter((m: { name?: string; supportedGenerationMethods?: string[] }) =>
+          typeof m.name === "string" && (m.supportedGenerationMethods ?? []).includes("generateContent"))
+        .map((m: { name: string }) => m.name.replace(/^models\//, ""));
+      const preferred = (Deno.env.get("GEMINI_MODEL") ?? "").trim().replace(/^models\//, "");
+      if (preferred && available.includes(preferred)) models.push(preferred);
+      models.push(...available.filter((name: string) => /gemini.*flash/i.test(name) && !/audio|tts|image|embedding|robotics/i.test(name)));
+      models.push(...available.filter((name: string) => /gemini/i.test(name) && !/audio|tts|image|embedding|robotics/i.test(name)));
+    }
+  } catch { /* Try the standard model as a fallback if model listing is unavailable. */ }
+  if (!models.length) {
+    const preferred = (Deno.env.get("GEMINI_MODEL") ?? "").trim().replace(/^models\//, "");
+    if (preferred) models.push(preferred);
+    models.push("gemini-2.5-flash", "gemini-2.0-flash");
+  }
+  const uniqueModels = [...new Set(models)].slice(0, 6);
   const prompt = [
     `You extract listing details for a directory (type: ${section}) from ONE public web page.`,
     "Rules: use ONLY the page data below. If a value is not explicitly stated there, return null (or [] for genres).",
@@ -35,8 +57,8 @@ export async function askGemini(page: PageInfo, section: string): Promise<Gemini
 
   let data: any = null;
   let lastModel = "";
-  for (let i = 0; i < models.length; i++) {
-    const model = models[i];
+  for (let i = 0; i < uniqueModels.length; i++) {
+    const model = uniqueModels[i];
     lastModel = model;
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: "POST",
@@ -49,7 +71,7 @@ export async function askGemini(page: PageInfo, section: string): Promise<Gemini
       signal: AbortSignal.timeout(25000),
     });
     if (res.ok) { data = await res.json(); break; }
-    if (res.status === 404 && i < models.length - 1) continue;
+    if (res.status === 404 && i < uniqueModels.length - 1) continue;
     if (res.status === 401 || res.status === 403) {
       throw new Error(`Gemini API key rejected (${res.status}). Check GEMINI_API_KEY in Supabase Secrets.`);
     }
