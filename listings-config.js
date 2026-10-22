@@ -17,5 +17,5 @@ window.STREAMCLOUD_SUPABASE = {
     if (done) s.addEventListener("load", done, { once: true });
     document.head.appendChild(s);
   }
-  load("./admin-ultra.js", function () { load("./admin-ai-plus.js"); });
+  load("./admin-ultra.js", function () { load("./admin-ai-plus.js", function () { load("./admin-polish.js"); }); });
 })();
