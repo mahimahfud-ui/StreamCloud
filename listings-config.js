@@ -6,5 +6,14 @@ window.STREAMCLOUD_SUPABASE = {
   anonKey: "sb_publishable_S20xF3_NWiQjA727-mG6oQ_Rxst1YQM"  // Public publishable key; RLS protects database access
 };
 
-/* Admin Ultra layer (steppers, live-preview dock, Catalogue Pro, AI tools) */
-(function () { var s = document.createElement("script"); s.src = "./admin-ultra.js"; s.defer = true; document.head.appendChild(s); })();
+/* Admin Ultra layer (steppers, live-preview dock, Catalogue Pro, AI tools) *//* Load admin enhancements in dependency order: Admin Ultra first, then AI Copilot. */
+(function () {
+  function load(src, done) {
+    var s = document.createElement("script");
+    s.src = src;
+    s.async = false;
+    if (done) s.addEventListener("load", done, { once: true });
+    document.head.appendChild(s);
+  }
+  load("./admin-ultra.js", function () { load("./admin-ai-plus.js"); });
+})();
