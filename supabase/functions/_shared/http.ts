@@ -3,6 +3,7 @@ const DEFAULT_ORIGINS = [
   "https://mahimahfud-ui.github.io",
   "https://streamcloud.ai.studio",
   "https://www.streamcloud.ai.studio",
+  "https://streamcloud-527d.onrender.com",
 ];
 
 function originAllowed(origin: string, configured: Set<string>): boolean {
