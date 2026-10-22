@@ -11,8 +11,13 @@ const na = (v: unknown) => (typeof v === "string" && v !== "N/A" && v.trim() ? v
 async function call(params: Record<string, string>, key: string) {
   const qs = new URLSearchParams({ apikey: key, ...params });
   const res = await fetch(`https://www.omdbapi.com/?${qs}`, { signal: AbortSignal.timeout(8000) });
+  const data = await res.json().catch(() => ({}));
+  const providerError = typeof data?.Error === "string" ? data.Error : "";
+  if (res.status === 401 || /invalid api key|api key/i.test(providerError)) {
+    throw new Error("OMDb rejected the API key (401). Check OMDB_API_KEY in Supabase Secrets and use the exact active key.");
+  }
   if (!res.ok) throw new Error(`OMDb returned ${res.status}.`);
-  return await res.json();
+  return data;
 }
 
 export async function omdbLookup(q: { imdbId?: string; title: string; year: number | null; type: "movie" | "series" }): Promise<Result> {
