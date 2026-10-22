@@ -160,7 +160,7 @@
     ".scx-box{width:min(1040px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--panel,#181818);color:var(--text,#fff);border:1px solid var(--border,#343434);border-radius:14px;padding:20px;box-shadow:0 24px 60px rgba(0,0,0,.55)}" +
     ".scx-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px}.scx-head h2{margin:0;font-size:19px}" +
     ".scx-x{border:0;background:transparent;color:var(--dim,#a7a7a7);font-size:24px;line-height:1;cursor:pointer;padding:4px 8px}.scx-x:hover{color:#fff}" +
-    ".scx-tabs{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}.scx-tab,.scx-btn{border:1px solid var(--border,#343434);background:var(--card,#242424);color:#fff;border-radius:10px;padding:10px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s}.scx-tab:hover,.scx-btn:hover{border-color:#555}.scx-tab.on,.scx-btn.pri{background:var(--red,#e50914);border-color:var(--red,#e50914)}.scx-btn.pri:hover{filter:brightness(1.1)}.scx-btn.dng{border-color:#8e202d;color:#ff7166}.scx-btn:disabled{opacity:.55;cursor:default}.scx-tab:focus-visible,.scx-btn:focus-visible,.scx-in:focus-visible{outline:2px solid #fff;outline-offset:2px}" +
+    ".scx-tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:0 0 16px}.scx-tab,.scx-btn{border:1px solid var(--border,#343434);background:var(--card,#242424);color:#fff;border-radius:10px;padding:10px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s,border-color .2s}.scx-tab{min-width:0;min-height:118px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:10px;padding:12px;text-align:left;white-space:normal;border-radius:12px;background:linear-gradient(145deg,var(--card,#242424),rgba(255,255,255,.025))}.scx-tab:hover,.scx-btn:hover{border-color:#555}.scx-tab.on{background:var(--red,#e50914);border-color:var(--red,#e50914)}.scx-btn.pri{background:var(--red,#e50914);border-color:var(--red,#e50914)}.scx-btn.pri:hover{filter:brightness(1.1)}.scx-nav-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:rgba(255,255,255,.08);font-size:18px;line-height:1;flex:0 0 auto}.scx-nav-title{display:block;font-size:13px;font-weight:800;line-height:1.15;color:#fff}.scx-nav-sub{display:block;font-size:10.5px;line-height:1.35;color:var(--dim,#a7a7a7);font-weight:500}.scx-tab.on .scx-nav-icon{background:rgba(255,255,255,.18)}.scx-tab.on .scx-nav-sub{color:rgba(255,255,255,.85)}.scx-btn.dng{border-color:#8e202d;color:#ff7166}.scx-btn:disabled{opacity:.55;cursor:default}.scx-tab:focus-visible,.scx-btn:focus-visible,.scx-in:focus-visible{outline:2px solid #fff;outline-offset:2px}" +
     ".scx-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}.scx-chip{border:1px solid var(--border,#343434);background:transparent;color:var(--dim,#a7a7a7);border-radius:999px;padding:8px 13px;font:inherit;font-size:12.5px;cursor:pointer}.scx-chip.on{background:#fff;color:#000;border-color:#fff}" +
     ".scx-row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;align-items:flex-end}.scx-row>.scx-f{flex:1 1 200px}" +
     ".scx-f{display:flex;flex-direction:column;gap:5px;margin:0 0 12px;font-size:12px;color:var(--dim,#a7a7a7)}.scx-f.full{width:100%}.scx-in{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--card,#242424);color:#fff;font:inherit;font-size:14px}textarea.scx-in{min-height:76px;resize:vertical}.scx-f.bad .scx-in{border-color:#ff7166}.scx-err{color:#ff7166;font-size:12px}.scx-ok{color:var(--green,#46d369);font-size:11px;margin-left:6px}" +
@@ -172,7 +172,7 @@
     ".scx-sum{margin:0 0 14px;padding:12px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--card,#242424);font-size:13px;line-height:1.55}.scx-sum dt{color:var(--dim,#a7a7a7);font-size:11px}.scx-sum dd{margin:0 0 6px;word-break:break-word}" });
   document.head.appendChild(style);
   var dashboardStyle = h("style", { text:
-    ".scx-tabs{max-height:none}.scx-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0 0 16px}.scx-stat{padding:14px;border:1px solid var(--border,#343434);border-radius:12px;background:var(--card,#242424)}.scx-stat strong{display:block;font-size:24px;margin:0 0 4px;color:#fff}.scx-stat span{display:block;font-size:11px;color:var(--dim,#a7a7a7)}.scx-help{font-size:12px;color:var(--dim,#a7a7a7);line-height:1.5}.scx-divider{height:1px;background:var(--border,#343434);margin:17px 0}.scx-order-list{display:flex;flex-direction:column;gap:7px;margin:10px 0}.scx-order-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 11px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--card,#242424)}.scx-order-row[draggable=true]{cursor:grab}.scx-order-row.dragging{opacity:.4;border-color:var(--red,#e50914)}.scx-order-title{flex:1;min-width:110px;font-size:13px;font-weight:700}.scx-status{font-size:10px;color:var(--dim,#a7a7a7)}.scx-small{font-size:11px;padding:6px 9px}.scx-two{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}@media(max-width:640px){.scx-two{grid-template-columns:1fr}.scx-box{padding:14px}.scx-tabs{gap:5px}.scx-tab{padding:8px 9px;font-size:12px}}.scx-field-note{font-size:11px;color:var(--dim,#a7a7a7);margin-top:4px}.scx-count{font-size:11px;color:var(--dim,#a7a7a7)}"
+    ".scx-tabs{max-height:none}.scx-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0 0 16px}.scx-stat{padding:14px;border:1px solid var(--border,#343434);border-radius:12px;background:var(--card,#242424)}.scx-stat strong{display:block;font-size:24px;margin:0 0 4px;color:#fff}.scx-stat span{display:block;font-size:11px;color:var(--dim,#a7a7a7)}.scx-help{font-size:12px;color:var(--dim,#a7a7a7);line-height:1.5}.scx-divider{height:1px;background:var(--border,#343434);margin:17px 0}.scx-order-list{display:flex;flex-direction:column;gap:7px;margin:10px 0}.scx-order-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 11px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--card,#242424)}.scx-order-row[draggable=true]{cursor:grab}.scx-order-row.dragging{opacity:.4;border-color:var(--red,#e50914)}.scx-order-title{flex:1;min-width:110px;font-size:13px;font-weight:700}.scx-status{font-size:10px;color:var(--dim,#a7a7a7)}.scx-small{font-size:11px;padding:6px 9px}.scx-two{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}@media(max-width:640px){.scx-two{grid-template-columns:1fr}.scx-box{padding:14px}.scx-tabs{gap:8px;grid-template-columns:repeat(auto-fit,minmax(112px,1fr))}.scx-tab{min-height:110px;padding:10px;font-size:12px}}.scx-field-note{font-size:11px;color:var(--dim,#a7a7a7);margin-top:4px}.scx-count{font-size:11px;color:var(--dim,#a7a7a7)}"
   });
   document.head.appendChild(dashboardStyle);
 
@@ -251,22 +251,34 @@
     ui.view = tab; titleEl.textContent = "Admin Dashboard"; bodyEl.textContent = "";
     var tabs = h("div", { class: "scx-tabs", role: "tablist", "aria-label": "Admin controls" });
     [
-      ["overview", "Overview"], ["add", "Add item"], ["ai", "Title lookup"], ["manage", "Content"],
-      ["layout", "Cards & Layout"], ["appearance", "Appearance"], ["site", "Site settings"],
-      ["activity", "Activity"], ["data", "Backup"], ["pin", "Change PIN"], ["logout", "Log out"]
+      { id: "overview", label: "Overview", icon: "▦", desc: "Totals and recent activity" },
+      { id: "add", label: "Add item", icon: "＋", desc: "Add a movie, service or app" },
+      { id: "ai", label: "Title lookup", icon: "⌕", desc: "Find verified title details" },
+      { id: "manage", label: "Content", icon: "▤", desc: "Select, publish, move or delete items" },
+      { id: "layout", label: "Cards & Layout", icon: "▥", desc: "Arrange cards and visibility" },
+      { id: "appearance", label: "Appearance", icon: "◐", desc: "Theme, colours and spacing" },
+      { id: "site", label: "Site settings", icon: "⚙", desc: "Announcement and visitor controls" },
+      { id: "activity", label: "Activity", icon: "◷", desc: "Review admin history" },
+      { id: "data", label: "Backup", icon: "⇅", desc: "Export or import data" },
+      { id: "pin", label: "Change PIN", icon: "◈", desc: "Update admin access PIN" },
+      { id: "logout", label: "Log out", icon: "↗", desc: "End your admin session" }
     ].forEach(function (item) {
       tabs.appendChild(h("button", {
-        class: "scx-tab" + (tab === item[0] ? " on" : ""),
-        type: "button", text: item[1], "aria-selected": String(tab === item[0]),
+        class: "scx-tab" + (tab === item.id ? " on" : ""),
+        type: "button", "aria-label": item.label, "aria-selected": String(tab === item.id),
         onclick: function () {
-          if (item[0] === "add") resetAdd();
-          if (item[0] === "logout") {
+          if (item.id === "add") resetAdd();
+          if (item.id === "logout") {
             api("admin-listings", { action: "logout" }).catch(function () {}).finally(function () { setSession(null); showPin(); });
             return;
           }
-          showHome(item[0]);
+          showHome(item.id);
         }
-      }));
+      }, [
+        h("span", { class: "scx-nav-icon", "aria-hidden": "true", text: item.icon }),
+        h("span", { class: "scx-nav-title", text: item.label }),
+        h("span", { class: "scx-nav-sub", text: item.desc })
+      ]));
     });
     bodyEl.appendChild(tabs);
     var msg = msgBox(); bodyEl.appendChild(msg);
@@ -577,44 +589,19 @@
       }
       filtered.forEach(function (r) {
         var check = h("input", { type: "checkbox", "data-listing-id": r.id, "aria-label": "Select " + r.name });
-        var del = h("button", { class: "scx-btn dng", type: "button", text: "Delete" });
         var edit = h("button", { class: "scx-btn", type: "button", text: "Edit" });
-        var visibility = h("button", { class: "scx-btn", type: "button", text: r.published ? "Hide" : "Publish" });
         var item = h("div", { class: "scx-item" }, [
           h("div", {}, [
             check,
             h("b", { text: r.name }),
             h("small", { text: r.category + " · " + (SECTION_LABEL[r.section] || r.section) + " · " + (r.published ? "Published" : "Hidden") })
           ]),
-          h("div", { class: "scx-actions" }, [edit, visibility, del])
+          h("div", { class: "scx-actions" }, [edit])
         ]);
         edit.addEventListener("click", function () {
           resetAdd(); ui.editingId = r.id;
           ui.form = Object.assign({}, r); ui.section = r.section; ui.verified = {}; ui.notes = [];
           showHome("add");
-        });
-        visibility.addEventListener("click", function () {
-          visibility.disabled = true;
-          api("admin-listings", { action: "bulk", operation: r.published ? "hide" : "publish", ids: [r.id] })
-            .then(function () { return refreshPublic(); })
-            .then(function () { showHome("manage", { kind: "ok", text: r.published ? "Listing hidden." : "Listing published." }); })
-            .catch(function (e) { if (!expired(e)) { visibility.disabled = false; say(msg, "err", e.message); } });
-        });
-        del.addEventListener("click", function () {
-          var yes = h("button", { class: "scx-btn dng", type: "button", text: "Yes, delete" });
-          var keep = h("button", { class: "scx-btn", type: "button", text: "Keep" });
-          var ask = h("div", { class: "scx-actions" }, [h("span", { text: "Delete “" + r.name + "”? " }), yes, keep]);
-          item.replaceChild(ask, item.lastChild); yes.focus();
-          keep.addEventListener("click", function () { item.replaceChild(h("div", { class: "scx-actions" }, [edit, visibility, del]), ask); });
-          yes.addEventListener("click", function () {
-            yes.disabled = true;
-            api("admin-listings", { action: "delete", id: r.id }).then(function () {
-              rows = rows.filter(function (x) { return x.id !== r.id; });
-              return refreshPublic();
-            }).then(function () {
-              showHome("manage", { kind: "ok", text: "Deleted." });
-            }).catch(function (e) { if (!expired(e)) { yes.disabled = false; say(msg, "err", e.message); } });
-          });
         });
         list.appendChild(item);
       });
@@ -872,8 +859,7 @@
         add("imdbId", "IMDb ID", "text", vals.imdbId || item.imdbId || "", { placeholder: "tt1234567" });
         add("industry", "Industry / region", "text", vals.industry || "", { maxlength: "80" });
       }
-      var hidden = checkbox("Hide this card from visitors", settings.content.hidden.indexOf(key) >= 0);
-      form.appendChild(hidden.wrap); fields.hidden = hidden.input; fields.section = section; fields.key = key; fields.isRec = rec;
+      fields.section = section; fields.key = key; fields.isRec = rec;
       var actions = h("div", { class: "scx-actions" });
       var save = h("button", { class: "scx-btn pri", type: "button", text: "Save card changes" });
       var reset = h("button", { class: "scx-btn", type: "button", text: "Reset overrides" });
@@ -907,13 +893,11 @@
         delete values.hidden; delete values.section; delete values.key; delete values.isRec;
         next.content.overrides[key] = values;
         next.content.hidden = next.content.hidden.filter(function (x) { return x !== key; });
-        if (fields.hidden.checked) next.content.hidden.push(key);
         saveSettings(next, msg, function (finalSettings) { settings = finalSettings; buildOptions(); buildFields(); buildOrderList(); });
       });
       reset.addEventListener("click", function () {
         if (!confirm("Reset saved field overrides for this card?")) return;
         var next = cloneSettings(settings); delete next.content.overrides[key];
-        next.content.hidden = next.content.hidden.filter(function (x) { return x !== key; });
         saveSettings(next, msg, function (finalSettings) { settings = finalSettings; buildOptions(); buildFields(); buildOrderList(); });
       });
     }
