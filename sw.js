@@ -1,4 +1,4 @@
-const CACHE_NAME = "streamcloud-shell-v22";
+const CACHE_NAME = "streamcloud-shell-v23";
 
 // Keep the existing offline shell and cache the two category/motion modules as part of it.
 const SHELL_PATHS = [
