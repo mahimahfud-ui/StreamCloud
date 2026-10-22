@@ -25,17 +25,17 @@ export type PageInfo = {
 
 const decode = (s: string) => s.replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#0?39;|&apos;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&nbsp;/g, " ");
 const attr = (tag: string, name: string) => {
-  const m = tag.match(new RegExp(`\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`, "i"));
+  const m = tag.match(new RegExp("\\b" + name + "\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))", "i"));
   return m ? decode(m[1] ?? m[2] ?? m[3] ?? "") : null;
 };
 function abs(href: string | null, base: URL): string | null {
   if (!href) return null;
   try { const u = new URL(href, base); return u.protocol === "https:" ? u.href : null; } catch { return null; }
 }
-const textVal = (v: unknown): string | null => typeof v === "string" && v.trim() ? decode(v).replace(/\\s+/g, " ").trim().slice(0, 1000) : null;
+const textVal = (v: unknown): string | null => typeof v === "string" && v.trim() ? decode(v).replace(/\s+/g, " ").trim().slice(0, 1000) : null;
 
 export function extractPage(html: string, base: URL): PageInfo {
-  const metas = [...html.matchAll(/<meta\\b[^>]*>/gi)].map((m) => m[0]);
+  const metas = [...html.matchAll(/<meta\b[^>]*>/gi)].map((m) => m[0]);
   const meta = (key: string) => {
     for (const t of metas) {
       const k = (attr(t, "property") ?? attr(t, "name") ?? "").toLowerCase();
@@ -44,12 +44,12 @@ export function extractPage(html: string, base: URL): PageInfo {
     return null;
   };
 
-  const rawTitle = decode(html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i)?.[1] ?? "").replace(/\\s+/g, " ").trim() || null;
+  const rawTitle = decode(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? "").replace(/\s+/g, " ").trim() || null;
   const title = textVal(meta("og:title") ?? meta("twitter:title") ?? rawTitle);
   const description = textVal(meta("og:description") ?? meta("twitter:description") ?? meta("description"));
   const siteName = textVal(meta("og:site_name") ?? meta("application-name"));
 
-  const links = [...html.matchAll(/<link\\b[^>]*>/gi)].map((m) => m[0]);
+  const links = [...html.matchAll(/<link\b[^>]*>/gi)].map((m) => m[0]);
   const icons: { href: string; size: number }[] = [];
   const linkImages: string[] = [];
   let canonical: string | null = null;
@@ -59,19 +59,19 @@ export function extractPage(html: string, base: URL): PageInfo {
     if (!href) continue;
     if (rel.includes("canonical")) canonical = href;
     if (rel.includes("image_src")) linkImages.push(href);
-    if (/(^|\\s)(apple-touch-icon|icon|shortcut icon)(\\s|$)/.test(rel)) {
-      const s = (attr(t, "sizes") ?? "").match(/(\\d+)x\\d+/);
+    if (/(^|\s)(apple-touch-icon|icon|shortcut icon)(\s|$)/.test(rel)) {
+      const s = (attr(t, "sizes") ?? "").match(/(\d+)x\d+/);
       icons.push({ href, size: s ? Number(s[1]) : rel.includes("apple") ? 180 : 16 });
     }
   }
   icons.sort((a, b) => b.size - a.size);
 
-  const hrefs = [...html.matchAll(/<a\\b[^>]*>/gi)].map((m) => abs(attr(m[0], "href"), base)).filter((v): v is string => !!v);
-  const imdbIds = [...new Set([...hrefs, ...[...html.matchAll(/imdb\\.com\\/title\\/(tt\\d{5,10})/gi)].map((m) => "https://imdb.com/title/" + m[1])]
-    .map((h) => h.match(/imdb\\.com\\/title\\/(tt\\d{5,10})/i)?.[1]).filter((v): v is string => !!v))];
-  const apkLinks = [...new Set(hrefs.filter((h) => { try { return /\\.apk$/i.test(new URL(h).pathname); } catch { return false; } }))];
+  const hrefs = [...html.matchAll(/<a\b[^>]*>/gi)].map((m) => abs(attr(m[0], "href"), base)).filter((v): v is string => !!v);
+  const imdbIds = [...new Set([...hrefs, ...[...html.matchAll(/imdb\.com\/title\/(tt\d{5,10})/gi)].map((m) => "https://imdb.com/title/" + m[1])]
+    .map((h) => h.match(/imdb\.com\/title\/(tt\d{5,10})/i)?.[1]).filter((v): v is string => !!v))];
+  const apkLinks = [...new Set(hrefs.filter((h) => { try { return /\.apk$/i.test(new URL(h).pathname); } catch { return false; } }))];
 
-  const jsonLdFull = [...html.matchAll(/<script[^>]*application\\/ld\\+json[^>]*>([\\s\\S]*?)<\\/script>/gi)].map((m) => m[1].trim()).slice(0, 6);
+  const jsonLdFull = [...html.matchAll(/<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1].trim()).slice(0, 6);
   const jsonLd = jsonLdFull.map((s) => s.slice(0, 3000)).slice(0, 3);
   const nodes: Record<string, unknown>[] = [];
   const addNodes = (value: unknown, depth = 0) => {
@@ -106,10 +106,11 @@ export function extractPage(html: string, base: URL): PageInfo {
     if (!["og:image", "og:image:secure_url", "twitter:image", "twitter:image:src", "thumbnail"].includes(k)) return [];
     return getImageUrls(attr(t, "content"));
   });
-  const imgSources = [...html.matchAll(/<img\\b[^>]*>/gi)].slice(0, 60).flatMap((m) => {
+  const imgSources = [...html.matchAll(/<img\b[^>]*>/gi)].slice(0, 60).flatMap((m) => {
     const t = m[0];
-    const raw = attr(t, "data-src") ?? attr(t, "data-lazy-src") ?? attr(t, "data-original") ?? attr(t, "src") ??
-      (attr(t, "srcset") ?? "").split(",")[0].trim().split(/\\s+/)[0] ?? null;
+    const srcset = attr(t, "srcset");
+    const firstSrcset = srcset ? srcset.split(",")[0].trim().split(/\s+/)[0] : null;
+    const raw = attr(t, "data-src") ?? attr(t, "data-lazy-src") ?? attr(t, "data-original") ?? attr(t, "src") ?? firstSrcset;
     const value = abs(raw, base);
     return value ? [value] : [];
   });
@@ -118,19 +119,19 @@ export function extractPage(html: string, base: URL): PageInfo {
   for (const o of orderedNodes) {
     const sameAs = [o.url, o.sameAs, o.identifier].flatMap((v) => Array.isArray(v) ? v : [v]).filter((v): v is string => typeof v === "string");
     for (const value of sameAs) {
-      const m = value.match(/imdb\\.com\\/title\\/(tt\\d{5,10})/i);
+      const m = value.match(/imdb\.com\/title\/(tt\d{5,10})/i);
       if (m && !imdbIds.includes(m[1])) imdbIds.push(m[1]);
     }
   }
 
   const bestNode = orderedNodes.find((o) => textVal(o.name) || textVal(o.headline) || textVal(o.alternateName));
   const date = bestNode ? textVal(bestNode.datePublished ?? bestNode.dateCreated ?? bestNode.uploadDate ?? bestNode.releaseDate) : null;
-  const yearMatch = date?.match(/(?:18|19|20|21)\\d{2}/);
+  const yearMatch = date?.match(/(?:18|19|20|21)\d{2}/);
   const genreRaw = bestNode?.genre;
   const genres = (Array.isArray(genreRaw) ? genreRaw : genreRaw ? [genreRaw] : [])
     .map((v) => textVal(v)).filter((v): v is string => !!v).slice(0, 12);
   const appCategory = bestNode ? textVal(bestNode.applicationCategory ?? bestNode.applicationSubCategory) : null;
-  const structured = {
+  const structured: StructuredInfo = {
     name: bestNode ? textVal(bestNode.name ?? bestNode.headline ?? bestNode.alternateName) : null,
     description: bestNode ? textVal(bestNode.description ?? bestNode.abstract) : null,
     image: jsonImages[0] ?? null,
@@ -140,7 +141,7 @@ export function extractPage(html: string, base: URL): PageInfo {
     version: bestNode ? textVal(bestNode.softwareVersion) : null,
   };
 
-  const text = decode(html.replace(/<(script|style|noscript|svg)[\\s\\S]*?<\\/\\1>/gi, " ").replace(/<[^>]+>/g, " ")).replace(/\\s+/g, " ").trim().slice(0, 6000);
+  const text = decode(html.replace(/<(script|style|noscript|svg)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim().slice(0, 6000);
 
   return {
     html, title, siteName, description, canonical,
