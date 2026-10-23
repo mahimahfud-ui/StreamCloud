@@ -129,6 +129,9 @@
     ".scx-ov.ux-admin-feature .scx-head .scx-x{grid-area:close;grid-row:1;grid-column:3}" +
     ".scx-ov.ux-admin-feature .scx-head .ux-gsearch{position:relative;grid-area:search;grid-row:2;grid-column:1/-1;left:auto;top:auto;transform:none;width:100%;max-width:none;min-width:0;margin:0}" +
     "@media(max-width:899px){.scx-ov.ux-admin-feature .scx-head{padding:12px 14px}.scx-ov.ux-admin-feature .scx-head h2{overflow:hidden;text-overflow:ellipsis}}";
+  css +=
+    ".scx-ov.ux-admin-auth .ux-gsearch{display:none!important}" +
+    "@media(max-width:899px){.scx-ov.ux-admin-auth .scx-head{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto}.scx-ov.ux-admin-auth .scx-head h2{grid-row:1;grid-column:1}.scx-ov.ux-admin-auth .scx-head .scx-x{grid-row:1;grid-column:2}}";
   var st = document.createElement("style");
   st.id = "ux-theme-campus";
   st.textContent = css;
@@ -187,6 +190,7 @@
     screenFeature = feature || "";
     ov.classList.toggle("ux-admin-catalogue", mode === "catalogue");
     ov.classList.toggle("ux-admin-feature", mode === "feature");
+    ov.classList.toggle("ux-admin-auth", mode === "auth");
     var back = $(".ux-admin-back", ov);
     if (back) back.hidden = mode !== "feature";
     var title = $("#scxTitle");
@@ -263,6 +267,7 @@
     } else {
       screenMode = ""; screenFeature = "";
       ov.classList.remove("ux-admin-catalogue", "ux-admin-feature");
+      ov.classList.add("ux-admin-auth");
       var back = $(".ux-admin-back", ov); if (back) back.hidden = true;
     }
   }
