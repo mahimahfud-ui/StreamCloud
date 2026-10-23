@@ -153,55 +153,59 @@
   mobileStyle.textContent =
     ".scx-ov .ux-admin-mobile-shell{display:none!important}" +
     "@media(max-width:899px){" +
-      ".scx-ov.ux-admin-mobile .scx-box{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;box-sizing:border-box!important}" +
-      ".scx-ov.ux-admin-mobile .scx-head{position:sticky!important;top:0!important;z-index:30!important;flex:none!important;box-sizing:border-box!important;width:100%!important;min-width:0!important}" +
-      ".scx-ov.ux-admin-mobile .ux-gsearch{display:none!important}" +
-      ".scx-ov.ux-admin-mobile .ux-admin-nav-screen{display:none!important}" +
+      ".scx-ov.ux-admin-mobile{position:fixed!important;inset:0!important;width:100%!important;height:100vh!important;height:100dvh!important;max-width:100%!important;padding:0!important;overflow:hidden!important;z-index:9999!important;background:#09090b!important;box-sizing:border-box!important}" +
+      ".scx-ov.ux-admin-mobile .scx-box{position:relative!important;inset:auto!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;width:100%!important;max-width:100%!important;height:100%!important;max-height:100%!important;min-width:0!important;margin:0!important;padding:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;box-sizing:border-box!important;border:0!important;border-radius:0!important;background:radial-gradient(ellipse at 95% 0,rgba(229,9,20,.14),transparent 42%),linear-gradient(180deg,#101014 0%,#09090b 42%,#09090b 100%)!important;color:#f5f5f7!important}" +
+      ".scx-ov.ux-admin-mobile .scx-head{position:sticky!important;top:0!important;z-index:10!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto!important;align-items:center!important;gap:10px!important;flex:none!important;width:100%!important;min-width:0!important;margin:0!important;padding:13px 14px!important;border:0!important;border-bottom:1px solid rgba(255,255,255,.09)!important;border-radius:0!important;background:linear-gradient(135deg,rgba(32,32,39,.98),rgba(15,15,19,.98))!important;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-sizing:border-box!important}" +
+      ".scx-ov.ux-admin-mobile .scx-head h2{grid-column:1!important;grid-row:1!important;min-width:0!important;margin:0!important;color:#f5f5f7!important;font-size:15px!important;font-weight:850!important;line-height:1.25!important;white-space:normal!important;overflow-wrap:anywhere!important}" +
+      ".scx-ov.ux-admin-mobile .scx-head .scx-x{grid-column:2!important;grid-row:1!important;position:static!important;display:grid!important;place-items:center!important;width:38px!important;height:38px!important;min-width:38px!important;margin:0!important;padding:0!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:12px!important;background:rgba(255,255,255,.06)!important;color:#f5f5f7!important;font-size:23px!important;line-height:1!important}" +
+      ".scx-ov.ux-admin-mobile .ux-gsearch{display:none!important}.scx-ov.ux-admin-mobile .ux-admin-nav-screen{display:none!important}" +
       ".scx-ov.ux-admin-mobile-hub .ux-admin-body{display:none!important}" +
-      ".scx-ov.ux-admin-mobile-feature .ux-admin-body{display:block!important;position:relative!important;float:none!important;inset:auto!important;transform:none!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:14px 12px calc(30px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}" +
-      ".scx-ov.ux-admin-mobile-feature .ux-admin-body>.scx-tabs{display:none!important}" +
-      ".scx-ov.ux-admin-mobile-feature .ux-admin-body>:not(.scx-tabs):not(.ux-admin-nav-screen){position:relative!important;float:none!important;inset:auto!important;transform:none!important;clear:both;width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;box-sizing:border-box!important;overflow-wrap:anywhere}" +
-      ".scx-ov.ux-admin-mobile-feature .ux-admin-body .scx-two,.scx-ov.ux-admin-mobile-feature .ux-admin-body .scx-stat-grid,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-stats,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-grid{grid-template-columns:minmax(0,1fr)!important}" +
-      ".scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-bar,.scx-ov.ux-admin-mobile-feature .ux-admin-body .scx-actions,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-acts{display:flex;flex-wrap:wrap;min-width:0;max-width:100%}" +
-      ".scx-ov.ux-admin-mobile-feature .ux-admin-body input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]),.scx-ov.ux-admin-mobile-feature .ux-admin-body select,.scx-ov.ux-admin-mobile-feature .ux-admin-body textarea{width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-size:16px!important}" +
-      ".scx-ov.ux-admin-mobile-feature .ux-admin-body img,.scx-ov.ux-admin-mobile-feature .ux-admin-body table{max-width:100%}" +
-      ".scx-ov.ux-admin-mobile-hub .ux-admin-mobile-shell{display:flex!important;position:relative!important;flex:1 0 auto!important;flex-direction:column!important;align-self:stretch!important;gap:16px!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:0!important;margin:0!important;padding:18px 14px calc(28px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important;overflow:visible!important;background:transparent!important;isolation:isolate}" +
-      ".scx-ov.ux-admin-mobile-shell,.scx-ov .ux-admin-mobile-shell *{box-sizing:border-box}" +
-      ".scx-ov .ux-admin-mobile-intro{display:grid;gap:6px;min-width:0;width:100%}" +
-      ".scx-ov .ux-admin-mobile-eyebrow{margin:0;color:#ff5962;font-size:10px;font-weight:850;letter-spacing:.16em;text-transform:uppercase;overflow-wrap:anywhere}" +
-      ".scx-ov .ux-admin-mobile-title{margin:0;color:#f5f5f7;font-size:clamp(24px,6vw,30px);font-weight:850;line-height:1.08;letter-spacing:-.035em;overflow-wrap:anywhere}" +
-      ".scx-ov .ux-admin-mobile-description{margin:2px 0 0;color:#a1a1aa;font-size:13px;line-height:1.55;overflow-wrap:anywhere}" +
-      ".scx-ov .ux-admin-mobile-search{display:flex;align-items:center;gap:8px;min-width:0;width:100%;margin:0;padding:6px;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:#121216}" +
-      ".scx-ov .ux-admin-mobile-search input{flex:1 1 auto!important;width:1px!important;min-width:0!important;margin:0!important;padding:11px 10px!important;border:0!important;background:transparent!important;box-shadow:none!important;font-size:16px!important}" +
-      ".scx-ov .ux-admin-mobile-search button{flex:none;min-height:42px;padding:0 13px;border:0;border-radius:11px;background:#e50914;color:#fff;font-size:12px;font-weight:800}" +
-      ".scx-ov .ux-admin-mobile-section-label{margin:0 0 2px;color:#d4d4d8;font-size:12px;font-weight:800;letter-spacing:.04em}" +
-      ".scx-ov .ux-admin-mobile-list{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important;list-style:none!important}" +
-      ".scx-ov .ux-admin-mobile-item{position:relative!important;display:grid!important;grid-template-columns:44px minmax(0,1fr) 18px!important;align-items:center!important;gap:12px!important;width:100%!important;min-width:0!important;min-height:82px!important;margin:0!important;padding:13px 12px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:16px!important;background:linear-gradient(135deg,#18181d,#111115)!important;color:#f5f5f7!important;text-align:left!important;white-space:normal!important;overflow:visible!important;box-shadow:0 7px 20px rgba(0,0,0,.22)!important;cursor:pointer!important;transform:none;appearance:none;-webkit-appearance:none}" +
-      ".scx-ov .ux-admin-mobile-item:focus-visible{outline:2px solid #ff5962!important;outline-offset:2px!important}" +
-      ".scx-ov .ux-admin-mobile-item:active{border-color:rgba(229,9,20,.55)!important;background:#202026!important}" +
-      ".scx-ov .ux-admin-mobile-icon{display:grid!important;place-items:center!important;flex:none!important;width:44px!important;height:44px!important;border:1px solid rgba(229,9,20,.28)!important;border-radius:13px!important;background:rgba(229,9,20,.12)!important;color:#ff5962!important}" +
-      ".scx-ov .ux-admin-mobile-icon svg{display:block;width:22px;height:22px;max-width:none}" +
-      ".scx-ov .ux-admin-mobile-copy{display:flex!important;flex-direction:column!important;gap:5px!important;min-width:0!important;width:100%!important}" +
-      ".scx-ov .ux-admin-mobile-item-title{display:block!important;margin:0!important;color:#f5f5f7!important;font-size:14px!important;font-weight:800!important;line-height:1.25!important;overflow-wrap:anywhere!important;white-space:normal!important}" +
-      ".scx-ov .ux-admin-mobile-item-description{display:block!important;margin:0!important;color:#a1a1aa!important;font-size:11.5px!important;font-weight:500!important;line-height:1.45!important;overflow-wrap:anywhere!important;white-space:normal!important}" +
-      ".scx-ov .ux-admin-mobile-count{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;margin-top:2px;padding:3px 7px;border:1px solid rgba(255,255,255,.09);border-radius:999px;color:#d4d4d8;background:rgba(255,255,255,.035);font-size:10px;font-weight:700}" +
-      ".scx-ov .ux-admin-mobile-chevron{display:block;color:#8d8d98;font-size:23px;line-height:1;text-align:right}" +
-      ".scx-ov.ux-admin-mobile-hub .scx-head{grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-rows:auto!important;gap:8px!important;padding:12px 12px!important}" +
-      ".scx-ov.ux-admin-mobile-hub .scx-head .ux-admin-back{grid-column:1!important;grid-row:1!important;min-height:36px!important;padding:7px 9px!important;font-size:11px!important}" +
-      ".scx-ov.ux-admin-mobile-hub .scx-head h2{grid-column:2!important;grid-row:1!important;min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:15px!important;line-height:1.2!important}" +
-      ".scx-ov.ux-admin-mobile-hub .scx-head .scx-x{grid-column:3!important;grid-row:1!important}" +
-      ".scx-ov.ux-admin-mobile-hub .ux-admin-back[hidden]{display:none!important}" +
-      ".scx-ov.ux-admin-mobile-feature .scx-head{grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-rows:auto!important;gap:8px!important;padding:12px 10px!important}" +
-      ".scx-ov.ux-admin-mobile-feature .scx-head .ux-admin-back{grid-column:1!important;grid-row:1!important;min-height:36px!important;padding:7px 9px!important;font-size:11px!important}" +
-      ".scx-ov.ux-admin-mobile-feature .scx-head h2{grid-column:2!important;grid-row:1!important;min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:14px!important;line-height:1.2!important}" +
+      ".scx-ov.ux-admin-mobile-hub .ux-admin-mobile-shell{position:relative!important;isolation:isolate!important;display:flex!important;flex:1 0 auto!important;flex-direction:column!important;align-items:stretch!important;gap:18px!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:0!important;margin:0!important;padding:20px 14px calc(28px + env(safe-area-inset-bottom))!important;overflow:visible!important;box-sizing:border-box!important;background:transparent!important}" +
+      ".scx-ov .ux-admin-mobile-intro{position:static!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;width:100%!important;min-width:0!important;margin:0!important;padding:0!important}" +
+      ".scx-ov .ux-admin-mobile-eyebrow{position:static!important;margin:0!important;color:#ff6971!important;font-size:10px!important;font-weight:850!important;line-height:1.4!important;letter-spacing:.16em!important;text-transform:uppercase!important;overflow-wrap:anywhere!important}" +
+      ".scx-ov .ux-admin-mobile-title{position:static!important;margin:0!important;color:#fafafa!important;font-size:clamp(25px,7vw,31px)!important;font-weight:850!important;line-height:1.08!important;letter-spacing:-.035em!important;overflow-wrap:anywhere!important}" +
+      ".scx-ov .ux-admin-mobile-description{position:static!important;margin:0!important;color:#b4b4be!important;font-size:13px!important;font-weight:450!important;line-height:1.6!important;overflow-wrap:anywhere!important}" +
+      ".scx-ov .ux-admin-mobile-search{position:relative!important;display:flex!important;align-items:center!important;gap:8px!important;width:100%!important;min-width:0!important;margin:0!important;padding:6px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:16px!important;background:rgba(24,24,30,.96)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 8px 26px rgba(0,0,0,.22)!important;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-sizing:border-box!important}" +
+      ".scx-ov .ux-admin-mobile-search input{position:static!important;flex:1 1 auto!important;width:1px!important;min-width:0!important;max-width:100%!important;margin:0!important;padding:10px 9px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#fafafa!important;box-shadow:none!important;font-size:16px!important}" +
+      ".scx-ov .ux-admin-mobile-search button{position:static!important;flex:none!important;min-height:41px!important;margin:0!important;padding:0 13px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:11px!important;background:linear-gradient(135deg,#fa2631,#b9040c)!important;color:#fff!important;font-size:12px!important;font-weight:850!important}" +
+      ".scx-ov .ux-admin-mobile-section-label{position:static!important;margin:0!important;color:#d7d7de!important;font-size:11px!important;font-weight:850!important;line-height:1.4!important;letter-spacing:.1em!important;text-transform:uppercase!important}" +
+      ".scx-ov .ux-admin-mobile-list{position:static!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:11px!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important;list-style:none!important}" +
+      ".scx-ov .ux-admin-mobile-item{position:relative!important;isolation:isolate!important;display:grid!important;grid-template-columns:44px minmax(0,1fr) 12px!important;align-items:center!important;align-content:center!important;gap:12px!important;width:100%!important;min-width:0!important;min-height:82px!important;height:auto!important;margin:0!important;padding:14px 12px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:17px!important;background:linear-gradient(135deg,rgba(38,38,46,.97),rgba(20,20,25,.99))!important;color:#f5f5f7!important;text-align:left!important;white-space:normal!important;overflow:visible!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.065),0 8px 24px rgba(0,0,0,.22)!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);cursor:pointer!important;appearance:none!important;-webkit-appearance:none!important;transform:none!important;box-sizing:border-box!important}" +
+      ".scx-ov .ux-admin-mobile-item:focus-visible{outline:2px solid #ff6971!important;outline-offset:2px!important}" +
+      ".scx-ov .ux-admin-mobile-item:active{border-color:rgba(229,9,20,.55)!important;background:linear-gradient(135deg,rgba(52,30,34,.99),rgba(24,20,24,.99))!important}" +
+      ".scx-ov .ux-admin-mobile-item *{position:static!important;inset:auto!important;float:none!important;transform:none!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}" +
+      ".scx-ov .ux-admin-mobile-icon{display:grid!important;place-items:center!important;flex:none!important;width:44px!important;height:44px!important;margin:0!important;padding:0!important;border:1px solid rgba(255,90,100,.27)!important;border-radius:13px!important;background:rgba(229,9,20,.14)!important;color:#ff7b83!important}" +
+      ".scx-ov .ux-admin-mobile-icon svg{display:block!important;width:22px!important;height:22px!important;max-width:none!important}" +
+      ".scx-ov .ux-admin-mobile-copy{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:5px!important;min-width:0!important;width:100%!important;margin:0!important;padding:0!important}" +
+      ".scx-ov .ux-admin-mobile-item-title{display:block!important;width:100%!important;margin:0!important;padding:0!important;color:#fafafa!important;font-size:14px!important;font-weight:850!important;line-height:1.35!important;overflow-wrap:anywhere!important;white-space:normal!important}" +
+      ".scx-ov .ux-admin-mobile-item-description{display:block!important;width:100%!important;margin:0!important;padding:0!important;color:#b7b7c2!important;font-size:11.5px!important;font-weight:500!important;line-height:1.5!important;overflow-wrap:anywhere!important;white-space:normal!important}" +
+      ".scx-ov .ux-admin-mobile-count{display:inline-flex!important;align-items:center!important;align-self:flex-start!important;gap:4px!important;width:auto!important;margin:3px 0 0!important;padding:3px 7px!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:999px!important;color:#d7d7de!important;background:rgba(255,255,255,.055)!important;font-size:10px!important;font-weight:750!important;line-height:1.4!important}" +
+      ".scx-ov .ux-admin-mobile-chevron{display:block!important;margin:0!important;padding:0!important;color:#a7a7b1!important;font-size:24px!important;font-weight:400!important;line-height:1!important;text-align:right!important}" +
+      ".scx-ov.ux-admin-mobile-hub.ux-admin-categories .scx-head{grid-template-columns:minmax(0,1fr) auto!important}" +
+      ".scx-ov.ux-admin-mobile-hub.ux-admin-subcategories .scx-head,.scx-ov.ux-admin-mobile-hub.ux-admin-tools .scx-head{grid-template-columns:auto minmax(0,1fr) auto!important;gap:8px!important;padding:12px 10px!important}" +
+      ".scx-ov.ux-admin-mobile-hub.ux-admin-subcategories .scx-head h2,.scx-ov.ux-admin-mobile-hub.ux-admin-tools .scx-head h2{grid-column:2!important;grid-row:1!important}" +
+      ".scx-ov.ux-admin-mobile-hub.ux-admin-subcategories .scx-head .scx-x,.scx-ov.ux-admin-mobile-hub.ux-admin-tools .scx-head .scx-x{grid-column:3!important;grid-row:1!important}" +
+      ".scx-ov.ux-admin-mobile .ux-admin-back{position:static!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;grid-column:1!important;grid-row:1!important;min-height:36px!important;width:auto!important;max-width:100%!important;margin:0!important;padding:7px 9px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:11px!important;background:rgba(255,255,255,.055)!important;color:#fafafa!important;font-size:11px!important;font-weight:800!important;line-height:1.2!important;white-space:nowrap!important;box-shadow:none!important}" +
+      ".scx-ov.ux-admin-mobile .ux-admin-back[hidden]{display:none!important}" +
+      ".scx-ov.ux-admin-mobile-feature .scx-head{grid-template-columns:auto minmax(0,1fr) auto!important;gap:8px!important;padding:12px 10px!important}" +
+      ".scx-ov.ux-admin-mobile-feature .scx-head h2{grid-column:2!important;grid-row:1!important;font-size:14px!important}" +
       ".scx-ov.ux-admin-mobile-feature .scx-head .scx-x{grid-column:3!important;grid-row:1!important}" +
-      ".scx-ov.ux-admin-mobile-auth .scx-head{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto!important;padding:12px 14px!important}" +
-      ".scx-ov.ux-admin-mobile-auth .scx-head h2{grid-column:1!important;grid-row:1!important;white-space:normal!important;overflow-wrap:anywhere!important}" +
-      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2){display:block!important;width:100%!important;max-width:100%!important;margin:0!important;padding:22px 16px calc(30px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}" +
-      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2) .scx-actions{display:flex;flex-wrap:wrap;gap:8px}" +
-      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2) label{display:grid;gap:8px;width:100%}" +
-      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2) input{width:100%;min-width:0;box-sizing:border-box;font-size:16px!important}" +
-      ".scx-ov.ux-admin-mobile-auth .ux-gsearch{display:none!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-mobile-shell{display:none!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body{display:block!important;position:static!important;float:none!important;inset:auto!important;transform:none!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:14px 12px calc(28px + env(safe-area-inset-bottom))!important;overflow:visible!important;box-sizing:border-box!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body>.scx-tabs{display:none!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body>:not(.scx-tabs):not(.ux-admin-nav-screen){display:block!important;position:static!important;float:none!important;inset:auto!important;transform:none!important;clear:both;width:100%!important;max-width:100%!important;min-width:0!important;margin:0 0 12px!important;box-sizing:border-box!important;overflow-wrap:anywhere!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body [hidden],.scx-ov.ux-admin-mobile-feature .ux-admin-body [aria-hidden=true]{display:none!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body .scx-two,.scx-ov.ux-admin-mobile-feature .ux-admin-body .scx-stat-grid,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-stats,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body .scx-actions,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-bar,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-acts{display:flex!important;flex-wrap:wrap!important;align-items:stretch!important;gap:8px!important;width:100%!important;min-width:0!important;max-width:100%!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body .scx-actions>.scx-btn,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-bar>.scx-btn{max-width:100%;overflow-wrap:anywhere;white-space:normal}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]),.scx-ov.ux-admin-mobile-feature .ux-admin-body select,.scx-ov.ux-admin-mobile-feature .ux-admin-body textarea{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;font-size:16px!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body img{max-width:100%!important;height:auto}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body table{display:block!important;width:100%!important;max-width:100%!important;overflow-x:auto!important;white-space:normal!important}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-head{grid-template-columns:minmax(0,1fr) auto!important}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2){display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:22px 16px calc(30px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2) .scx-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2) label{display:grid!important;gap:8px!important;width:100%!important}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2) input{width:100%!important;min-width:0!important;box-sizing:border-box!important;font-size:16px!important}" +
     "}";
   (document.head || document.documentElement).appendChild(mobileStyle);
 
@@ -249,34 +253,51 @@
 
   /* ---------- Category -> Subcategory -> full-screen Feature navigation ---------- */
   var wasOpen = false, path = location.pathname + location.search;
-  var navLevel = "", navCategory = "", navFeature = "";
+  var navLevel = "", navCategory = "", navSubcategory = "", navFeature = "";
   var ADMIN_GROUPS = [
-    { id:"dashboard", label:"Dashboard & Activity", icon:"overview", desc:"Site totals and recent admin activity", items:[
-      { label:"Overview", desc:"Totals and recent activity" },
-      { label:"Activity", desc:"Review recent admin actions" }
+    { id:"dashboard", label:"Dashboard & Activity", icon:"overview", desc:"Site totals, activity history and operational overview", items:[
+      { label:"Overview", desc:"Totals and recent activity" }, { label:"Activity", desc:"Review recent admin actions" }
+    ], subcategories:[
+      { id:"dashboard-overview", label:"Dashboard", icon:"overview", desc:"Site summary and catalogue totals", items:["Overview"] },
+      { id:"activity-history", label:"Activity history", icon:"clock", desc:"Recent Admin actions and activity", items:["Activity"] }
     ]},
-    { id:"catalogue", label:"Catalogue & AI", icon:"layers", desc:"Add, search, review and manage listings", items:[
+    { id:"catalogue", label:"Catalogue & AI", icon:"layers", desc:"Add listings, detect titles and manage catalogue content", items:[
       { label:"Add item", desc:"Add a movie, series, website or app" },
       { label:"Title lookup", desc:"Find verified movie and series details" },
       { label:"Content", desc:"Publish, hide, move or delete listings" },
       { label:"Catalogue Pro", desc:"Search, bulk-manage and audit catalogue entries" },
       { label:"AI Copilot", desc:"Assist with catalogue lookup and review" }
+    ], subcategories:[
+      { id:"add-detect", label:"Add & Detect", icon:"add", desc:"Create a listing or look up a title", items:["Add item","Title lookup"] },
+      { id:"catalogue-manage", label:"Catalogue management", icon:"list", desc:"Review, publish and organise saved listings", items:["Content","Catalogue Pro"] },
+      { id:"ai-assistant", label:"AI assistant", icon:"ai", desc:"AI-assisted catalogue research and review", items:["AI Copilot"] }
     ]},
-    { id:"design", label:"Design & Layout", icon:"layout", desc:"Manage card layout and visual appearance", items:[
-      { label:"Cards & Layout", desc:"Arrange cards, sections and responsive grids" },
-      { label:"Appearance", desc:"Manage site colours and appearance settings" }
+    { id:"design", label:"Design & Layout", icon:"layout", desc:"Manage card layout and the visual appearance of StreamCloud", items:[
+      { label:"Cards & Layout", desc:"Arrange cards, sections and responsive grids" }, { label:"Appearance", desc:"Manage site colours and appearance settings" }
+    ], subcategories:[
+      { id:"card-layout", label:"Card layout", icon:"layout", desc:"Arrange cards, sections and grid order", items:["Cards & Layout"] },
+      { id:"site-appearance", label:"Site appearance", icon:"palette", desc:"Colours, themes and visual settings", items:["Appearance"] }
     ]},
-    { id:"site", label:"Site Controls", icon:"globe", desc:"Manage site identity and visitor-facing controls", items:[
+    { id:"site", label:"Site Controls", icon:"globe", desc:"Manage visitor-facing settings and website identity", items:[
       { label:"Site settings", desc:"Announcement, SEO and site identity" }
+    ], subcategories:[
+      { id:"site-settings", label:"Website settings", icon:"globe", desc:"Announcement, SEO and site identity", items:["Site settings"] }
     ]},
-    { id:"security", label:"Security & Data", icon:"lock", desc:"Manage backups and admin access", items:[
-      { label:"Backup", desc:"Export or import site data" },
-      { label:"Change PIN", desc:"Update the Admin access PIN" },
-      { label:"Log out", desc:"End the current admin session" }
+    { id:"security", label:"Security & Data", icon:"lock", desc:"Backups and secure Admin access controls", items:[
+      { label:"Backup", desc:"Export or import data" }, { label:"Change PIN", desc:"Update the Admin access PIN" }, { label:"Log out", desc:"End the current admin session" }
+    ], subcategories:[
+      { id:"backup-data", label:"Backup & data", icon:"download", desc:"Export or import catalogue and settings data", items:["Backup"] },
+      { id:"admin-security", label:"Admin security", icon:"lock", desc:"Change Admin PIN or end your session", items:["Change PIN","Log out"] }
     ]}
   ];
   function groupById(id) {
     for (var i = 0; i < ADMIN_GROUPS.length; i++) if (ADMIN_GROUPS[i].id === id) return ADMIN_GROUPS[i];
+    return null;
+  }
+  function subGroupById(categoryId, subcategoryId) {
+    var group = groupById(categoryId);
+    if (!group || !Array.isArray(group.subcategories)) return null;
+    for (var i = 0; i < group.subcategories.length; i++) if (group.subcategories[i].id === subcategoryId) return group.subcategories[i];
     return null;
   }
   function cleanLabel(value) {
@@ -297,28 +318,30 @@
   function setText(node, value) {
     if (node && node.textContent !== value) node.textContent = value;
   }
-  function categoryState(level, category, feature) {
-    return { scAdmin: true, level: level, category: category || "", feature: feature || "" };
+  function categoryState(level, category, feature, subcategory) {
+    return { scAdmin: true, level: level, category: category || "", subcategory: subcategory || "", feature: feature || "" };
   }
-  function setAdminScreen(level, category, feature, push) {
+  function setAdminScreen(level, category, feature, push, subcategory) {
     var ov = $(".scx-ov");
     if (!ov) return;
     if (level !== "auth" && !$(".scx-tabs", ov)) level = "auth";
     navLevel = level || "categories";
     navCategory = category || "";
+    navSubcategory = subcategory || "";
     navFeature = feature || "";
     ov.classList.toggle("ux-admin-categories", navLevel === "categories");
     ov.classList.toggle("ux-admin-subcategories", navLevel === "subcategories");
+    ov.classList.toggle("ux-admin-tools", navLevel === "tools");
     ov.classList.toggle("ux-admin-feature", navLevel === "feature");
     ov.classList.toggle("ux-admin-auth", navLevel === "auth");
     if (push) {
-      try { history.pushState(categoryState(navLevel, navCategory, navFeature), "", path + "#admin"); }
+      try { history.pushState(categoryState(navLevel, navCategory, navFeature, navSubcategory), "", path + "#admin"); }
       catch (e) { /* Browser/embedded history can be restricted. */ }
     }
     renderAdminNavigation();
   }
   function pushRootState() {
-    try { history.replaceState(categoryState("categories", "", ""), "", path + "#admin"); }
+    try { history.replaceState(categoryState("categories", "", "", ""), "", path + "#admin"); }
     catch (e) { /* ignore */ }
   }
   function goBack() {
@@ -328,7 +351,8 @@
       history.back();
       return;
     }
-    if (navLevel === "feature") setAdminScreen("subcategories", navCategory, "", false);
+    if (navLevel === "feature") setAdminScreen("tools", navCategory, "", false, navSubcategory);
+    else if (navLevel === "tools") setAdminScreen("subcategories", navCategory, "", false);
     else setAdminScreen("categories", "", "", false);
   }
   function makeAdminNavCard(title, description, icon, click) {
@@ -381,44 +405,46 @@
     ov.classList.remove("ux-admin-auth", "ux-admin-mobile-auth");
 
     if (navLevel === "feature") {
-      var oldScreen = $(".ux-admin-nav-screen", body);
-      if (oldScreen) oldScreen.remove();
       ov.classList.add("ux-admin-mobile-feature", "ux-admin-feature");
-      ov.classList.remove("ux-admin-mobile-hub", "ux-admin-categories", "ux-admin-subcategories");
-      var titleFeature = $("#scxTitle", ov);
-      setText(titleFeature, navFeature || "Admin");
+      ov.classList.remove("ux-admin-mobile-hub", "ux-admin-categories", "ux-admin-subcategories", "ux-admin-tools");
+      setText($("#scxTitle", ov), navFeature || "Admin");
       var backFeature = $(".ux-admin-back", ov);
       if (backFeature) {
         backFeature.hidden = false;
-        backFeature.setAttribute("aria-label", "Return to the previous Admin menu");
+        backFeature.setAttribute("aria-label", "Return to the tool list");
         setText(backFeature, "← Back");
       }
       shell.setAttribute("aria-hidden", "true");
       return;
     }
 
-    if (navLevel !== "subcategories") { navLevel = "categories"; navCategory = ""; navFeature = ""; }
-    var group = navLevel === "subcategories" ? groupById(navCategory) : null;
-    if (navLevel === "subcategories" && !group) {
-      navLevel = "categories"; navCategory = ""; navFeature = "";
+    if (navLevel !== "subcategories" && navLevel !== "tools") {
+      navLevel = "categories"; navCategory = ""; navSubcategory = ""; navFeature = "";
     }
+    var group = navLevel === "categories" ? null : groupById(navCategory);
+    var subGroup = navLevel === "tools" ? subGroupById(navCategory, navSubcategory) : null;
+    if ((navLevel !== "categories" && !group) || (navLevel === "tools" && !subGroup)) {
+      navLevel = "categories"; navCategory = ""; navSubcategory = ""; navFeature = "";
+      group = null; subGroup = null;
+    }
+
     ov.classList.add("ux-admin-mobile-hub");
     ov.classList.remove("ux-admin-mobile-feature", "ux-admin-feature");
     ov.classList.toggle("ux-admin-categories", navLevel === "categories");
     ov.classList.toggle("ux-admin-subcategories", navLevel === "subcategories");
+    ov.classList.toggle("ux-admin-tools", navLevel === "tools");
 
-    var title = $("#scxTitle", ov);
-    setText(title, navLevel === "categories" ? "StreamCloud Admin" : group.label);
+    setText($("#scxTitle", ov), navLevel === "categories" ? "StreamCloud Admin" : navLevel === "subcategories" ? group.label : subGroup.label);
     var back = $(".ux-admin-back", ov);
     if (back) {
       back.hidden = navLevel === "categories";
-      back.setAttribute("aria-label", "Back to Admin categories");
-      setText(back, "← Back");
+      back.setAttribute("aria-label", navLevel === "tools" ? "Back to subcategories" : "Back to categories");
+      setText(back, navLevel === "tools" ? "← Subcategories" : "← Categories");
     }
     shell.setAttribute("aria-hidden", "false");
 
     var signature = tabSignature(tabs);
-    var screenKey = navLevel + "|" + navCategory + "|" + signature;
+    var screenKey = navLevel + "|" + navCategory + "|" + navSubcategory + "|" + signature;
     if (shell.getAttribute("data-screen-key") === screenKey) return;
     shell.textContent = "";
     shell.setAttribute("data-screen-key", screenKey);
@@ -428,7 +454,7 @@
     if (navLevel === "categories") {
       intro.appendChild(h("p", { class: "ux-admin-mobile-eyebrow", text: "STREAMCLOUD · ADMIN" }));
       intro.appendChild(h("h3", { class: "ux-admin-mobile-title", text: "Admin workspace" }));
-      intro.appendChild(h("p", { class: "ux-admin-mobile-description", text: "Choose a section to continue. Each tool opens separately, so the controls stay clear on your phone." }));
+      intro.appendChild(h("p", { class: "ux-admin-mobile-description", text: "Start with a category. Each next screen shows only the options for that step." }));
       var searchForm = h("form", { class: "ux-admin-mobile-search", role: "search", "aria-label": "Search catalogue" });
       var searchInput = h("input", { type: "search", placeholder: "Search catalogue…", "aria-label": "Search catalogue" });
       var searchButton = h("button", { type: "submit", text: "Search" });
@@ -441,31 +467,40 @@
       });
       shell.appendChild(intro);
       shell.appendChild(searchForm);
-      shell.appendChild(h("p", { class: "ux-admin-mobile-section-label", text: "ALL ADMIN SECTIONS" }));
+      shell.appendChild(h("p", { class: "ux-admin-mobile-section-label", text: "CATEGORIES" }));
       ADMIN_GROUPS.forEach(function (g) {
-        var available = g.items.filter(function (item) { return !!findAdminTab(item.label, tabs); }).length;
         list.appendChild(makeMobileAdminItem(g.label, g.desc, g.icon, function () {
-          setAdminScreen("subcategories", g.id, "", true);
-        }, available + (available === 1 ? " tool" : " tools")));
+          setAdminScreen("subcategories", g.id, "", true, "");
+        }, g.subcategories.length + (g.subcategories.length === 1 ? " subcategory" : " subcategories")));
+      });
+    } else if (navLevel === "subcategories") {
+      intro.appendChild(h("p", { class: "ux-admin-mobile-eyebrow", text: "CATEGORY" }));
+      intro.appendChild(h("h3", { class: "ux-admin-mobile-title", text: group.label }));
+      intro.appendChild(h("p", { class: "ux-admin-mobile-description", text: group.desc + ". Choose a subcategory to view its tools on the next screen." }));
+      shell.appendChild(intro);
+      shell.appendChild(h("p", { class: "ux-admin-mobile-section-label", text: "SUBCATEGORIES" }));
+      group.subcategories.forEach(function (item) {
+        list.appendChild(makeMobileAdminItem(item.label, item.desc, item.icon || iconKey(item.label), function () {
+          setAdminScreen("tools", group.id, "", true, item.id);
+        }, item.items.length + (item.items.length === 1 ? " tool" : " tools")));
       });
     } else {
-      intro.appendChild(h("p", { class: "ux-admin-mobile-eyebrow", text: "ADMIN CATEGORY" }));
-      intro.appendChild(h("h3", { class: "ux-admin-mobile-title", text: group.label }));
-      intro.appendChild(h("p", { class: "ux-admin-mobile-description", text: group.desc + ". Choose one tool to open its full mobile workspace." }));
-      group.items.forEach(function (item) {
-        var target = findAdminTab(item.label, tabs);
+      intro.appendChild(h("p", { class: "ux-admin-mobile-eyebrow", text: group.label.toUpperCase() }));
+      intro.appendChild(h("h3", { class: "ux-admin-mobile-title", text: subGroup.label }));
+      intro.appendChild(h("p", { class: "ux-admin-mobile-description", text: subGroup.desc + ". Select one tool to open its own workspace." }));
+      shell.appendChild(intro);
+      shell.appendChild(h("p", { class: "ux-admin-mobile-section-label", text: "TOOLS" }));
+      subGroup.items.forEach(function (itemLabel) {
+        var target = findAdminTab(itemLabel, tabs);
         if (!target) return;
-        var label = tabLabel(target) || item.label;
-        list.appendChild(makeMobileAdminItem(label, item.desc, iconKey(label), function () {
-          setAdminScreen("feature", group.id, label, true);
+        var label = tabLabel(target) || itemLabel, itemDesc = "Open " + label + " tools and settings";
+        group.items.forEach(function (it) { if (it.label === itemLabel) itemDesc = it.desc; });
+        list.appendChild(makeMobileAdminItem(label, itemDesc, iconKey(label), function () {
+          setAdminScreen("feature", group.id, label, true, navSubcategory);
           target.click();
         }));
       });
-      if (!list.childNodes.length) {
-        list.appendChild(h("p", { class: "ux-admin-mobile-description", text: "These tools are still loading. Return to the categories screen and try again in a moment." }));
-      }
-      shell.appendChild(intro);
-      shell.appendChild(h("p", { class: "ux-admin-mobile-section-label", text: "TOOLS IN THIS CATEGORY" }));
+      if (!list.childNodes.length) list.appendChild(h("p", { class: "ux-admin-mobile-description", text: "These tools are still loading. Go back and try again." }));
     }
     shell.appendChild(list);
   }
@@ -476,7 +511,7 @@
     if (!ov || ov.hidden) return;
     var mobile = isMobileAdminViewport();
     if (!tabs) {
-      navLevel = "auth"; navCategory = ""; navFeature = "";
+      navLevel = "auth"; navCategory = ""; navSubcategory = ""; navFeature = "";
       ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-feature", "ux-admin-mobile-hub", "ux-admin-mobile-feature");
       var backAuth = $(".ux-admin-back", ov); if (backAuth) backAuth.hidden = true;
       if (mobile) {
@@ -514,15 +549,16 @@
       if (backFeature) { backFeature.hidden = false; backFeature.setAttribute("aria-label", "Back to " + ((groupById(navCategory) || {}).label || "Admin menu")); setText(backFeature, "← Back"); }
       return;
     }
-    if (navLevel !== "subcategories") { navLevel = "categories"; navCategory = ""; navFeature = ""; }
+    if (navLevel !== "subcategories" && navLevel !== "tools") { navLevel = "categories"; navCategory = ""; navSubcategory = ""; navFeature = ""; }
     var signature = tabSignature(tabs);
     var needsBuild = !screen || screen.parentNode !== body ||
       screen.getAttribute("data-level") !== navLevel ||
       screen.getAttribute("data-category") !== navCategory ||
-      (navLevel === "subcategories" && screen.getAttribute("data-tabs-signature") !== signature);
+      screen.getAttribute("data-subcategory") !== navSubcategory ||
+      ((navLevel === "subcategories" || navLevel === "tools") && screen.getAttribute("data-tabs-signature") !== signature);
     if (needsBuild) {
       if (screen && screen.parentNode) screen.remove();
-      screen = h("div", { class: "ux-admin-nav-screen", "data-level": navLevel, "data-category": navCategory, "data-tabs-signature": signature });
+      screen = h("div", { class: "ux-admin-nav-screen", "data-level": navLevel, "data-category": navCategory, "data-subcategory": navSubcategory, "data-tabs-signature": signature });
       var intro = h("div", { class: "ux-admin-nav-intro" });
       var grid = h("div", { class: "ux-admin-nav-grid" });
       if (navLevel === "categories") {
@@ -537,22 +573,36 @@
       } else {
         var group = groupById(navCategory);
         if (!group) {
-          navLevel = "categories"; navCategory = "";
-          setAdminScreen("categories", "", "", false);
+          navLevel = "categories"; navCategory = ""; navSubcategory = "";
+          setAdminScreen("categories", "", "", false, "");
           return;
         }
-        intro.appendChild(h("p", { class: "ux-admin-nav-eyebrow", text: "CATEGORY / " + group.label }));
-        intro.appendChild(h("h3", { text: "Choose a subcategory" }));
-        intro.appendChild(h("p", { text: "Select one feature to open its own full-screen panel." }));
-        group.items.forEach(function (item) {
-          var target = findAdminTab(item.label, tabs);
-          if (!target) return;
-          var label = tabLabel(target) || item.label;
-          grid.appendChild(makeAdminNavCard(label, item.desc, iconKey(label), function () {
-            setAdminScreen("feature", group.id, label, true);
-            target.click();
-          }));
-        });
+        if (navLevel === "subcategories") {
+          intro.appendChild(h("p", { class: "ux-admin-nav-eyebrow", text: "CATEGORY / " + group.label }));
+          intro.appendChild(h("h3", { text: "Choose a subcategory" }));
+          intro.appendChild(h("p", { text: "Each subcategory opens a separate list of tools." }));
+          group.subcategories.forEach(function (item) {
+            grid.appendChild(makeAdminNavCard(item.label, item.desc, item.icon || iconKey(item.label), function () {
+              setAdminScreen("tools", group.id, "", true, item.id);
+            }));
+          });
+        } else {
+          var subGroup = subGroupById(group.id, navSubcategory);
+          if (!subGroup) { setAdminScreen("subcategories", group.id, "", false, ""); return; }
+          intro.appendChild(h("p", { class: "ux-admin-nav-eyebrow", text: group.label.toUpperCase() + " / " + subGroup.label }));
+          intro.appendChild(h("h3", { text: "Choose a tool" }));
+          intro.appendChild(h("p", { text: "Select one tool to open its full-screen panel." }));
+          subGroup.items.forEach(function (itemLabel) {
+            var target = findAdminTab(itemLabel, tabs);
+            if (!target) return;
+            var label = tabLabel(target) || itemLabel, desc = "Open " + label + " tools and settings";
+            group.items.forEach(function (it) { if (it.label === itemLabel) desc = it.desc; });
+            grid.appendChild(makeAdminNavCard(label, desc, iconKey(label), function () {
+              setAdminScreen("feature", group.id, label, true, navSubcategory);
+              target.click();
+            }));
+          });
+        }
       }
       screen.appendChild(intro);
       screen.appendChild(grid);
@@ -560,15 +610,17 @@
     }
     ov.classList.toggle("ux-admin-categories", navLevel === "categories");
     ov.classList.toggle("ux-admin-subcategories", navLevel === "subcategories");
+    ov.classList.toggle("ux-admin-tools", navLevel === "tools");
     ov.classList.remove("ux-admin-feature");
     var title = $("#scxTitle", ov);
     var groupTitle = groupById(navCategory);
-    setText(title, navLevel === "categories" ? "Admin Catalogue" : (groupTitle ? groupTitle.label : "Admin Catalogue"));
+    var toolTitle = navLevel === "tools" ? subGroupById(navCategory, navSubcategory) : null;
+    setText(title, navLevel === "categories" ? "Admin Catalogue" : (toolTitle ? toolTitle.label : (groupTitle ? groupTitle.label : "Admin Catalogue")));
     var back = $(".ux-admin-back", ov);
     if (back) {
       back.hidden = navLevel === "categories";
-      back.setAttribute("aria-label", "Back to Admin catalogue");
-      setText(back, "← Catalogue");
+      back.setAttribute("aria-label", navLevel === "tools" ? "Back to subcategories" : "Back to Admin catalogue");
+      setText(back, navLevel === "tools" ? "← Subcategories" : "← Catalogue");
     }
   }
   function routeHash(open) {
@@ -576,7 +628,7 @@
     wasOpen = open;
     try {
       if (open) {
-        var base = categoryState("categories", "", "");
+        var base = categoryState("categories", "", "", "");
         if (location.hash !== "#admin") history.pushState(base, "", path + "#admin");
         else history.replaceState(base, "", path + "#admin");
       } else if (location.hash === "#admin") {
@@ -601,8 +653,8 @@
     var state = e.state;
     if (state && state.scAdmin === true) {
       var level = state.level || (state.screen === "feature" ? "feature" : "categories");
-      if (level !== "subcategories" && level !== "feature") level = "categories";
-      setAdminScreen(level, state.category || "", state.feature || "", false);
+      if (level !== "subcategories" && level !== "tools" && level !== "feature") level = "categories";
+      setAdminScreen(level, state.category || "", state.feature || "", false, state.subcategory || "");
     } else {
       setAdminScreen("categories", "", "", false);
     }
@@ -628,8 +680,8 @@
     document.body.classList.toggle("ux-page", open && ov.parentNode === document.body);
     routeHash(open);
     if (!open) {
-      navLevel = ""; navCategory = ""; navFeature = "";
-      if (ov) ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-feature", "ux-admin-auth");
+      navLevel = ""; navCategory = ""; navSubcategory = ""; navFeature = "";
+      if (ov) ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-tools", "ux-admin-feature", "ux-admin-auth", "ux-admin-mobile", "ux-admin-mobile-hub", "ux-admin-mobile-feature", "ux-admin-mobile-auth");
       return;
     }
     header();
