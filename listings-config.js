@@ -8,7 +8,7 @@ window.STREAMCLOUD_SUPABASE = {
 
 /* Admin Ultra layer (steppers, live-preview dock, Catalogue Pro, AI tools) */
 
-/* Load admin enhancements in dependency order: Ultra, AI Copilot, Polish, then Aurora Glass theme last. */
+/* Load admin enhancements in dependency order: Ultra, AI Copilot, Polish, then Campus theme last. */
 (function () {
   function load(src, done) {
     var s = document.createElement("script");
