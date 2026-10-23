@@ -122,6 +122,13 @@
     ".scx-ov.ux-admin-catalogue .scx-box>div:nth-child(2)>.scx-tabs{float:none;width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));position:static;top:auto;max-height:none;overflow:visible;background:transparent;border:0;padding:0;margin:0;box-shadow:none}" +
     ".scx-ov.ux-admin-catalogue .scx-box>div:nth-child(2)>.scx-tabs:before{grid-column:1/-1}" +
     "@media(max-width:899px){.scx-ov.ux-admin-feature .scx-head{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'back title close' 'search search search'}.scx-ov.ux-admin-feature .scx-head .ux-admin-back{grid-area:back;grid-row:1;grid-column:1}.scx-ov.ux-admin-feature .scx-head h2{grid-area:title;grid-row:1;grid-column:2}.scx-ov.ux-admin-feature .scx-head .scx-x{grid-area:close;grid-row:1;grid-column:3}.scx-ov.ux-admin-feature .scx-head .ux-gsearch{grid-area:search;grid-row:2;grid-column:1/-1}.scx-ov.ux-admin-catalogue .scx-box>div:nth-child(2){padding:16px 14px 30px}.scx-ov.ux-admin-feature .scx-box>div:nth-child(2){padding:16px 14px 30px}.scx-ov.ux-admin-catalogue .scx-box>div:nth-child(2)>.scx-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}";
+  css +=
+    ".scx-ov.ux-admin-feature .scx-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;grid-template-areas:'back title close' 'search search search';gap:10px}" +
+    ".scx-ov.ux-admin-feature .scx-head .ux-admin-back{grid-area:back;grid-row:1;grid-column:1;display:inline-flex}" +
+    ".scx-ov.ux-admin-feature .scx-head h2{grid-area:title;grid-row:1;grid-column:2}" +
+    ".scx-ov.ux-admin-feature .scx-head .scx-x{grid-area:close;grid-row:1;grid-column:3}" +
+    ".scx-ov.ux-admin-feature .scx-head .ux-gsearch{position:relative;grid-area:search;grid-row:2;grid-column:1/-1;left:auto;top:auto;transform:none;width:100%;max-width:none;min-width:0;margin:0}" +
+    "@media(max-width:899px){.scx-ov.ux-admin-feature .scx-head{padding:12px 14px}.scx-ov.ux-admin-feature .scx-head h2{overflow:hidden;text-overflow:ellipsis}}";
   var st = document.createElement("style");
   st.id = "ux-theme-campus";
   st.textContent = css;
