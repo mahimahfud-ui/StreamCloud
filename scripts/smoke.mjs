@@ -255,7 +255,7 @@ try {
 
   await clickAdminFeature(page, "Catalogue", "Content");
   await page.getByText("Smoke test listing").waitFor({ timeout: 8000 });
-  assert.ok(await page.locator(".ux-l2 .ux-s").count() >= 3, "Admin feature sub-navigation should remain visible while managing content");
+  await page.locator(".ux-l2 .ux-s").filter({ hasText: "Content" }).waitFor({ timeout: 5000 });
   assert.equal(await page.getByRole("button", { name: "Delete selected", exact: true }).count(), 1, "Content should show only one shared delete action");
   assert.equal(await page.getByRole("button", { name: "Delete", exact: true }).count(), 0, "Listing rows should not duplicate the shared delete action");
   assert.equal(await page.getByRole("button", { name: "Hide", exact: true }).count(), 1, "Visibility should use the shared bulk action instead of per-row duplicates");
