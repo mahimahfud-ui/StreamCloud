@@ -141,6 +141,16 @@
   function header() {
     var head = $(".scx-head");
     if (!head) return;
+    if (!$(".ux-admin-back", head)) {
+      var back = h("button", { class: "ux-admin-back", type: "button", text: "← Catalogue", "aria-label": "Back to Admin catalogue", hidden: true });
+      back.addEventListener("click", function () {
+        if (screenMode !== "feature") return;
+        var current = history.state;
+        if (current && current.scAdmin === true && current.screen === "feature") history.back();
+        else setAdminScreen("catalogue", "", false);
+      });
+      head.insertBefore(back, head.firstChild);
+    }
     if (!$(".ux-gsearch")) {
       var inp = h("input", { type: "search", placeholder: "Search catalogue…", "aria-label": "Search catalogue" });
       inp.addEventListener("keydown", function (e) { if (e.key === "Enter" && inp.value.trim()) { e.preventDefault(); globalSearch(inp.value.trim()); } });
@@ -160,16 +170,59 @@
     });
   }
 
-  /* ---------- same-page route + hide main UI while admin is open ---------- */
-  var wasOpen = false, path = location.pathname + location.search;
+  /* ---------- catalogue-first Admin screens + browser Back support ---------- */
+  var wasOpen = false, path = location.pathname + location.search, screenMode = "", screenFeature = "";
+  function setAdminScreen(mode, feature, push) {
+    var ov = $(".scx-ov");
+    if (!ov) return;
+    if (mode === "feature" && !$(".scx-tabs", ov)) mode = "catalogue";
+    screenMode = mode;
+    screenFeature = feature || "";
+    ov.classList.toggle("ux-admin-catalogue", mode === "catalogue");
+    ov.classList.toggle("ux-admin-feature", mode === "feature");
+    var back = $(".ux-admin-back", ov);
+    if (back) back.hidden = mode !== "feature";
+    var title = $("#scxTitle");
+    if (mode === "catalogue" && title && $(".scx-tabs", ov)) title.textContent = "Admin Catalogue";
+    if (push && mode === "feature") {
+      try { history.pushState({ scAdmin: true, screen: "feature", feature: screenFeature }, "", path + "#admin"); }
+      catch (e) { /* history may be limited in embedded browsers */ }
+    }
+  }
   function routeHash(open) {
     if (open === wasOpen) return;
     wasOpen = open;
     try {
-      if (open) { if (location.hash !== "#admin") history.replaceState(null, "", path + "#admin"); }
-      else if (location.hash === "#admin") history.replaceState(null, "", path);
+      if (open) {
+        var baseState = { scAdmin: true, screen: "catalogue" };
+        if (location.hash !== "#admin") history.pushState(baseState, "", path + "#admin");
+        else history.replaceState(baseState, "", path + "#admin");
+      } else if (location.hash === "#admin") {
+        history.replaceState(null, "", path);
+      }
     } catch (e) { /* ignore */ }
   }
+  document.addEventListener("click", function (e) {
+    var tab = e.target && e.target.closest ? e.target.closest(".scx-tabs .scx-tab") : null;
+    if (!tab || screenMode !== "catalogue") return;
+    var ov = $(".scx-ov");
+    if (!ov || ov.hidden || !ov.contains(tab)) return;
+    var label = (tab.textContent || "").replace("✦", "").trim();
+    if (/^log\s*out$/i.test(label)) return;
+    setAdminScreen("feature", label, true);
+  }, true);
+  window.addEventListener("popstate", function (e) {
+    var ov = $(".scx-ov");
+    if (ov && !ov.hidden && location.hash === "#admin" && e.state && e.state.scAdmin === true) {
+      setAdminScreen(e.state.screen === "feature" ? "feature" : "catalogue", e.state.feature || "", false);
+      return;
+    }
+    if (ov && !ov.hidden && location.hash !== "#admin") {
+      var close = $(".scx-x", ov);
+      if (close) close.click();
+      else ov.hidden = true;
+    }
+  });
   function autoOpen() {
     if (location.hash !== "#admin") return;
     var n = 0, timer = setInterval(function () {
@@ -190,9 +243,21 @@
     var ov = $(".scx-ov"), open = !!(ov && !ov.hidden);
     document.body.classList.toggle("ux-page", open && ov.parentNode === document.body);
     routeHash(open);
-    if (!open) return;
+    if (!open) {
+      screenMode = ""; screenFeature = "";
+      if (ov) ov.classList.remove("ux-admin-catalogue", "ux-admin-feature");
+      return;
+    }
     header();
     icons();
+    if ($(".scx-tabs", ov)) {
+      if (!screenMode) setAdminScreen("catalogue", "", false);
+      else setAdminScreen(screenMode, screenFeature, false);
+    } else {
+      screenMode = ""; screenFeature = "";
+      ov.classList.remove("ux-admin-catalogue", "ux-admin-feature");
+      var back = $(".ux-admin-back", ov); if (back) back.hidden = true;
+    }
   }
   function sched() {
     if (!queued) {
