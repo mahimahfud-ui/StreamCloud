@@ -266,7 +266,7 @@
     }
     function hint() { return mode.value === "titles" ? "One title per line. Optional year: Dune | 2021" : "One public https:// link per line"; }
     var ta = h("textarea", { class: "scx-in", rows: "5", placeholder: hint(), "aria-label": "Items to add" });
-    var run = h("button", { class: "scx-btn pri", type: "button", text: "✦ Analyse with AI" }), out = h("div", {});
+    var run = h("button", { class: "scx-btn pri", type: "button", text: "✦ Analyse details" }), out = h("div", {});
     var readyNote = h("p", { class: "scx-help", text: "Loading catalogue…" }); out.appendChild(readyNote);
     fillCats();
     mode.addEventListener("change", function () { fillCats(); ta.placeholder = hint(); });
@@ -323,7 +323,7 @@
     });
 
     root.appendChild(h("div", { class: "ux-panel" }, [
-      h("h3", { text: "✦ Bulk add with AI (up to 25 per run)" }),
+      h("h3", { text: "✦ Bulk add (up to 25 per run)" }),
       h("div", { class: "ux-bar" }, [mode, cat]), ta,
       h("p", { class: "scx-help", text: "Metadata is fetched through your existing secured Supabase function. Review every suggestion before publishing." }),
       h("div", { class: "scx-actions" }, [run]), out
@@ -394,7 +394,7 @@
       var on = t.classList.contains("ux-aitab");
       t.classList.toggle("on", on); t.setAttribute("aria-selected", String(on));
     });
-    var ttl = $("#scxTitle"); if (ttl) ttl.textContent = "AI Copilot";
+    var ttl = $("#scxTitle"); if (ttl) ttl.textContent = "Catalogue helper";
     var root = h("div", { class: "ux-pro" }); body.appendChild(root);
     readyCallbacks = [];
     catalogueLoaded = false; catalogueError = ""; existing = [];
@@ -408,7 +408,7 @@
     if (!tabs || $(".ux-aitab", tabs)) return;
     var anchor = $(".ux-protab", tabs);
     if (!anchor) $$(".scx-tab", tabs).forEach(function (b) { if (b.textContent.trim() === "Content") anchor = b; });
-    if (anchor) anchor.after(h("button", { class: "scx-tab ux-aitab", type: "button", text: "AI Copilot ✦", onclick: openAi }));
+    if (anchor) anchor.after(h("button", { class: "scx-tab ux-aitab", type: "button", text: "Catalogue helper ✦", onclick: openAi }));
   }
   var queued = false;
   function schedule() {

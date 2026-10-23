@@ -217,6 +217,10 @@ try {
   await page.locator('input[aria-label="Admin PIN"]').fill("smoke-pin");
   await page.getByRole("button", { name: "Unlock" }).click();
   await page.getByText("Recent admin activity").waitFor({ timeout: 8000 });
+  await page.locator(".ux-l1 .ux-c").first().waitFor({ timeout: 5000 });
+  assert.ok(await page.locator(".ux-l1 .ux-c").count() >= 4, "Admin v4 should group features into category navigation");
+  assert.ok(await page.locator(".ux-l2 .ux-s").count() > 0, "Admin v4 should show sub-category navigation");
+  assert.doesNotMatch(await page.locator(".scx-ov").innerText(), /\\bAI\\b|Gemini|GroqCloud|OpenAI GPT/i, "Admin UI should not show AI/provider branding");
   assert.ok(mockState.calls.some((x) => x.action === "overview"), "Admin overview API should be called after PIN login");
 
   await page.getByRole("button", { name: "Title lookup", exact: true }).click();

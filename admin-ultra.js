@@ -138,8 +138,8 @@
       stat("Hidden", rows.filter(function (r) { return !r.published; }).length), stat("Need attention", rows.filter(function (r) { return r._h.score < 80; }).length), stat("Avg health", avg + "%")]));
     var aiBox = h("div", {}); pro.aiBox = aiBox;
     root.appendChild(h("div", { class: "ux-bar" }, [
-      h("button", { class: "scx-btn pri", type: "button", text: "✦ AI Audit", onclick: showAudit }),
-      h("button", { class: "scx-btn pri", type: "button", text: "✦ AI Auto-Fill metadata", onclick: runFill }),
+      h("button", { class: "scx-btn pri", type: "button", text: "✦ Catalogue audit", onclick: showAudit }),
+      h("button", { class: "scx-btn pri", type: "button", text: "✦ Fill missing details", onclick: runFill }),
       h("button", { class: "scx-btn", type: "button", text: "↻ Refresh", onclick: loadPro })]));
     root.appendChild(aiBox);
     var chips = h("div", { class: "ux-bar" }); pro.chips = chips; root.appendChild(chips);
@@ -182,7 +182,7 @@
   }
   function renderItems() {
     renderChips(); var list = pro.list, rows = filtered(); list.textContent = ""; list.className = pro.view === "grid" ? "ux-grid" : "ux-listv";
-    if (!rows.length) { list.className = ""; list.appendChild(h("p", { class: "scx-help", text: pro.rows.length ? "Nothing matches these filters." : "No database listings yet. Use Add item or AI Studio." })); updBulk(); return; }
+    if (!rows.length) { list.className = ""; list.appendChild(h("p", { class: "scx-help", text: pro.rows.length ? "Nothing matches these filters." : "No database listings yet. Use Add item or Title lookup." })); updBulk(); return; }
     rows.forEach(function (r) {
       var img = r.poster_url || r.logo_url, th = h("div", { class: "ux-thumb", text: isHttps(img) ? "" : String(r.name || "?").charAt(0).toUpperCase() });
       if (isHttps(img)) { var im = h("img", { src: img, alt: "", loading: "lazy", referrerpolicy: "no-referrer" }); im.onerror = function () { im.remove(); th.textContent = String(r.name || "?").charAt(0).toUpperCase(); }; th.appendChild(im); }
@@ -240,11 +240,11 @@
     var box = pro.aiBox; box.textContent = ""; var counts = {};
     pro.rows.forEach(function (r) { r._h.iss.forEach(function (m) { counts[m] = (counts[m] || 0) + 1; }); });
     var keys = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; });
-    var panel = h("div", { class: "ux-panel" }, [h("h3", { text: "✦ AI Audit — catalogue quality" })]);
+    var panel = h("div", { class: "ux-panel" }, [h("h3", { text: "✦ Catalogue audit — data quality" })]);
     if (!keys.length) panel.appendChild(h("p", { class: "scx-help", text: "Everything looks complete. Great catalogue!" }));
     else {
       var potential = pro.rows.filter(function (r) { return r._h.score < 80; }).length;
-      panel.appendChild(h("p", { class: "scx-help", text: potential + " of " + pro.rows.length + " items score below 80%. Tap an issue to filter the catalogue, then fix in bulk or use AI Auto-Fill (movies/series)." }));
+      panel.appendChild(h("p", { class: "scx-help", text: potential + " of " + pro.rows.length + " items score below 80%. Tap an issue to filter the catalogue, then fix items in bulk or fill missing details (movies/series)." }));
       var row = h("div", { class: "ux-iss" }); keys.forEach(function (k) { row.appendChild(h("button", { class: "ux-pill", type: "button", text: k + " · " + counts[k], onclick: function () { pro.issue = k; renderItems(); } })); }); panel.appendChild(row);
     }
     box.appendChild(panel);
@@ -252,7 +252,7 @@
   function runFill() {
     var box = pro.aiBox; box.textContent = "";
     var cands = pro.rows.filter(function (r) { return isRec(r) && (!r.poster_url || !r.year || r.imdb_rating == null || (r.description || "").length < 40 || !(r.genres || []).length); }).slice(0, 20);
-    var panel = h("div", { class: "ux-panel" }, [h("h3", { text: "✦ AI Auto-Fill — missing metadata only (never overwrites)" })]); box.appendChild(panel);
+    var panel = h("div", { class: "ux-panel" }, [h("h3", { text: "✦ Fill missing details — missing metadata only (never overwrites)" })]); box.appendChild(panel);
     if (!cands.length) { panel.appendChild(h("p", { class: "scx-help", text: "All movies/series already have poster, year, rating, genres and a description." })); return; }
     var prog = h("div", { class: "ux-prog" }, [h("i")]), status = h("p", { class: "scx-help", text: "Looking up 0 / " + cands.length + "…" }); panel.appendChild(status); panel.appendChild(prog);
     var results = [], i = 0;
