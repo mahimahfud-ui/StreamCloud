@@ -37,9 +37,15 @@ function providerKey(provider: Provider): string {
   return (value ?? "").trim();
 }
 
+function paidFallbackEnabled(): boolean {
+  return Deno.env.get("ENABLE_PAID_FALLBACK")?.trim().toLowerCase() === "true";
+}
+
 function isConfigured(provider: Provider): boolean {
   const key = providerKey(provider);
-  if (!key || key === "এপিয়াই") return false;
+  if (!key || key === "এপিয়াই" || /^YOUR_.+_KEY$/i.test(key)) return false;
+  // Keep potentially billable providers out of automatic fallback unless explicitly enabled.
+  if ((provider === "deepseek" || provider === "openai") && !paidFallbackEnabled()) return false;
   return (providerCooldownUntil.get(provider) ?? 0) <= Date.now();
 }
 
