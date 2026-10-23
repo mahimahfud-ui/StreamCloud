@@ -31,6 +31,8 @@ supabase secrets set \
 # GEMINI_MODEL='gemini-2.5-flash'
 # OPENROUTER_MODEL='openrouter/free'
 # DEEPSEEK_MODEL='deepseek-flash'
+# Optional: enable potentially billable DeepSeek/OpenAI fallback only if you accept API charges.
+# ENABLE_PAID_FALLBACK='true'
 # Optional if you need authenticated GitHub release lookups:
 # GITHUB_TOKEN='YOUR_PRIVATE_GITHUB_TOKEN'
 ```
@@ -50,11 +52,11 @@ The existing project database already has the requested initial PIN. Login retur
 
 ## 4. AI Studio and deployment
 
-The Admin Dashboard's **AI Studio** looks up Movie / Web Series metadata by exact title (optional release year) using `OMDB_API_KEY`. The AI provider is selected automatically by task: summaries try Gemini first, structured Movie / Web Series metadata tries Groq first, and website/app/music extraction tries Groq first with OpenRouter and other configured providers as fallbacks. OpenRouter defaults to `openrouter/free`, which chooses an available free model compatible with the request instead of pinning a model ID. Gemini discovers models enabled for the key and retries a bounded list; Groq retries compatible models on availability/rate-limit failures. Invalid keys, quota errors and temporary provider failures trigger bounded cooldowns before later requests try the same provider again. OpenAI is the last provider fallback because it can incur API charges. `OPENAI_MODEL` defaults to `gpt-4.1-mini`; `GROQ_MODEL` defaults to `openai/gpt-oss-120b`. Users do not manually select providers. Ratings, posters, years, seasons and episode counts are never fabricated by title lookup. AI Studio only fills the Add item form; an administrator must review the destination URL and publish manually.
+The Admin Dashboard's **AI Studio** looks up Movie / Web Series metadata by exact title (optional release year) using `OMDB_API_KEY`. The AI provider is selected automatically by task: summaries try Gemini first, structured Movie / Web Series metadata tries Groq first, and website/app/music extraction tries Groq first with OpenRouter and other configured providers as fallbacks. OpenRouter defaults to `openrouter/free`, which selects an available free model compatible with the request instead of pinning a model ID. Gemini discovers models enabled for the key and retries a bounded list; Groq retries compatible models on availability/rate-limit failures. Invalid keys, quota errors and temporary provider failures trigger bounded cooldowns before later requests try the same provider again. DeepSeek and OpenAI are skipped unless `ENABLE_PAID_FALLBACK=true` because their API use may incur charges; OpenRouter non-free model overrides are also skipped unless that flag is enabled. `OPENAI_MODEL` defaults to `gpt-4.1-mini`; `GROQ_MODEL` defaults to `openai/gpt-oss-120b`. Users do not manually select providers. Ratings, posters, years, seasons and episode counts are never fabricated by title lookup. AI Studio only fills the Add item form; an administrator must review the destination URL and publish manually.
 
 OpenAI API usage is billed separately from ChatGPT subscriptions. GroqCloud has a free API tier with per-model rate limits. Keep `OPENAI_API_KEY` and `GROQ_API_KEY` only in Supabase Edge Function Secrets; never add them to `admin-listings.js`, `listings-config.js`, or another public file. Get a Groq key at https://console.groq.com/keys.
 
-The existing Add item URL detector still uses Gemini for page extraction, with OMDb/IMDb verification for movie and series metadata.
+The existing Add item URL detector uses task-based routing for page extraction, with OMDb/IMDb verification for movie and series metadata. Potentially paid DeepSeek/OpenAI fallbacks require `ENABLE_PAID_FALLBACK=true`; leaving it unset keeps them out of automatic routing.
 
 Deploy the functions after changing them:
 ```bash
