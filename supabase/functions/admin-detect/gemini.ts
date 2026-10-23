@@ -43,7 +43,8 @@ export async function askGemini(page: PageInfo, section: string): Promise<Gemini
     if (preferred) models.push(preferred);
     models.push("gemini-2.5-flash", "gemini-2.0-flash");
   }
-  const uniqueModels = [...new Set(models)].slice(0, 6);
+  // The preferred model is tried first, followed by available Flash models. Keep fallback bounded.
+  const uniqueModels = [...new Set(models)].slice(0, 3);
   const prompt = [
     `You extract listing details for a directory (type: ${section}) from ONE public web page.`,
     "Rules: use ONLY the page data below. If a value is not explicitly stated there, return null (or [] for genres).",
@@ -57,30 +58,42 @@ export async function askGemini(page: PageInfo, section: string): Promise<Gemini
 
   let data: any = null;
   let lastModel = "";
+  const modelFailures: string[] = [];
   for (let i = 0; i < uniqueModels.length; i++) {
     const model = uniqueModels[i];
     lastModel = model;
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        // Gemini 3 models no longer need the legacy temperature parameter.
-        generationConfig: { responseMimeType: "application/json", responseSchema: SCHEMA },
-      }),
-      signal: AbortSignal.timeout(25000),
-    });
+    let res: Response;
+    try {
+      res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          // Gemini 3 models no longer need the legacy temperature parameter.
+          generationConfig: { responseMimeType: "application/json", responseSchema: SCHEMA },
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
+    } catch (error) {
+      modelFailures.push(model + ": " + ((error as Error).message || "network error"));
+      if (i < uniqueModels.length - 1) continue;
+      throw new Error("Gemini model attempts failed: " + modelFailures.join(" | ").slice(0, 300));
+    }
     if (res.ok) { data = await res.json(); break; }
-    if (res.status === 404 && i < uniqueModels.length - 1) continue;
     if (res.status === 401 || res.status === 403) {
-      throw new Error(`Gemini API key rejected (${res.status}). Check GEMINI_API_KEY in Supabase Secrets.`);
+      throw new Error("Gemini API key rejected (" + res.status + "). Check GEMINI_API_KEY in Supabase Secrets.");
     }
+    const canTryAnotherModel = res.status === 404 || res.status === 429 || res.status === 500 ||
+      res.status === 502 || res.status === 503 || res.status === 504;
+    modelFailures.push(model + ": HTTP " + res.status);
+    if (canTryAnotherModel && i < uniqueModels.length - 1) continue;
     if (res.status === 404) {
-      throw new Error(`Gemini model "${model}" is unavailable (404). Set GEMINI_MODEL to a model enabled for your API key.`);
+      throw new Error('Gemini model "' + model + '" is unavailable (404). Set GEMINI_MODEL to a model enabled for your API key.');
     }
-    throw new Error(`Gemini returned ${res.status} for model "${model}".`);
+    if (res.status === 429) throw new Error("Gemini quota or rate limit reached across available models.");
+    throw new Error('Gemini returned ' + res.status + ' for model "' + model + '".');
   }
-  if (!data) throw new Error(`No available Gemini model succeeded; last tried "${lastModel}".`);
+  if (!data) throw new Error('No available Gemini model succeeded; last tried "' + lastModel + '". ' + modelFailures.join(" | ").slice(0, 180));
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) throw new Error("Gemini returned no answer.");
   const v = JSON.parse(text);
