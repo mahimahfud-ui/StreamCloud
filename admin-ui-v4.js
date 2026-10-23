@@ -16,7 +16,7 @@
     search: "M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.3-4.3", chev: "M9 6l6 6-6 6", back: "M15 6l-6 6 6 6", shield: "M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z", more: "M5 12h.01M12 12h.01M19 12h.01"
   };
   var CATS = [
-    { t: "Dashboard", d: "Overview and recent activity", i: "overview", rx: /overview|dashboard|activity|log\b/ },
+    { t: "Dashboard", d: "Overview and recent activity", i: "overview", rx: /overview|dashboard|activity/ },
     { t: "Catalogue", d: "Add, edit and organise items", i: "layers", rx: /add|catalogue|content|manage|listing/ },
     { t: "Title Tools", d: "Verified title lookup and autofill", i: "search", rx: /title lookup|studio/ },
     { t: "Site Design", d: "Layout, colours and site settings", i: "palette", rx: /layout|card|appearance|theme|site|setting/ },
@@ -171,12 +171,14 @@
       bk.addEventListener("click", function () { st.view = st.view === "page" ? "sub" : "home"; sched(); }); head.insertBefore(bk, head.firstChild);
       var h2 = $("h2", head); if (h2) h2.after(h("h2", { class: "ux-ttl", text: "Admin" }));
     }
-    if (!$(".ux-gsearch")) {
+    var tools = $(".ux-tools", head);
+    if (!tools) { tools = h("div", { class: "ux-tools" }); head.appendChild(tools); }
+    if (!$(".ux-gsearch", head)) {
       var inp = h("input", { type: "search", placeholder: "Search catalogue…", "aria-label": "Search catalogue" });
       inp.addEventListener("keydown", function (e) { if (e.key === "Enter" && inp.value.trim()) { e.preventDefault(); globalSearch(inp.value.trim()); } });
-      head.insertBefore(h("div", { class: "ux-gsearch" }, [svg("search", 16), inp]), $(".ux-tools") || head.lastChild);
+      head.insertBefore(h("div", { class: "ux-gsearch" }, [svg("search", 16), inp]), tools);
     }
-    var tools = $(".ux-tools"); if (tools && !$(".ux-themebtn", tools)) { var b = h("button", { class: "ux-tbtn ux-themebtn", type: "button", onclick: toggle }); setIcon(b); tools.appendChild(b); }
+    if (!$(".ux-themebtn", tools)) { var b = h("button", { class: "ux-tbtn ux-themebtn", type: "button", onclick: toggle }); setIcon(b); tools.appendChild(b); }
   }
 
   /* ---------- page behaviour ---------- */

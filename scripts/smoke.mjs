@@ -220,7 +220,12 @@ try {
   await page.locator(".ux-l1 .ux-c").first().waitFor({ timeout: 5000 });
   assert.ok(await page.locator(".ux-l1 .ux-c").count() >= 4, "Admin v4 should group features into category navigation");
   assert.ok(await page.locator(".ux-l2 .ux-s").count() > 0, "Admin v4 should show sub-category navigation");
-  assert.doesNotMatch(await page.locator(".scx-ov").innerText(), /\\bAI\\b|Gemini|GroqCloud|OpenAI GPT/i, "Admin UI should not show AI/provider branding");
+  assert.doesNotMatch(await page.locator(".scx-ov").innerText(), /\bAI\b|Gemini|GroqCloud|OpenAI GPT/i, "Admin UI should not show AI/provider branding");
+  const themeToggle = page.locator(".ux-themebtn");
+  await themeToggle.waitFor({ timeout: 5000 });
+  const themeBefore = await themeToggle.getAttribute("aria-label");
+  await themeToggle.click();
+  assert.notEqual(await themeToggle.getAttribute("aria-label"), themeBefore, "Admin theme switch should toggle between dark and light");
   assert.ok(mockState.calls.some((x) => x.action === "overview"), "Admin overview API should be called after PIN login");
 
   await page.getByRole("button", { name: "Title lookup", exact: true }).click();
