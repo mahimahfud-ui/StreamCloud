@@ -1,6 +1,6 @@
 /* StreamCloud Admin Ultra — additive layer on top of admin-listings.js.
    DOM-only: no secrets, no innerHTML with data. Adds: +/- steppers,
-   live card preview, Catalogue Pro (organized catalogue, health score, bulk, quick edit) and AI tools. */
+   Catalogue Pro (organized catalogue, health score, bulk, quick edit) and AI tools. */
 (function () {
   "use strict";
   var CFG = window.STREAMCLOUD_SUPABASE || {}, BASE = String(CFG.url || "").replace(/\/+$/, "");
@@ -43,8 +43,6 @@
     ".ux-step{display:flex;width:100%}.ux-step input{flex:1;min-width:0;border-radius:0!important;text-align:center;-moz-appearance:textfield}.ux-step input::-webkit-inner-spin-button,.ux-step input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}" +
     ".ux-step button{width:40px;flex:none;border:1px solid var(--border,#343434);background:var(--card,#242424);color:var(--text,#fff);font-size:19px;line-height:1;cursor:pointer;user-select:none;touch-action:manipulation}.ux-step button:first-child{border-radius:8px 0 0 8px}.ux-step button:last-child{border-radius:0 8px 8px 0}.ux-step button:hover,.ux-step button:active{background:var(--red,#e50914);border-color:var(--red,#e50914)}" +
     ".ux-tools{display:flex;gap:6px;align-items:center;margin-left:auto;flex-wrap:wrap}.ux-tbtn{border:1px solid var(--border,#343434);background:var(--card,#242424);color:var(--text,#fff);border-radius:999px;padding:6px 11px;font-size:12px;cursor:pointer}.ux-tbtn.on{background:var(--red,#e50914);border-color:var(--red,#e50914)}" +
-    ".ux-cardprev{grid-column:1/-1;margin:0 0 14px;padding:12px;border:1px dashed var(--border,#343434);border-radius:12px;background:rgba(255,255,255,.02)}.ux-pvl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim,#a7a7a7);margin:0 0 8px}.ux-pv{display:flex;gap:12px}.ux-art{flex:none;width:92px;aspect-ratio:2/3;border-radius:var(--sc-radius,6px);background:var(--card,#242424);display:grid;place-items:center;overflow:hidden;font-size:28px;font-weight:700;color:var(--dim,#a7a7a7)}.ux-art img{width:100%;height:100%;object-fit:cover}" +
-    ".ux-pvb{min-width:0;display:flex;flex-direction:column;gap:4px}.ux-pvb b{font-size:15px;overflow-wrap:anywhere}.ux-pvb small{color:var(--dim,#a7a7a7)}.ux-pvb p{margin:0;font-size:12px;line-height:1.45;color:var(--dim,#a7a7a7);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.ux-chips{display:flex;gap:5px;flex-wrap:wrap}.ux-chips span{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--card,#242424);border:1px solid var(--border,#343434)}" +
     ".ux-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin:0 0 12px}.ux-stat{padding:10px 12px;border:1px solid var(--border,#343434);border-radius:12px;background:var(--card,#242424)}.ux-stat b{display:block;font-size:21px}.ux-stat small{color:var(--dim,#a7a7a7);font-size:11px}" +
     ".ux-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}.ux-bar .scx-in{width:auto;flex:1 1 150px}.ux-sticky{position:sticky;top:-1px;z-index:5;background:var(--panel,#181818);padding:8px 0}" +
     ".ux-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}.ux-listv{display:flex;flex-direction:column;gap:8px}.ux-card{position:relative;display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--border,#343434);border-radius:12px;background:var(--card,#242424)}.ux-card.hid{opacity:.62}.ux-listv .ux-card{flex-direction:row;align-items:center}" +
@@ -79,45 +77,6 @@
       wrap.appendChild(stepBtn(inp, -1)); wrap.appendChild(inp); wrap.appendChild(stepBtn(inp, 1));
     });
   }
-
-  /* ---------- live card preview ---------- */
-  var RX = { title: /^(title|name)\b/, img: /poster|logo|image/, desc: /^description/, year: /year/, rating: /rating/, genres: /^genres/ };
-  function fieldsIn(scope) {
-    var out = {};
-    $$("label", scope).forEach(function (l) {
-      var t = labelText(l), c = ctl(l); if (!t || !c) return;
-      Object.keys(RX).forEach(function (k) { if (!out[k] && RX[k].test(t)) out[k] = c; });
-    });
-    return out;
-  }
-  function buildPrev(wrap) {
-    wrap._a = h("div", { class: "ux-art" }); wrap._t = h("b"); wrap._m = h("small"); wrap._g = h("div", { class: "ux-chips" }); wrap._d = h("p");
-    wrap.appendChild(h("div", { class: "ux-pvl", text: "Live card preview" }));
-    wrap.appendChild(h("div", { class: "ux-pv" }, [wrap._a, h("div", { class: "ux-pvb" }, [wrap._t, wrap._m, wrap._g, wrap._d])]));
-  }
-  function renderPrev(wrap) {
-    var f = fieldsIn(wrap.parentNode); function v(k) { return f[k] ? String(f[k].value || "").trim() : ""; }
-    var img = v("img"), title = v("title"), letter = (title || "?").charAt(0).toUpperCase();
-    if (wrap._img !== img) {
-      wrap._img = img; wrap._a.textContent = letter;
-      if (isHttps(img)) { var im = h("img", { src: img, alt: "", referrerpolicy: "no-referrer", loading: "lazy" }); im.onerror = function () { im.remove(); wrap._a.textContent = letter; }; wrap._a.textContent = ""; wrap._a.appendChild(im); }
-    } else if (!isHttps(img)) wrap._a.textContent = letter;
-    wrap._t.textContent = title || "Untitled";
-    wrap._m.textContent = [v("year"), v("rating") ? "★ " + v("rating") : ""].filter(Boolean).join(" · ");
-    wrap._g.textContent = ""; v("genres").split(",").map(function (g) { return g.trim(); }).filter(Boolean).slice(0, 5).forEach(function (g) { wrap._g.appendChild(h("span", { text: g })); });
-    wrap._d.textContent = v("desc").slice(0, 220);
-  }
-  function ensurePreview() {
-    if ($(".ux-cardprev")) return;
-    var t = null; $$(".scx-box label").forEach(function (l) { if (!t && RX.title.test(labelText(l)) && ctl(l)) t = l; });
-    if (!t || !t.parentNode) return;
-    var wrap = h("div", { class: "ux-cardprev" }); t.parentNode.insertBefore(wrap, t); buildPrev(wrap); renderPrev(wrap);
-  }
-  function onField(e) {
-    if (!e.target.closest || !e.target.closest(".scx-box")) return;
-    $(".ux-cardprev").forEach(renderPrev);
-  }
-  document.addEventListener("input", onField, true); document.addEventListener("change", onField, true);
 
   /* ---------- Catalogue Pro ---------- */
   var KEYS = ["section", "category", "name", "url", "description", "logo_url", "poster_url", "official_url", "download_url", "platform", "version", "imdb_id", "year", "imdb_rating", "season_count", "episode_count", "genres", "ads"];
@@ -262,7 +221,7 @@
       if (r.section === "series") { F.seasons = fld("Season count", "input", { type: "number", min: "1", max: "5000" }, r.season_count); F.eps = fld("Episode count", "input", { type: "number", min: "1", max: "100000" }, r.episode_count); kids.push(F.seasons.wrap, F.eps.wrap); }
     }
     var panel = h("div", { class: "ux-panel" }, [h("h3", { text: "Quick edit · " + r.name })]), grid = h("div", { class: "scx-grid" }, kids);
-    panel.appendChild(grid); var wrap = h("div", { class: "ux-cardprev" }); grid.insertBefore(wrap, grid.firstChild); buildPrev(wrap);
+    panel.appendChild(grid);
     var save = h("button", { class: "scx-btn pri", type: "button", text: "Save changes" });
     save.addEventListener("click", function () {
       var patch = { name: F.name.c.value.trim(), category: F.category.c.value.trim(), url: F.url.c.value.trim(), description: F.desc.c.value.trim() }; patch[rec ? "poster_url" : "logo_url"] = F.img.c.value.trim();
@@ -273,7 +232,7 @@
       }).catch(function (e) { save.disabled = false; toast(e.message || "Save failed", "err"); });
     });
     panel.appendChild(h("div", { class: "scx-actions" }, [save, h("button", { class: "scx-btn", type: "button", text: "Cancel", onclick: function () { box.textContent = ""; } })]));
-    box.appendChild(panel); renderPrev(wrap); box.scrollIntoView({ block: "nearest" });
+    box.appendChild(panel); box.scrollIntoView({ block: "nearest" });
   }
 
   /* ---------- AI tools ---------- */
@@ -335,7 +294,7 @@
   var queued = false;
   function pass() {
     queued = false; var ov = $(".scx-ov"); if (!ov || ov.hidden) return;
-    addSteppers(); injectProTab(); ensurePreview();
+    addSteppers(); injectProTab();
   }
   function schedule() { if (!queued) { queued = true; requestAnimationFrame(pass); } }
   function start() {
