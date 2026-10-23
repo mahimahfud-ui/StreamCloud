@@ -48,10 +48,10 @@
     if (/layout|card/.test(t)) return "layout";
     if (/appearance|theme/.test(t)) return "palette";
     if (/site|setting/.test(t)) return "globe";
+    if (/log ?out|sign ?out/.test(t)) return "logout";
     if (/activity|log/.test(t)) return "clock";
     if (/backup|export|import/.test(t)) return "download";
     if (/pin|password|security/.test(t)) return "lock";
-    if (/log ?out|sign ?out/.test(t)) return "logout";
     return "dot";
   }
 
