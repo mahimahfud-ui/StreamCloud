@@ -71,18 +71,21 @@ function useful(result: AIResult | null, task: Task): result is AIResult {
 }
 
 function orderFor(section: string, task: Task): Provider[] {
-  // Structured extraction starts with Groq's JSON-schema path. Movie/series
-  // summaries keep Gemini near the front; OpenRouter can select a suitable free
-  // model dynamically, and paid OpenAI is deliberately last.
-  if (task === "summary" || section === "movie" || section === "series") {
+  // Use Gemini for summaries; its response is then checked for a usable description.
+  if (task === "summary") {
+    return ["gemini", "groq", "openrouter", "deepseek", "openai"];
+  }
+  // Groq's strict JSON-schema support is a good first choice for metadata extraction.
+  if (section === "movie" || section === "series") {
     return ["groq", "gemini", "openrouter", "deepseek", "openai"];
   }
+  // Website/app/music extraction uses Groq first. OpenRouter can choose a free,
+  // feature-compatible model dynamically; paid OpenAI remains the final fallback.
   if (section === "music" || section === "apps" || section === "sites") {
     return ["groq", "openrouter", "deepseek", "gemini", "openai"];
   }
   return ["groq", "gemini", "openrouter", "deepseek", "openai"];
 }
-
 function shortError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error ?? "unknown error");
   return message.replace(/[\r\n]+/g, " ").slice(0, 180);
