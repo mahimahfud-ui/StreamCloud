@@ -5,7 +5,7 @@
   "use strict";
   if (document.getElementById("ux-theme-campus")) return;
 
-  var NS = "http://www.w3.org/2000/svg", TK = "scx-ux-theme";
+  var NS = "http://www.w3.org/2000/svg";
   var P = {
     overview: "M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z",
     add: "M12 5v14M5 12h14",
@@ -20,8 +20,7 @@
     lock: "M5 11h14v9H5zM8 11V8a4 4 0 018 0v3",
     logout: "M9 4H5v16h4M16 8l4 4-4 4M20 12H9",
     dot: "M12 12h.01",
-    sun: "M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5",
-    moon: "M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z",
+
     search: "M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.3-4.3",
     more: "M5 12h.01M12 12h.01M19 12h.01"
   };
@@ -56,14 +55,12 @@
   }
 
   /* ---------- Campus theme CSS ---------- */
-  var LOGO = "url(\"data:image/svg+xml," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#6366f1'/><stop offset='1' stop-color='#8b5cf6'/></linearGradient></defs><rect width='36' height='36' rx='10' fill='url(#g)'/><path d='M14 11l11 7-11 7z' fill='white'/></svg>") + "\")";
+  var LOGO = "url(\"data:image/svg+xml," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#e50914'/><stop offset='1' stop-color='#ff3b45'/></linearGradient></defs><rect width='36' height='36' rx='10' fill='url(#g)'/><path d='M14 11l11 7-11 7z' fill='white'/></svg>") + "\")";
   var G = "linear-gradient(135deg,var(--u-ac),var(--u-ac2))", O = ".scx-ov ", SURF = "background:var(--u-sf);border:1px solid var(--u-ln);border-radius:16px";
   var css =
-    O + "{--u-bg:#0e1016;--u-sf:#161922;--u-sf2:#1d212c;--u-ln:rgba(255,255,255,.09);--u-tx:#f3f5f9;--u-dm:#98a1b5;--u-ac:#6366f1;--u-ac2:#8b5cf6;--u-acs:rgba(99,102,241,.18);--u-actx:#a5b4fc;--u-sh:0 30px 90px rgba(0,0,0,.6);--u-ov:rgba(7,8,13,.68);--card:var(--u-sf2);--text:var(--u-tx);--dim:var(--u-dm);--border:var(--u-ln);--panel:var(--u-sf);--red:var(--u-ac);color-scheme:dark}" +
-    ".scx-ov[data-ux-theme=light]{--u-bg:#f1f5f9;--u-sf:#fff;--u-sf2:#f8fafc;--u-ln:#e2e8f0;--u-tx:#0f172a;--u-dm:#64748b;--u-ac:#4f46e5;--u-ac2:#7c3aed;--u-acs:#eef2ff;--u-actx:#4f46e5;--u-sh:0 30px 80px rgba(15,23,42,.2);--u-ov:rgba(203,213,225,.66);color-scheme:light}" +
-    O + "{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;z-index:9999!important;overflow:hidden!important;background:var(--u-bg)!important;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0!important;display:block}.scx-ov[hidden]{display:none!important}" +
-    "html,body{max-width:100%;min-width:0}body.ux-page{width:100%;height:100%;overflow:hidden!important;overscroll-behavior:none}body.ux-page>*:not(.scx-ov):not(.ux-toast):not(script):not(style):not(link){display:none!important}" +
-    ".ux-dockbtn,.ux-live,.ux-revert,.ux-qbar button:first-child{display:none!important}" +
+    O + "{--u-bg:#09090b;--u-sf:#121216;--u-sf2:#1b1b21;--u-ln:rgba(255,255,255,.08);--u-tx:#f5f5f7;--u-dm:#a1a1aa;--u-ac:#e50914;--u-ac2:#ff3b45;--u-acs:rgba(229,9,20,.16);--u-actx:#fff;--u-sh:0 30px 90px rgba(0,0,0,.6);--u-ov:rgba(0,0,0,.72);--card:var(--u-sf2);--text:var(--u-tx);--dim:var(--u-dm);--border:var(--u-ln);--panel:var(--u-sf);--red:var(--u-ac);color-scheme:dark}" +
+    O + "{position:fixed!important;inset:0!important;width:100%!important;max-width:100%!important;height:100vh!important;height:100dvh!important;box-sizing:border-box!important;z-index:9999!important;overflow:hidden!important;background:var(--u-bg)!important;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0!important;display:block}.scx-ov[hidden]{display:none!important}" +
+    "html,body{width:100%;max-width:100%;min-width:0}body.ux-page{width:100%;height:100vh;height:100dvh;overflow:hidden!important;overscroll-behavior:none}body.ux-page>*:not(.scx-ov):not(.ux-toast):not(script):not(style):not(link){display:none!important}" +
     O + ".scx-box{position:relative;width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:0;border:0;border-radius:0;background:var(--u-bg);color:var(--u-tx);box-shadow:none}" +
     /* header */
     O + ".scx-head{position:sticky;top:0;z-index:20;margin:0;padding:14px 22px;display:flex;align-items:center;gap:14px;background:var(--u-sf);border-bottom:1px solid var(--u-ln);border-radius:0}" +
@@ -73,11 +70,11 @@
     O + ".scx-x{width:36px;height:36px;display:grid;place-items:center;padding:0;border-radius:50%;background:var(--u-sf2);border:1px solid var(--u-ln);color:var(--u-tx)}" +
     O + ".scx-box>div:nth-child(2){max-width:1320px;margin:0 auto;padding:24px 22px 40px}" +
     /* desktop sidebar */
-    "@media(min-width:900px){.scx-ov:not(.ux-dock) .scx-box>div:nth-child(2):has(>.scx-tabs)>.scx-tabs{float:left;width:220px;flex-direction:column;flex-wrap:nowrap;gap:3px;margin:0;padding:14px 12px;position:sticky;top:84px;max-height:calc(100vh - 150px);overflow:auto;" + SURF.replace("16px", "18px") + "}" +
-    ".scx-ov:not(.ux-dock) .scx-box>div:nth-child(2):has(>.scx-tabs)>:not(.scx-tabs){margin-left:244px}" +
-    ".scx-ov:not(.ux-dock) .scx-box>div:nth-child(2):has(>.scx-tabs)::after{content:\"\";display:block;clear:both}" +
-    ".scx-ov:not(.ux-dock) .scx-tabs::before{content:\"StreamCloud Admin\";display:block;margin:0 0 10px;padding:2px 0 12px 48px;min-height:38px;line-height:34px;font-weight:800;font-size:14px;color:var(--u-tx);background:" + LOGO + " no-repeat 2px 0/34px;border-bottom:1px solid var(--u-ln)}.scx-ov:not(.ux-dock) .scx-tab{width:100%}}" +
-    O + ".scx-tabs{gap:6px;margin:0 0 18px;scrollbar-width:none}.scx-ov.ux-dock .scx-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}@media(max-width:899px){.scx-ov .scx-tabs{flex-wrap:nowrap;overflow-x:auto}}" +
+    "@media(min-width:900px){.scx-ov .scx-box>div:nth-child(2):has(>.scx-tabs)>.scx-tabs{float:left;width:220px;flex-direction:column;flex-wrap:nowrap;gap:3px;margin:0;padding:14px 12px;position:sticky;top:84px;max-height:calc(100vh - 150px);overflow:auto;" + SURF.replace("16px", "18px") + "}" +
+    ".scx-ov .scx-box>div:nth-child(2):has(>.scx-tabs)>:not(.scx-tabs){margin-left:244px}" +
+    ".scx-ov .scx-box>div:nth-child(2):has(>.scx-tabs)::after{content:\"\";display:block;clear:both}" +
+    ".scx-ov .scx-tabs::before{content:\"StreamCloud Admin\";display:block;margin:0 0 10px;padding:2px 0 12px 48px;min-height:38px;line-height:34px;font-weight:800;font-size:14px;color:var(--u-tx);background:" + LOGO + " no-repeat 2px 0/34px;border-bottom:1px solid var(--u-ln)}.scx-ov .scx-tab{width:100%}}" +
+    O + ".scx-tabs{gap:6px;margin:0 0 18px;scrollbar-width:none}@media(max-width:899px){.scx-ov .scx-tabs{flex-wrap:nowrap;overflow-x:auto}}" +
     O + ".scx-tab{display:flex;align-items:center;justify-content:flex-start;gap:10px;white-space:nowrap;text-align:left;padding:10px 12px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--u-dm);font-size:13px;font-weight:650}" +
     O + ".scx-tab .ux-ico{display:grid;place-items:center;flex:none}" +
     O + ".scx-tab:hover{background:var(--u-sf2);color:var(--u-tx)}" +
@@ -92,8 +89,7 @@
     O + ".scx-f{gap:6px;font-size:11.5px;font-weight:650;color:var(--u-dm)}" +
     O + ".scx-in,.scx-box input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]),.scx-box select,.scx-box textarea{background:var(--u-sf2);border:1px solid var(--u-ln);border-radius:12px;padding:10px 13px;color:var(--u-tx);font-size:13.5px}" +
     O + ".scx-box select{color-scheme:inherit}" +
-    ".scx-ov:not([data-ux-theme=light]) .scx-box select option,.scx-ov:not([data-ux-theme=light]) .scx-box select optgroup{background:#1d212c;color:#f3f5f9}" +
-    ".scx-ov[data-ux-theme=light] .scx-box select option,.scx-ov[data-ux-theme=light] .scx-box select optgroup{background:#fff;color:#0f172a}" +
+    ".scx-ov .scx-box select option,.scx-ov .scx-box select optgroup{background:#1b1b21;color:#f5f5f7}" +
     O + ".scx-box input[type=color]{height:42px;padding:3px;border-radius:12px;background:var(--u-sf2);border:1px solid var(--u-ln);cursor:pointer}" +
     O + ".scx-in:focus,.scx-box input:focus,.scx-box select:focus,.scx-box textarea:focus{border-color:var(--u-ac);background:var(--u-sf);box-shadow:0 0 0 3px var(--u-acs)}" +
     O + ".ux-step input{border-radius:0!important}.scx-ov .ux-step button{background:var(--u-sf2);border-color:var(--u-ln);color:var(--u-tx);font-weight:700}.scx-ov .ux-step button:hover{background:var(--u-ac);border-color:var(--u-ac);color:#fff}" +
@@ -110,30 +106,14 @@
     O + ".ux-cardprev{" + SURF + ";background:var(--u-sf2)}" +
     O + ".ux-meter,.ux-prog{background:var(--u-ln)}.scx-ov .ux-prog i{background:" + G + "}.scx-ov .ux-meter i{background:#10b981}.scx-ov .ux-meter.mid i{background:#f59e0b}.scx-ov .ux-meter.low i{background:#ef4444}" +
     O + ".ux-fillrow{border-top-color:var(--u-ln)}.scx-ov .ux-live{color:#10b981}" +
-    /* mobile bottom dock */
-    ".ux-bnav,.ux-sheet{display:none}" +
-    "@media(max-width:899px){.scx-ov:not(.ux-dock){inset:0!important;width:100vw!important;height:100vh!important;height:100dvh!important}.scx-ov:not(.ux-dock) .scx-box{position:absolute;width:100%;max-width:none;height:100%;max-height:none;border-radius:0;padding-bottom:calc(112px + env(safe-area-inset-bottom));overflow:auto;-webkit-overflow-scrolling:touch}.scx-ov:not(.ux-dock) .scx-head{display:grid;position:sticky;top:0;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:\"title close\" \"search search\";gap:10px;border-radius:0;padding:12px 14px}.scx-ov:not(.ux-dock) .scx-head h2{grid-area:title;min-width:0;overflow:hidden;text-overflow:ellipsis}.scx-ov:not(.ux-dock) .scx-head .scx-x{grid-area:close}.scx-ov:not(.ux-dock) .scx-head .ux-tools{position:absolute;right:58px;top:12px;margin:0}.scx-ov:not(.ux-dock) .ux-gsearch{display:block;position:relative;grid-area:search;left:auto;top:auto;transform:none;width:100%;max-width:none;min-width:0;margin:0}.scx-ov:not(.ux-dock) .scx-tabs{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible;padding:0;margin:0 0 18px}.scx-ov:not(.ux-dock) .scx-tab{min-height:92px;width:auto;white-space:normal;align-items:flex-start;word-break:normal}.scx-ov:not(.ux-dock) .ux-bnav,.scx-ov:not(.ux-dock) .ux-sheet{display:none!important}.scx-ov:not(.ux-dock) .scx-box>div:nth-child(2){padding:16px 14px 30px}.scx-ov:not(.ux-dock) input:not([type=checkbox]):not([type=radio]):not([type=color]),.scx-ov:not(.ux-dock) select,.scx-ov:not(.ux-dock) textarea{font-size:16px!important;max-width:100%}" +
-    ".scx-ov:not(.ux-dock) .ux-bnav{display:flex;position:fixed;left:50%;transform:translateX(-50%);bottom:max(12px,env(safe-area-inset-bottom));width:min(440px,calc(100% - 24px));z-index:50;align-items:center;justify-content:space-around;padding:8px 6px;border-radius:26px;background:var(--u-sf);border:1px solid var(--u-ln);box-shadow:0 14px 40px rgba(15,23,42,.3)}" +
-    ".scx-ov:not(.ux-dock) .ux-sheet.open{display:grid}}" +
-    O + ".ux-bn{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:54px;padding:6px 8px;border:0;border-radius:14px;background:transparent;color:var(--u-dm);font-size:10px;font-weight:700;cursor:pointer}.scx-ov .ux-bn.on{color:var(--u-actx);background:var(--u-acs)}" +
-    O + ".ux-bn.ux-fab{width:54px;height:54px;min-width:54px;margin-top:-26px;padding:0;justify-content:center;border-radius:50%;background:" + G + ";color:#fff;border:4px solid var(--u-bg);box-shadow:0 10px 24px rgba(99,102,241,.45)}.scx-ov .ux-bn.ux-fab span{display:none}" +
-    O + ".ux-sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(max(12px,env(safe-area-inset-bottom)) + 76px);width:min(440px,calc(100% - 24px));z-index:41;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;border-radius:22px;background:var(--u-sf);border:1px solid var(--u-ln);box-shadow:0 18px 50px rgba(15,23,42,.35)}" +
-    O + ".ux-sheet button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border:1px solid var(--u-ln);border-radius:14px;background:var(--u-sf2);color:var(--u-tx);font-size:11px;font-weight:650;cursor:pointer}.scx-ov .ux-sheet button.on{background:var(--u-acs);color:var(--u-actx);border-color:transparent}" +
-    ".ux-qbar{background:rgba(20,22,30,.85)}";
+    /* Responsive viewport fit across mobile browsers; keep full Admin controls visible. */
+    "@media(max-width:899px){.scx-ov{inset:0!important;width:100%!important;height:100vh!important;height:100dvh!important}.scx-ov .scx-box{position:absolute;inset:0;width:100%;max-width:none;height:100%;max-height:none;border-radius:0;padding-bottom:calc(24px + env(safe-area-inset-bottom));overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-sizing:border-box}.scx-ov .scx-head{display:grid;position:sticky;top:0;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:10px;border-radius:0;padding:12px 14px}.scx-ov .scx-head h2{grid-row:1;grid-column:1;min-width:0;overflow:hidden;text-overflow:ellipsis}.scx-ov .scx-head .scx-x{grid-row:1;grid-column:2}.scx-ov .ux-gsearch{display:block;position:relative;grid-row:2;grid-column:1/-1;left:auto;top:auto;transform:none;width:100%;max-width:none;min-width:0;margin:0}.scx-ov .scx-tabs{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible;padding:0;margin:0 0 18px}.scx-ov .scx-tab{min-height:92px;width:auto;min-width:0;white-space:normal;align-items:flex-start;word-break:normal;overflow-wrap:anywhere}.scx-ov .scx-box>div:nth-child(2){padding:16px 14px 30px}.scx-ov input:not([type=checkbox]):not([type=radio]):not([type=color]),.scx-ov select,.scx-ov textarea{font-size:16px!important;max-width:100%;box-sizing:border-box}}"
+    O + ".ux-qbar{background:rgba(9,9,11,.82);border-color:rgba(255,255,255,.08)}";
 
   var st = document.createElement("style");
   st.id = "ux-theme-campus";
   st.textContent = css;
   (document.head || document.documentElement).appendChild(st);
-
-  /* ---------- admin theme preference ---------- */
-  function theme() {
-    try { return localStorage.getItem(TK) === "light" ? "light" : "dark"; }
-    catch (e) { return "dark"; }
-  }
-  function applyTheme(ov) {
-    if (ov.dataset.uxTheme !== theme()) ov.dataset.uxTheme = theme();
-  }
 
   /* ---------- header search ---------- */
   function globalSearch(q) {
@@ -168,55 +148,6 @@
     });
   }
 
-  /* ---------- mobile bottom navigation ---------- */
-  function tabBtn(label) {
-    var out = null;
-    $$(".scx-tab").forEach(function (b) { if (!out && b.textContent.trim().indexOf(label) === 0) out = b; });
-    return out;
-  }
-  var sheet = null;
-  function closeSheet() { if (sheet) sheet.classList.remove("open"); }
-  function openSheet(ov) {
-    if (!sheet) { sheet = h("div", { class: "ux-sheet", role: "menu" }); ov.appendChild(sheet); }
-    if (sheet.classList.contains("open")) return closeSheet();
-    sheet.textContent = "";
-    $$(".scx-tab").forEach(function (t) {
-      var label = t.textContent.replace("✦", "").trim();
-      var b = h("button", { type: "button", role: "menuitem", class: t.classList.contains("on") ? "on" : "" }, [svg(iconKey(label), 20), h("span", { text: label })]);
-      b.addEventListener("click", function () { t.click(); closeSheet(); setTimeout(sync, 80); });
-      sheet.appendChild(b);
-    });
-    sheet.classList.add("open");
-  }
-  function sync() {
-    $$(".ux-bn[data-t]").forEach(function (b) {
-      var t = tabBtn(b.dataset.t);
-      b.classList.toggle("on", !!(t && t.classList.contains("on")));
-    });
-  }
-  function dock(ov) {
-    if ($(".ux-bnav", ov)) return sync();
-    var nav = h("nav", { class: "ux-bnav", "aria-label": "Admin sections" });
-    [["Overview", "overview", "Overview"], ["Catalogue Pro", "layers", "Catalogue"], ["Add item", "add", "Add", 1], ["AI Copilot", "ai", "AI"], ["More", "more", "More"]].forEach(function (d) {
-      var b = h("button", { type: "button", class: "ux-bn" + (d[3] ? " ux-fab" : ""), "aria-label": d[0] }, [svg(d[1], d[3] ? 24 : 20), h("span", { text: d[2] })]);
-      if (d[0] !== "More") b.dataset.t = d[0];
-      b.addEventListener("click", function (e) {
-        e.stopPropagation();
-        if (d[0] === "More") return openSheet(ov);
-        closeSheet();
-        var t = tabBtn(d[0]);
-        if (t) t.click();
-        setTimeout(sync, 80);
-      });
-      nav.appendChild(b);
-    });
-    ov.appendChild(nav);
-    sync();
-  }
-  document.addEventListener("click", function (e) {
-    if (sheet && sheet.classList.contains("open") && !e.target.closest(".ux-sheet,.ux-bnav")) closeSheet();
-  });
-
   /* ---------- same-page route + hide main UI while admin is open ---------- */
   var wasOpen = false, path = location.pathname + location.search;
   function routeHash(open) {
@@ -248,16 +179,8 @@
     document.body.classList.toggle("ux-page", open && ov.parentNode === document.body);
     routeHash(open);
     if (!open) return;
-    /* Keep the Campus UI full-page even if the old live-preview preference was enabled. */
-    if (ov.classList.contains("ux-dock")) {
-      var db = $(".ux-dockbtn");
-      if (db) db.click();
-      else ov.classList.remove("ux-dock");
-    }
-    applyTheme(ov);
     header();
     icons();
-    dock(ov);
   }
   function sched() {
     if (!queued) {
