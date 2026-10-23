@@ -140,3 +140,27 @@ main .app-card p{min-height:40px}
 /* Keep a single Download action visible when no verified direct APK link exists. */
 .download-unavailable{font:inherit;border:0;opacity:.42;cursor:not-allowed;pointer-events:none}
 .unavailable-tag{opacity:.65}
+
+/* Mobile/tablet fit: keep cards and controls inside the device viewport without disabling pinch zoom. */
+@media(max-width:760px){
+  html,body{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+  body{min-width:0}
+  .hero,.hero-in,.mode-wrap,.mode-switch,main,.row-section,.track,.finale,.finale-in,footer{min-width:0;max-width:100%}
+  .hero{padding-left:16px!important;padding-right:16px!important}
+  .hero-in{width:100%}
+  .mode-wrap{width:calc(100% - 24px);margin-left:auto!important;margin-right:auto!important}
+  .mode-switch{width:100%;max-width:560px}
+  .mode-switch .mode{flex:1 1 0;min-width:0;padding-left:clamp(4px,1.4vw,12px);padding-right:clamp(4px,1.4vw,12px);white-space:normal;overflow-wrap:anywhere}
+  main .track{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:clamp(8px,2.5vw,12px)!important;padding-left:12px!important;padding-right:12px!important}
+  main .card{min-width:0;max-width:100%}
+  main .card .cap,main .card h3,main .card p{overflow-wrap:anywhere}
+  .card.logo-card .site-meta{min-width:0;gap:6px}
+  .card.logo-card .site-meta>span:first-child{min-width:0}
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),select,textarea{font-size:16px}
+}
+@media(max-width:360px){
+  .mode-switch .mode{letter-spacing:0;font-size:clamp(8px,2.5vw,10px)}
+  main .card.logo-card .cap{padding-left:10px;padding-right:10px;font-size:13px}
+  main .track{gap:8px!important;padding-left:8px!important;padding-right:8px!important}
+}
+
