@@ -42,8 +42,7 @@
   document.head.appendChild(h("style", { text:
     ".ux-step{display:flex;width:100%}.ux-step input{flex:1;min-width:0;border-radius:0!important;text-align:center;-moz-appearance:textfield}.ux-step input::-webkit-inner-spin-button,.ux-step input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}" +
     ".ux-step button{width:40px;flex:none;border:1px solid var(--border,#343434);background:var(--card,#242424);color:var(--text,#fff);font-size:19px;line-height:1;cursor:pointer;user-select:none;touch-action:manipulation}.ux-step button:first-child{border-radius:8px 0 0 8px}.ux-step button:last-child{border-radius:0 8px 8px 0}.ux-step button:hover,.ux-step button:active{background:var(--red,#e50914);border-color:var(--red,#e50914)}" +
-    ".ux-tools{display:flex;gap:6px;align-items:center;margin-left:auto;flex-wrap:wrap}.ux-tbtn{border:1px solid var(--border,#343434);background:var(--card,#242424);color:var(--text,#fff);border-radius:999px;padding:6px 11px;font-size:12px;cursor:pointer}.ux-tbtn.on{background:var(--red,#e50914);border-color:var(--red,#e50914)}.ux-live{font-size:11px;color:#46d369}" +
-    ".scx-ov.ux-dock{background:transparent!important;pointer-events:none;display:block!important;padding:0!important;overflow:visible!important}.scx-ov.ux-dock[hidden]{display:none!important}.scx-ov.ux-dock .scx-box{position:fixed;top:0;right:0;bottom:0;width:min(480px,100vw);max-height:none;height:100vh;border-radius:0;pointer-events:auto;box-shadow:-14px 0 44px rgba(0,0,0,.55)}@media(max-width:700px){.scx-ov.ux-dock .scx-box{top:auto;left:0;width:100%;height:58vh;border-radius:16px 16px 0 0}}" +
+    ".ux-tools{display:flex;gap:6px;align-items:center;margin-left:auto;flex-wrap:wrap}.ux-tbtn{border:1px solid var(--border,#343434);background:var(--card,#242424);color:var(--text,#fff);border-radius:999px;padding:6px 11px;font-size:12px;cursor:pointer}.ux-tbtn.on{background:var(--red,#e50914);border-color:var(--red,#e50914)}" +
     ".ux-cardprev{grid-column:1/-1;margin:0 0 14px;padding:12px;border:1px dashed var(--border,#343434);border-radius:12px;background:rgba(255,255,255,.02)}.ux-pvl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim,#a7a7a7);margin:0 0 8px}.ux-pv{display:flex;gap:12px}.ux-art{flex:none;width:92px;aspect-ratio:2/3;border-radius:var(--sc-radius,6px);background:var(--card,#242424);display:grid;place-items:center;overflow:hidden;font-size:28px;font-weight:700;color:var(--dim,#a7a7a7)}.ux-art img{width:100%;height:100%;object-fit:cover}" +
     ".ux-pvb{min-width:0;display:flex;flex-direction:column;gap:4px}.ux-pvb b{font-size:15px;overflow-wrap:anywhere}.ux-pvb small{color:var(--dim,#a7a7a7)}.ux-pvb p{margin:0;font-size:12px;line-height:1.45;color:var(--dim,#a7a7a7);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.ux-chips{display:flex;gap:5px;flex-wrap:wrap}.ux-chips span{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--card,#242424);border:1px solid var(--border,#343434)}" +
     ".ux-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin:0 0 12px}.ux-stat{padding:10px 12px;border:1px solid var(--border,#343434);border-radius:12px;background:var(--card,#242424)}.ux-stat b{display:block;font-size:21px}.ux-stat small{color:var(--dim,#a7a7a7);font-size:11px}" +
@@ -81,56 +80,6 @@
     });
   }
 
-  /* ---------- label helpers ---------- */
-  function labelText(l) { for (var n = l.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && n.textContent.trim()) return n.textContent.trim().toLowerCase(); return ""; }
-  function ctl(l) { return l.querySelector("input:not([type=checkbox]),select,textarea"); }
-
-  /* ---------- dock (live preview) mode ---------- */
-  var COLOR = { background: "--bg", panel: "--panel", card: "--card", text: "--text", "muted text": "--dim", accent: "--red", border: "--border" };
-  var SC_VARS = ["--sc-cols-d", "--sc-cols-t", "--sc-cols-m", "--sc-gap", "--sc-radius", "--sc-aspect", "--sc-image-fit"];
-  function activeTab() { var t = $(".scx-tab.on"); return t ? t.textContent : ""; }
-  function liveApply() {
-    if (!/Appearance|Layout/.test(activeTab())) return;
-    var root = document.documentElement, any = false;
-    $$(".scx-box label").forEach(function (l) {
-      var t = labelText(l), c = ctl(l); if (!t || !c) return; var v = c.value;
-      if (COLOR[t] && c.type === "color") { root.style.setProperty(COLOR[t], v); any = true; }
-      else if (t === "font family" && /^[a-zA-Z0-9 ,"'_-]{1,80}$/.test(v)) { document.body.style.fontFamily = v; any = true; }
-      else if (/^base font size/.test(t)) { document.body.style.fontSize = clamp(v, 12, 20, 14) + "px"; any = true; }
-      else if (/image fit/.test(t) && /^(contain|cover|fill)$/.test(v)) { root.style.setProperty("--sc-image-fit", v); any = true; }
-      else if (/desktop/.test(t) && /col/.test(t)) { root.style.setProperty("--sc-cols-d", clamp(v, 1, 8, 3)); any = true; }
-      else if (/tablet/.test(t) && /col/.test(t)) { root.style.setProperty("--sc-cols-t", clamp(v, 1, 6, 2)); any = true; }
-      else if (/mobile/.test(t) && /col/.test(t)) { root.style.setProperty("--sc-cols-m", clamp(v, 1, 3, 1)); any = true; }
-      else if (/gap|spacing/.test(t)) { root.style.setProperty("--sc-gap", clamp(v, 0, 48, 22) + "px"); any = true; }
-      else if (/radius|corner/.test(t)) { root.style.setProperty("--sc-radius", clamp(v, 0, 32, 4) + "px"); any = true; }
-      else if (/aspect/.test(t) && /^(1 \/ 1|2 \/ 3|16 \/ 9|4 \/ 3)$/.test(v)) { root.style.setProperty("--sc-aspect", v); any = true; }
-    });
-    var pill = $(".ux-live"); if (any && pill) { pill.hidden = false; $(".ux-revert").hidden = false; }
-  }
-  function revertLive() {
-    api("admin-listings", { action: "settings-get" }).then(function (d) {
-      var root = document.documentElement;
-      Object.keys(COLOR).forEach(function (k) { root.style.removeProperty(COLOR[k]); });
-      SC_VARS.forEach(function (v) { root.style.removeProperty(v); });
-      document.body.style.fontFamily = ""; document.body.style.fontSize = "";
-      if (typeof window.STREAMCLOUD_APPLY_SETTINGS === "function" && d.settings) window.STREAMCLOUD_APPLY_SETTINGS(d.settings);
-      $(".ux-live").hidden = true; $(".ux-revert").hidden = true; toast("Preview reverted to saved settings", "ok");
-    }).catch(function (e) { toast(e.message, "err"); });
-  }
-  function applyDock() {
-    var ov = $(".scx-ov"); if (!ov) return;
-    ov.classList.toggle("ux-dock", !!prefs.dock);
-    if (!ov.hidden) document.body.style.overflow = prefs.dock ? "" : "hidden";
-    var b = $(".ux-dockbtn"); if (b) b.classList.toggle("on", !!prefs.dock);
-  }
-  function addTools() {
-    var head = $(".scx-head"); if (!head || $(".ux-tools")) return;
-    var dock = h("button", { class: "ux-tbtn ux-dockbtn", type: "button", title: "Dock the panel to the side and edit while the site is visible", text: "◧ Live preview", onclick: function () { prefs.dock = !prefs.dock; savePrefs(); applyDock(); } });
-    var pill = h("span", { class: "ux-live", hidden: true, text: "● Unsaved preview" });
-    var rev = h("button", { class: "ux-tbtn ux-revert", type: "button", hidden: true, text: "↺ Revert", onclick: revertLive });
-    head.insertBefore(h("div", { class: "ux-tools" }, [pill, rev, dock]), head.lastChild); applyDock();
-  }
-
   /* ---------- live card preview ---------- */
   var RX = { title: /^(title|name)\b/, img: /poster|logo|image/, desc: /^description/, year: /year/, rating: /rating/, genres: /^genres/ };
   function fieldsIn(scope) {
@@ -166,7 +115,7 @@
   }
   function onField(e) {
     if (!e.target.closest || !e.target.closest(".scx-box")) return;
-    $$(".ux-cardprev").forEach(renderPrev); liveApply();
+    $(".ux-cardprev").forEach(renderPrev);
   }
   document.addEventListener("input", onField, true); document.addEventListener("change", onField, true);
 
@@ -386,7 +335,7 @@
   var queued = false;
   function pass() {
     queued = false; var ov = $(".scx-ov"); if (!ov || ov.hidden) return;
-    addTools(); applyDock(); addSteppers(); injectProTab(); ensurePreview();
+    addSteppers(); injectProTab(); ensurePreview();
   }
   function schedule() { if (!queued) { queued = true; requestAnimationFrame(pass); } }
   function start() {
@@ -413,13 +362,13 @@
     var out = null; document.querySelectorAll(".scx-tab").forEach(function (b) { if (!out && b.textContent.indexOf(label) === 0) out = b; });
     return out;
   }
-  function openTab(label, after) {
+  function openTab(label) {
     var ov = $(".scx-ov"), icon = $("#adminIcon");
     if ((!ov || ov.hidden) && icon) icon.click();
-    waitFor(function () { return tabBtn(label); }, function (b) { b.click(); if (after) waitFor(function () { return $(".ux-dockbtn"); }, after); });
+    waitFor(function () { return tabBtn(label); }, function (b) { b.click(); });
   }
   var ICON = {
-    live: "M4 5h16v10H4zM8 19h8M12 15v4", cat: "M4 6h16M4 12h16M4 18h10", add: "M12 5v14M5 12h14"
+    cat: "M4 6h16M4 12h16M4 18h10", add: "M12 5v14M5 12h14"
   };
   function btn(key, label, title, onclick) {
     var b = document.createElement("button"); b.type = "button"; b.title = title; b.setAttribute("aria-label", title);
@@ -433,9 +382,6 @@
     ".ux-qbar button:hover,.ux-qbar button:focus-visible{background:var(--red,#e50914);outline:0}@media(max-width:560px){.ux-qbar button span{display:none}.ux-qbar button{padding:11px}}";
   document.head.appendChild(style);
   var bar = document.createElement("div"); bar.className = "ux-qbar"; bar.hidden = true; bar.setAttribute("role", "toolbar"); bar.setAttribute("aria-label", "Admin quick actions");
-  bar.appendChild(btn("live", "Live preview", "Edit appearance with live preview", function () {
-    openTab("Appearance", function (d) { var ov = $(".scx-ov"); if (ov && !ov.classList.contains("ux-dock")) d.click(); });
-  }));
   bar.appendChild(btn("cat", "Catalogue", "Open Catalogue Pro", function () { openTab("Catalogue Pro"); }));
   bar.appendChild(btn("add", "Add item", "Add a new item", function () { openTab("Add item"); }));
   function mount() { document.body.appendChild(bar); bar.hidden = !sessionOk(); setInterval(function () { bar.hidden = !sessionOk(); }, 1500); }
