@@ -111,32 +111,40 @@
     O + ".ux-qbar{background:rgba(9,9,11,.82);border-color:rgba(255,255,255,.08)}";
 
   css +=
-    ".scx-ov.ux-admin-catalogue .scx-box>div:nth-child(2)>:not(.scx-tabs){display:none!important}" +
+    ".scx-ov.ux-admin-categories .scx-box>div:nth-child(2)>.scx-tabs,.scx-ov.ux-admin-subcategories .scx-box>div:nth-child(2)>.scx-tabs,.scx-ov.ux-admin-feature .scx-box>div:nth-child(2)>.scx-tabs{display:none!important}" +
+    ".scx-ov.ux-admin-categories .scx-box>div:nth-child(2)>:not(.scx-tabs):not(.ux-admin-nav-screen),.scx-ov.ux-admin-subcategories .scx-box>div:nth-child(2)>:not(.scx-tabs):not(.ux-admin-nav-screen){display:none!important}" +
+    ".scx-ov .ux-admin-nav-screen{display:none;min-width:0;width:100%;gap:18px}" +
+    ".scx-ov.ux-admin-categories .ux-admin-nav-screen,.scx-ov.ux-admin-subcategories .ux-admin-nav-screen{display:grid!important;grid-template-columns:minmax(0,1fr)}" +
+    ".scx-ov.ux-admin-categories .scx-box>div:nth-child(2)>.ux-admin-nav-screen,.scx-ov.ux-admin-subcategories .scx-box>div:nth-child(2)>.ux-admin-nav-screen{float:none!important;width:100%!important;max-width:none!important;margin:0!important;clear:both}" +
+    ".scx-ov.ux-admin-feature .scx-box>div:nth-child(2)>.ux-admin-nav-screen{display:none!important}" +
     ".scx-ov.ux-admin-feature .scx-box>div:nth-child(2)>.scx-tabs{display:none!important}" +
-    ".scx-ov .ux-admin-back{display:none;align-items:center;justify-content:center;flex:none;min-height:36px;padding:8px 12px;border:1px solid var(--u-ln);border-radius:11px;background:var(--u-sf2);color:var(--u-tx);font-size:12px;font-weight:750;white-space:nowrap;cursor:pointer}" +
+    ".scx-ov.ux-admin-feature .scx-box>div:nth-child(2)>:not(.scx-tabs):not(.ux-admin-nav-screen){margin-left:0!important;float:none!important;width:auto!important;max-width:none!important}" +
+    ".scx-ov.ux-admin-categories .scx-box>div:nth-child(2),.scx-ov.ux-admin-subcategories .scx-box>div:nth-child(2),.scx-ov.ux-admin-feature .scx-box>div:nth-child(2){max-width:1320px;margin:0 auto;padding:24px 22px 40px}" +
+    ".scx-ov .ux-admin-nav-intro{min-width:0;display:grid;gap:5px}" +
+    ".scx-ov .ux-admin-nav-eyebrow{margin:0;color:var(--u-ac);font-size:10px;font-weight:850;letter-spacing:.14em;text-transform:uppercase;overflow-wrap:anywhere}" +
+    ".scx-ov .ux-admin-nav-intro h3{margin:0;color:var(--u-tx);font-size:clamp(21px,3vw,28px);font-weight:850;line-height:1.15;overflow-wrap:anywhere}" +
+    ".scx-ov .ux-admin-nav-intro p{margin:2px 0 0;color:var(--u-dm);font-size:13px;line-height:1.55;overflow-wrap:anywhere}" +
+    ".scx-ov .ux-admin-nav-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;align-items:stretch;min-width:0}" +
+    ".scx-ov .ux-admin-nav-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:0;min-height:128px;width:100%;padding:15px;text-align:left;border:1px solid var(--u-ln);border-radius:16px;background:linear-gradient(145deg,var(--u-sf),rgba(255,255,255,.015));color:var(--u-tx);cursor:pointer;white-space:normal;overflow-wrap:anywhere;box-shadow:0 8px 24px rgba(0,0,0,.12);transition:background .18s ease,border-color .18s ease,transform .18s ease}" +
+    ".scx-ov .ux-admin-nav-card:hover,.scx-ov .ux-admin-nav-card:focus-visible{background:var(--u-sf2);border-color:rgba(229,9,20,.42);outline:none}" +
+    ".scx-ov .ux-admin-nav-card:focus-visible{box-shadow:0 0 0 3px rgba(229,9,20,.2)}" +
+    ".scx-ov .ux-admin-nav-card:active{transform:scale(.985)}" +
+    ".scx-ov .ux-admin-nav-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;color:var(--u-ac)}" +
+    ".scx-ov .ux-admin-nav-card-top svg{flex:none;width:23px;height:23px}" +
+    ".scx-ov .ux-admin-nav-arrow{font-size:18px;line-height:1;color:var(--u-dm)}" +
+    ".scx-ov .ux-admin-nav-card-title{display:block;max-width:100%;font-size:14px;font-weight:800;line-height:1.3;color:var(--u-tx);overflow-wrap:anywhere}" +
+    ".scx-ov .ux-admin-nav-card-desc{display:block;max-width:100%;font-size:11.5px;font-weight:500;line-height:1.45;color:var(--u-dm);overflow-wrap:anywhere}" +
+    ".scx-ov .ux-admin-back{display:none;align-items:center;justify-content:center;flex:none;min-height:36px;max-width:100%;padding:8px 11px;border:1px solid var(--u-ln);border-radius:11px;background:var(--u-sf2);color:var(--u-tx);font-size:12px;font-weight:750;white-space:nowrap;cursor:pointer}" +
     ".scx-ov .ux-admin-back[hidden]{display:none!important}" +
-    ".scx-ov.ux-admin-feature .ux-admin-back{display:inline-flex}" +
-    ".scx-ov.ux-admin-feature .scx-head h2{min-width:0;white-space:normal;overflow-wrap:anywhere}" +
-    ".scx-ov.ux-admin-feature .scx-box>div:nth-child(2)>:not(.scx-tabs){margin-left:0!important}" +
-    ".scx-ov.ux-admin-catalogue .scx-box>div:nth-child(2){max-width:1320px;margin:0 auto;padding:24px 22px 40px}" +
-    ".scx-ov.ux-admin-catalogue .scx-box>div:nth-child(2)>.scx-tabs{float:none;width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));position:static;top:auto;max-height:none;overflow:visible;background:transparent;border:0;padding:0;margin:0;box-shadow:none}" +
-    ".scx-ov.ux-admin-catalogue .scx-box>div:nth-child(2)>.scx-tabs:before{grid-column:1/-1}" +
-    "@media(max-width:899px){.scx-ov.ux-admin-feature .scx-head{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:'back title close' 'search search search'}.scx-ov.ux-admin-feature .scx-head .ux-admin-back{grid-area:back;grid-row:1;grid-column:1}.scx-ov.ux-admin-feature .scx-head h2{grid-area:title;grid-row:1;grid-column:2}.scx-ov.ux-admin-feature .scx-head .scx-x{grid-area:close;grid-row:1;grid-column:3}.scx-ov.ux-admin-feature .scx-head .ux-gsearch{grid-area:search;grid-row:2;grid-column:1/-1}.scx-ov.ux-admin-catalogue .scx-box>div:nth-child(2){padding:16px 14px 30px}.scx-ov.ux-admin-feature .scx-box>div:nth-child(2){padding:16px 14px 30px}.scx-ov.ux-admin-catalogue .scx-box>div:nth-child(2)>.scx-tabs{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}";
-  css +=
-    ".scx-ov.ux-admin-feature .scx-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;grid-template-areas:'back title close' 'search search search';gap:10px}" +
-    ".scx-ov.ux-admin-feature .scx-head .ux-admin-back{grid-area:back;grid-row:1;grid-column:1;display:inline-flex}" +
-    ".scx-ov.ux-admin-feature .scx-head h2{grid-area:title;grid-row:1;grid-column:2}" +
-    ".scx-ov.ux-admin-feature .scx-head .scx-x{grid-area:close;grid-row:1;grid-column:3}" +
-    ".scx-ov.ux-admin-feature .scx-head .ux-gsearch{position:relative;grid-area:search;grid-row:2;grid-column:1/-1;left:auto;top:auto;transform:none;width:100%;max-width:none;min-width:0;margin:0}" +
-    "@media(max-width:899px){.scx-ov.ux-admin-feature .scx-head{padding:12px 14px}.scx-ov.ux-admin-feature .scx-head h2{overflow:hidden;text-overflow:ellipsis}}";
-  css +=
-    ".scx-ov.ux-admin-auth .ux-gsearch{display:none!important}" +
-    "@media(max-width:899px){.scx-ov.ux-admin-auth .scx-head{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto}.scx-ov.ux-admin-auth .scx-head h2{grid-row:1;grid-column:1}.scx-ov.ux-admin-auth .scx-head .scx-x{grid-row:1;grid-column:2}}";
-  css +=
-    ".scx-ov.ux-admin-catalogue .scx-tabs .scx-tab{min-height:118px;display:flex;align-items:flex-start;justify-content:flex-start;gap:10px;padding:14px;text-align:left;white-space:normal;background:linear-gradient(145deg,var(--u-sf),rgba(255,255,255,.015));border:1px solid var(--u-ln);border-radius:16px;color:var(--u-tx)}" +
-    ".scx-ov.ux-admin-catalogue .scx-tabs .scx-tab:hover{background:var(--u-sf2);border-color:rgba(229,9,20,.35);transform:translateY(-2px)}" +
-    ".scx-ov.ux-admin-catalogue .scx-tabs .scx-tab.on{background:rgba(229,9,20,.14);border-color:rgba(229,9,20,.45);color:var(--u-tx)}" +
-    "@media(max-width:899px){.scx-ov.ux-admin-catalogue .scx-tabs .scx-tab{min-height:92px;padding:10px;gap:8px}}";
+    ".scx-ov.ux-admin-subcategories .ux-admin-back,.scx-ov.ux-admin-feature .ux-admin-back{display:inline-flex}" +
+    ".scx-ov.ux-admin-subcategories .scx-head,.scx-ov.ux-admin-feature .scx-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;gap:10px}" +
+    ".scx-ov.ux-admin-subcategories .scx-head .ux-admin-back,.scx-ov.ux-admin-feature .scx-head .ux-admin-back{grid-column:1;grid-row:1}" +
+    ".scx-ov.ux-admin-subcategories .scx-head h2,.scx-ov.ux-admin-feature .scx-head h2{grid-column:2;grid-row:1;min-width:0;white-space:normal;overflow-wrap:anywhere}" +
+    ".scx-ov.ux-admin-subcategories .scx-head .scx-x,.scx-ov.ux-admin-feature .scx-head .scx-x{grid-column:3;grid-row:1}" +
+    ".scx-ov.ux-admin-categories .ux-gsearch{display:block}" +
+    ".scx-ov.ux-admin-subcategories .ux-gsearch,.scx-ov.ux-admin-feature .ux-gsearch,.scx-ov.ux-admin-auth .ux-gsearch{display:none!important}" +
+    ".scx-ov.ux-admin-auth .scx-head{display:flex}" +
+    "@media(max-width:899px){.scx-ov.ux-admin-categories .scx-head{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;gap:10px;padding:12px 14px}.scx-ov.ux-admin-categories .scx-head h2{grid-column:1;grid-row:1;min-width:0;white-space:normal;overflow-wrap:anywhere}.scx-ov.ux-admin-categories .scx-head .scx-x{grid-column:2;grid-row:1}.scx-ov.ux-admin-categories .ux-gsearch{position:relative;left:auto;top:auto;transform:none;grid-column:1/-1;grid-row:2;width:100%;max-width:none;min-width:0;margin:0}.scx-ov.ux-admin-subcategories .scx-head,.scx-ov.ux-admin-feature .scx-head{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto;gap:7px;padding:12px 10px}.scx-ov.ux-admin-categories .scx-box>div:nth-child(2),.scx-ov.ux-admin-subcategories .scx-box>div:nth-child(2),.scx-ov.ux-admin-feature .scx-box>div:nth-child(2){padding:14px 12px calc(28px + env(safe-area-inset-bottom))!important;width:100%;max-width:100%;margin:0}.scx-ov .ux-admin-nav-screen{gap:14px}.scx-ov .ux-admin-nav-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.scx-ov .ux-admin-nav-card{min-height:110px;padding:11px 10px;gap:7px;border-radius:13px}.scx-ov .ux-admin-nav-card-title{font-size:13px;line-height:1.25}.scx-ov .ux-admin-nav-card-desc{font-size:11px;line-height:1.4}.scx-ov .ux-admin-nav-card-top svg{width:21px;height:21px}.scx-ov.ux-admin-auth .scx-head{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto;padding:12px 14px}.scx-ov.ux-admin-auth .scx-head h2{grid-column:1;grid-row:1}.scx-ov.ux-admin-auth .scx-head .scx-x{grid-column:2;grid-row:1}}";
   var st = document.createElement("style");
   st.id = "ux-theme-campus";
   st.textContent = css;
@@ -144,9 +152,13 @@
 
   /* ---------- header search ---------- */
   function globalSearch(q) {
-    var t = $(".ux-protab");
+    var tabs = $(".scx-tabs"), t = findAdminTab("Catalogue Pro", tabs);
     if (!t) return;
-    t.click();
+    if (navLevel !== "feature" || navFeature !== "Catalogue Pro") {
+      if (navLevel === "categories") setAdminScreen("subcategories", "catalogue", "", true);
+      setAdminScreen("feature", "catalogue", "Catalogue Pro", true);
+      t.click();
+    }
     var n = 0, timer = setInterval(function () {
       var i = $(".ux-pro input[type=search]");
       if (i) { clearInterval(timer); i.value = q; i.dispatchEvent(new Event("input", { bubbles: true })); i.focus(); }
@@ -157,13 +169,8 @@
     var head = $(".scx-head");
     if (!head) return;
     if (!$(".ux-admin-back", head)) {
-      var back = h("button", { class: "ux-admin-back", type: "button", text: "← Catalogue", "aria-label": "Back to Admin catalogue", hidden: true });
-      back.addEventListener("click", function () {
-        if (screenMode !== "feature") return;
-        var current = history.state;
-        if (current && current.scAdmin === true && current.screen === "feature") history.back();
-        else setAdminScreen("catalogue", "", false);
-      });
+      var back = h("button", { class: "ux-admin-back", type: "button", text: "← Back", "aria-label": "Back to previous Admin screen", hidden: true });
+      back.addEventListener("click", goBack);
       head.insertBefore(back, head.firstChild);
     }
     if (!$(".ux-gsearch")) {
@@ -185,24 +192,189 @@
     });
   }
 
-  /* ---------- catalogue-first Admin screens + browser Back support ---------- */
-  var wasOpen = false, path = location.pathname + location.search, screenMode = "", screenFeature = "";
-  function setAdminScreen(mode, feature, push) {
+  /* ---------- Category -> Subcategory -> full-screen Feature navigation ---------- */
+  var wasOpen = false, path = location.pathname + location.search;
+  var navLevel = "", navCategory = "", navFeature = "";
+  var ADMIN_GROUPS = [
+    { id:"dashboard", label:"Dashboard & Activity", icon:"overview", desc:"Site totals and recent admin activity", items:[
+      { label:"Overview", desc:"Totals and recent activity" },
+      { label:"Activity", desc:"Review recent admin actions" }
+    ]},
+    { id:"catalogue", label:"Catalogue & AI", icon:"layers", desc:"Add, search, review and manage listings", items:[
+      { label:"Add item", desc:"Add a movie, series, website or app" },
+      { label:"Title lookup", desc:"Find verified movie and series details" },
+      { label:"Content", desc:"Publish, hide, move or delete listings" },
+      { label:"Catalogue Pro", desc:"Search, bulk-manage and audit catalogue entries" },
+      { label:"AI Copilot", desc:"Assist with catalogue lookup and review" }
+    ]},
+    { id:"design", label:"Design & Layout", icon:"layout", desc:"Manage card layout and visual appearance", items:[
+      { label:"Cards & Layout", desc:"Arrange cards, sections and responsive grids" },
+      { label:"Appearance", desc:"Manage site colours and appearance settings" }
+    ]},
+    { id:"site", label:"Site Controls", icon:"globe", desc:"Manage site identity and visitor-facing controls", items:[
+      { label:"Site settings", desc:"Announcement, SEO and site identity" }
+    ]},
+    { id:"security", label:"Security & Data", icon:"lock", desc:"Manage backups and admin access", items:[
+      { label:"Backup", desc:"Export or import site data" },
+      { label:"Change PIN", desc:"Update the Admin access PIN" },
+      { label:"Log out", desc:"End the current admin session" }
+    ]}
+  ];
+  function groupById(id) {
+    for (var i = 0; i < ADMIN_GROUPS.length; i++) if (ADMIN_GROUPS[i].id === id) return ADMIN_GROUPS[i];
+    return null;
+  }
+  function cleanLabel(value) {
+    return String(value || "").replace(/[✦★]/g, "").replace(/\s+/g, " ").trim();
+  }
+  function tabLabel(tab) {
+    if (!tab) return "";
+    var title = $(".scx-nav-title", tab);
+    return cleanLabel(tab.getAttribute("aria-label") || (title && title.textContent) || tab.textContent);
+  }
+  function findAdminTab(label, tabs) {
+    var found = null, target = cleanLabel(label).toLowerCase();
+    $$(".scx-tab", tabs || $(".scx-tabs")).forEach(function (tab) {
+      if (!found && tabLabel(tab).toLowerCase() === target) found = tab;
+    });
+    return found;
+  }
+  function setText(node, value) {
+    if (node && node.textContent !== value) node.textContent = value;
+  }
+  function categoryState(level, category, feature) {
+    return { scAdmin: true, level: level, category: category || "", feature: feature || "" };
+  }
+  function setAdminScreen(level, category, feature, push) {
     var ov = $(".scx-ov");
     if (!ov) return;
-    if (!$(".scx-tabs", ov)) mode = "auth";
-    screenMode = mode;
-    screenFeature = feature || "";
-    ov.classList.toggle("ux-admin-catalogue", mode === "catalogue");
-    ov.classList.toggle("ux-admin-feature", mode === "feature");
-    ov.classList.toggle("ux-admin-auth", mode === "auth");
+    if (level !== "auth" && !$(".scx-tabs", ov)) level = "auth";
+    navLevel = level || "categories";
+    navCategory = category || "";
+    navFeature = feature || "";
+    ov.classList.toggle("ux-admin-categories", navLevel === "categories");
+    ov.classList.toggle("ux-admin-subcategories", navLevel === "subcategories");
+    ov.classList.toggle("ux-admin-feature", navLevel === "feature");
+    ov.classList.toggle("ux-admin-auth", navLevel === "auth");
+    if (push) {
+      try { history.pushState(categoryState(navLevel, navCategory, navFeature), "", path + "#admin"); }
+      catch (e) { /* Browser/embedded history can be restricted. */ }
+    }
+    renderAdminNavigation();
+  }
+  function pushRootState() {
+    try { history.replaceState(categoryState("categories", "", ""), "", path + "#admin"); }
+    catch (e) { /* ignore */ }
+  }
+  function goBack() {
+    if (navLevel === "categories" || navLevel === "auth") return;
+    var state = history.state;
+    if (state && state.scAdmin === true) {
+      history.back();
+      return;
+    }
+    if (navLevel === "feature") setAdminScreen("subcategories", navCategory, "", false);
+    else setAdminScreen("categories", "", "", false);
+  }
+  function makeAdminNavCard(title, description, icon, click) {
+    var b = h("button", { class: "ux-admin-nav-card", type: "button", "aria-label": title });
+    var top = h("span", { class: "ux-admin-nav-card-top" }, [
+      svg(icon || "dot", 23),
+      h("span", { class: "ux-admin-nav-arrow", text: "↗", "aria-hidden": "true" })
+    ]);
+    b.appendChild(top);
+    b.appendChild(h("span", { class: "ux-admin-nav-card-title", text: title }));
+    b.appendChild(h("span", { class: "ux-admin-nav-card-desc", text: description || "" }));
+    b.addEventListener("click", click);
+    return b;
+  }
+  function tabSignature(tabs) {
+    return $$(".scx-tab", tabs).map(tabLabel).join("|");
+  }
+  function renderAdminNavigation() {
+    var ov = $(".scx-ov");
+    var tabs = ov && $(".scx-tabs", ov);
+    if (!ov || ov.hidden) return;
+    if (!tabs) {
+      navLevel = "auth"; navCategory = ""; navFeature = "";
+      ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-feature");
+      ov.classList.add("ux-admin-auth");
+      var backAuth = $(".ux-admin-back", ov); if (backAuth) backAuth.hidden = true;
+      return;
+    }
+    ov.classList.remove("ux-admin-auth");
+    if (!navLevel || navLevel === "auth") {
+      navLevel = "categories"; navCategory = ""; navFeature = "";
+      pushRootState();
+    }
+    var body = tabs.parentNode;
+    var screen = $(".ux-admin-nav-screen", body);
+    if (navLevel === "feature") {
+      if (screen) screen.remove();
+      ov.classList.add("ux-admin-feature");
+      ov.classList.remove("ux-admin-categories", "ux-admin-subcategories");
+      var titleFeature = $("#scxTitle", ov);
+      setText(titleFeature, navFeature || "Admin");
+      var backFeature = $(".ux-admin-back", ov);
+      if (backFeature) { backFeature.hidden = false; backFeature.setAttribute("aria-label", "Back to " + ((groupById(navCategory) || {}).label || "Admin menu")); setText(backFeature, "← Back"); }
+      return;
+    }
+    if (navLevel !== "subcategories") { navLevel = "categories"; navCategory = ""; navFeature = ""; }
+    var signature = tabSignature(tabs);
+    var needsBuild = !screen || screen.parentNode !== body ||
+      screen.getAttribute("data-level") !== navLevel ||
+      screen.getAttribute("data-category") !== navCategory ||
+      (navLevel === "subcategories" && screen.getAttribute("data-tabs-signature") !== signature);
+    if (needsBuild) {
+      if (screen && screen.parentNode) screen.remove();
+      screen = h("div", { class: "ux-admin-nav-screen", "data-level": navLevel, "data-category": navCategory, "data-tabs-signature": signature });
+      var intro = h("div", { class: "ux-admin-nav-intro" });
+      var grid = h("div", { class: "ux-admin-nav-grid" });
+      if (navLevel === "categories") {
+        intro.appendChild(h("p", { class: "ux-admin-nav-eyebrow", text: "STREAMCLOUD · ADMIN" }));
+        intro.appendChild(h("h3", { text: "Choose a category" }));
+        intro.appendChild(h("p", { text: "Open a category first. Its subcategories will appear on the next screen." }));
+        ADMIN_GROUPS.forEach(function (group) {
+          grid.appendChild(makeAdminNavCard(group.label, group.desc, group.icon, function () {
+            setAdminScreen("subcategories", group.id, "", true);
+          }));
+        });
+      } else {
+        var group = groupById(navCategory);
+        if (!group) {
+          navLevel = "categories"; navCategory = "";
+          setAdminScreen("categories", "", "", false);
+          return;
+        }
+        intro.appendChild(h("p", { class: "ux-admin-nav-eyebrow", text: "CATEGORY / " + group.label }));
+        intro.appendChild(h("h3", { text: "Choose a subcategory" }));
+        intro.appendChild(h("p", { text: "Select one feature to open its own full-screen panel." }));
+        group.items.forEach(function (item) {
+          var target = findAdminTab(item.label, tabs);
+          if (!target) return;
+          var title = tabLabel(target) || item.label;
+          var icon = iconKey(title);
+          grid.appendChild(makeAdminNavCard(title, item.desc, icon, function () {
+            setAdminScreen("feature", group.id, title, true);
+            target.click();
+          }));
+        });
+      }
+      screen.appendChild(intro);
+      screen.appendChild(grid);
+      body.insertBefore(screen, tabs);
+    }
+    ov.classList.toggle("ux-admin-categories", navLevel === "categories");
+    ov.classList.toggle("ux-admin-subcategories", navLevel === "subcategories");
+    ov.classList.remove("ux-admin-feature");
+    var title = $("#scxTitle", ov);
+    var groupTitle = groupById(navCategory);
+    setText(title, navLevel === "categories" ? "Admin Catalogue" : (groupTitle ? groupTitle.label : "Admin Catalogue"));
     var back = $(".ux-admin-back", ov);
-    if (back) back.hidden = mode !== "feature";
-    var title = $("#scxTitle");
-    if (mode === "catalogue" && title && $(".scx-tabs", ov)) title.textContent = "Admin Catalogue";
-    if (push && mode === "feature") {
-      try { history.pushState({ scAdmin: true, screen: "feature", feature: screenFeature }, "", path + "#admin"); }
-      catch (e) { /* history may be limited in embedded browsers */ }
+    if (back) {
+      back.hidden = navLevel === "categories";
+      back.setAttribute("aria-label", "Back to Admin catalogue");
+      setText(back, "← Catalogue");
     }
   }
   function routeHash(open) {
@@ -210,33 +382,35 @@
     wasOpen = open;
     try {
       if (open) {
-        var baseState = { scAdmin: true, screen: "catalogue" };
-        if (location.hash !== "#admin") history.pushState(baseState, "", path + "#admin");
-        else history.replaceState(baseState, "", path + "#admin");
+        var base = categoryState("categories", "", "");
+        if (location.hash !== "#admin") history.pushState(base, "", path + "#admin");
+        else history.replaceState(base, "", path + "#admin");
       } else if (location.hash === "#admin") {
         history.replaceState(null, "", path);
       }
     } catch (e) { /* ignore */ }
   }
-  document.addEventListener("click", function (e) {
-    var tab = e.target && e.target.closest ? e.target.closest(".scx-tabs .scx-tab") : null;
-    if (!tab || screenMode !== "catalogue") return;
-    var ov = $(".scx-ov");
-    if (!ov || ov.hidden || !ov.contains(tab)) return;
-    var label = (tab.getAttribute("aria-label") || tab.textContent || "").replace("✦", "").trim();
-    if (/^log\s*out$/i.test(label)) return;
-    setAdminScreen("feature", label, true);
-  }, true);
   window.addEventListener("popstate", function (e) {
     var ov = $(".scx-ov");
-    if (ov && !ov.hidden && location.hash === "#admin" && e.state && e.state.scAdmin === true) {
-      setAdminScreen(e.state.screen === "feature" ? "feature" : "catalogue", e.state.feature || "", false);
+    if (!ov || ov.hidden) return;
+    if (location.hash !== "#admin") {
+      var close = $(".scx-x", ov);
+      if (close) close.click(); else ov.hidden = true;
       return;
     }
-    if (ov && !ov.hidden && location.hash !== "#admin") {
-      var close = $(".scx-x", ov);
-      if (close) close.click();
-      else ov.hidden = true;
+    if (!$(".scx-tabs", ov)) {
+      navLevel = "auth";
+      ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-feature");
+      ov.classList.add("ux-admin-auth");
+      return;
+    }
+    var state = e.state;
+    if (state && state.scAdmin === true) {
+      var level = state.level || (state.screen === "feature" ? "feature" : "categories");
+      if (level !== "subcategories" && level !== "feature") level = "categories";
+      setAdminScreen(level, state.category || "", state.feature || "", false);
+    } else {
+      setAdminScreen("categories", "", "", false);
     }
   });
   function autoOpen() {
@@ -260,21 +434,13 @@
     document.body.classList.toggle("ux-page", open && ov.parentNode === document.body);
     routeHash(open);
     if (!open) {
-      screenMode = ""; screenFeature = "";
-      if (ov) ov.classList.remove("ux-admin-catalogue", "ux-admin-feature");
+      navLevel = ""; navCategory = ""; navFeature = "";
+      if (ov) ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-feature", "ux-admin-auth");
       return;
     }
     header();
     icons();
-    if ($(".scx-tabs", ov)) {
-      if (!screenMode) setAdminScreen("catalogue", "", false);
-      else setAdminScreen(screenMode, screenFeature, false);
-    } else {
-      screenMode = ""; screenFeature = "";
-      ov.classList.remove("ux-admin-catalogue", "ux-admin-feature");
-      ov.classList.add("ux-admin-auth");
-      var back = $(".ux-admin-back", ov); if (back) back.hidden = true;
-    }
+    renderAdminNavigation();
   }
   function sched() {
     if (!queued) {
