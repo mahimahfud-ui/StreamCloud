@@ -14,21 +14,29 @@ The existing production database's migration history was created through a manag
 
 ## 2. Set server-side API secrets (never commit these)
 
-Set only the provider keys you actually use. These remain in Supabase Edge Function secrets; no provider secret belongs in public JavaScript.
+These are the provider secret names read by the active StreamCloud `admin-detect` router. The router automatically tries the next configured provider if a request fails; OpenAI is last because it can require paid API credits. Keep all provider keys in Supabase Edge Function Secrets, never in public JavaScript.
+
 ```bash
 supabase secrets set \
   GEMINI_API_KEY='YOUR_PRIVATE_GEMINI_KEY' \
-  OPENAI_API_KEY='YOUR_PRIVATE_OPENAI_API_KEY' \
-  OPENAI_MODEL='gpt-4.1-mini' \
+  OMDB_API_KEY='YOUR_PRIVATE_OMDB_KEY' \
   GROQ_API_KEY='YOUR_PRIVATE_GROQ_KEY' \
   GROQ_MODEL='openai/gpt-oss-120b' \
-  OMDB_API_KEY='YOUR_PRIVATE_OMDB_KEY' \
+  OPENROUTER_API_KEY='YOUR_PRIVATE_OPENROUTER_KEY' \
+  OPENAI_API_KEY='YOUR_PRIVATE_OPENAI_API_KEY' \
+  OPENAI_MODEL='gpt-4.1-mini' \
+  DEEPSEEK_API_KEY='YOUR_PRIVATE_DEEPSEEK_KEY' \
   ALLOWED_ORIGINS='https://mahimahfud-ui.github.io,https://streamcloud.ai.studio,https://streamcloud-527d.onrender.com'
+# Optional model overrides:
+# GEMINI_MODEL='gemini-2.5-flash'
+# DEEPSEEK_MODEL='deepseek-flash'
 # Optional if you need authenticated GitHub release lookups:
 # GITHUB_TOKEN='YOUR_PRIVATE_GITHUB_TOKEN'
-# Optional model override:
-# GEMINI_MODEL='gemini-2.5-flash'
 ```
+
+The existing Edge Function also recognises the legacy secret name `DeepSeek` if `DEEPSEEK_API_KEY` is not set. Use one valid DeepSeek key name, not two different values.
+
+The current login implementation stores a bcrypt PIN hash in `public.admin_credentials` and random session-token hashes in `public.admin_sessions`. `ADMIN_PIN` and `ADMIN_SESSION_SECRET` are not read by the active StreamCloud functions; keeping them in Secrets does not activate them. Do not put the PIN itself or its hash in GitHub.
 
 ## 3. Initialize the admin PIN privately
 
