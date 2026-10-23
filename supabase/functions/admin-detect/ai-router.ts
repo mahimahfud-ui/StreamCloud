@@ -25,11 +25,40 @@ const ENV_KEY: Record<Provider, string> = {
   openai: "OPENAI_API_KEY",
 };
 
-function isConfigured(provider: Provider): boolean {
+// Short-lived, per-isolate health memory prevents repeated attempts against a
+// provider that just rejected its key, hit a quota, or returned a transient error.
+// This is only an optimization: every new isolate rechecks providers.
+const providerCooldownUntil = new Map<Provider, number>();
+
+function providerKey(provider: Provider): string {
   const value = provider === "deepseek"
-    ? (Deno.env.get("DEEPSEEK_API_KEY") ?? Deno.env.get("DeepSeek"))
+    ? (Deno.env.get("DEEPSEEK_API_KEY") || Deno.env.get("DeepSeek"))
     : Deno.env.get(ENV_KEY[provider]);
-  return !!value && value.trim() !== "এপিয়াই";
+  return (value ?? "").trim();
+}
+
+function isConfigured(provider: Provider): boolean {
+  const key = providerKey(provider);
+  if (!key || key === "এপিয়াই") return false;
+  return (providerCooldownUntil.get(provider) ?? 0) <= Date.now();
+}
+
+function cooldownFor(error: unknown): number {
+  const message = shortError(error).toLowerCase();
+  if (/\b401\b|\b403\b|invalid api key|rejected the api key|authentication fails/.test(message)) return 30 * 60_000;
+  if (/\b429\b|quota|rate limit|too many requests/.test(message)) return 90_000;
+  if (/\b404\b|model .*unavailable|model not found/.test(message)) return 5 * 60_000;
+  if (/\b5\d\d\b|timeout|network error|temporarily unavailable/.test(message)) return 30_000;
+  return 0;
+}
+
+function rememberProviderFailure(provider: Provider, error: unknown): void {
+  const delay = cooldownFor(error);
+  if (delay) providerCooldownUntil.set(provider, Date.now() + delay);
+}
+
+function rememberProviderSuccess(provider: Provider): void {
+  providerCooldownUntil.delete(provider);
 }
 
 function useful(result: AIResult | null, task: Task): result is AIResult {
@@ -42,12 +71,16 @@ function useful(result: AIResult | null, task: Task): result is AIResult {
 }
 
 function orderFor(section: string, task: Task): Provider[] {
-  // Movie/series synopsis and title tasks start with Gemini; website/app/music
-  // extraction starts with Groq. OpenAI is last to avoid unnecessary paid API calls.
+  // Structured extraction starts with Groq's JSON-schema path. Movie/series
+  // summaries keep Gemini near the front; OpenRouter can select a suitable free
+  // model dynamically, and paid OpenAI is deliberately last.
   if (task === "summary" || section === "movie" || section === "series") {
-    return ["gemini", "groq", "openrouter", "deepseek", "openai"];
+    return ["groq", "gemini", "openrouter", "deepseek", "openai"];
   }
-  return ["groq", "openrouter", "deepseek", "gemini", "openai"];
+  if (section === "music" || section === "apps" || section === "sites") {
+    return ["groq", "openrouter", "deepseek", "gemini", "openai"];
+  }
+  return ["groq", "gemini", "openrouter", "deepseek", "openai"];
 }
 
 function shortError(error: unknown): string {
@@ -74,14 +107,21 @@ export async function askAutoAI(
       else result = await askOpenAI(page, section);
 
       if (!useful(result, task)) {
-        failures.push("no usable result");
+        const error = new Error("Provider returned no usable structured result.");
+        failures.push(provider + ": " + shortError(error));
+        rememberProviderFailure(provider, error);
         continue;
       }
 
-      const note = "Details processed successfully.";
+      rememberProviderSuccess(provider);
+      const note = "Details processed successfully using " + provider + ".";
       return { result, provider, note };
     } catch (error) {
-      failures.push(shortError(error));
+      const detail = shortError(error);
+      failures.push(provider + ": " + detail);
+      rememberProviderFailure(provider, error);
+      // Never log credentials or full provider response bodies.
+      console.warn("[StreamCloud AI router] provider attempt failed:", provider, detail);
     }
   }
 
