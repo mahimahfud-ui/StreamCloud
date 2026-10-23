@@ -132,6 +132,11 @@
   css +=
     ".scx-ov.ux-admin-auth .ux-gsearch{display:none!important}" +
     "@media(max-width:899px){.scx-ov.ux-admin-auth .scx-head{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto}.scx-ov.ux-admin-auth .scx-head h2{grid-row:1;grid-column:1}.scx-ov.ux-admin-auth .scx-head .scx-x{grid-row:1;grid-column:2}}";
+  css +=
+    ".scx-ov.ux-admin-catalogue .scx-tabs .scx-tab{min-height:118px;display:flex;align-items:flex-start;justify-content:flex-start;gap:10px;padding:14px;text-align:left;white-space:normal;background:linear-gradient(145deg,var(--u-sf),rgba(255,255,255,.015));border:1px solid var(--u-ln);border-radius:16px;color:var(--u-tx)}" +
+    ".scx-ov.ux-admin-catalogue .scx-tabs .scx-tab:hover{background:var(--u-sf2);border-color:rgba(229,9,20,.35);transform:translateY(-2px)}" +
+    ".scx-ov.ux-admin-catalogue .scx-tabs .scx-tab.on{background:rgba(229,9,20,.14);border-color:rgba(229,9,20,.45);color:var(--u-tx)}" +
+    "@media(max-width:899px){.scx-ov.ux-admin-catalogue .scx-tabs .scx-tab{min-height:92px;padding:10px;gap:8px}}";
   var st = document.createElement("style");
   st.id = "ux-theme-campus";
   st.textContent = css;
