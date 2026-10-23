@@ -1,5 +1,5 @@
 /* StreamCloud Admin Ultra — additive layer on top of admin-listings.js.
-   DOM-only: no secrets, no innerHTML with data. Adds: +/- steppers, dockable live-preview mode,
+   DOM-only: no secrets, no innerHTML with data. Adds: +/- steppers,
    live card preview, Catalogue Pro (organized catalogue, health score, bulk, quick edit) and AI tools. */
 (function () {
   "use strict";
