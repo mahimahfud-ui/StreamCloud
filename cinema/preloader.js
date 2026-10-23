@@ -10,7 +10,7 @@ export function initPreloader() {
   const valEl = document.getElementById('introVal'), countEl = document.getElementById('introCount');
   if (!valEl || !countEl) return;
 
-  const t0 = performance.now(), MIN = 1700, MAX = 4000;
+  const t0 = performance.now(), MIN = 1000, MAX = 2200;
   const parts = { fonts: 0, load: 0, logos: 0, scene: 0 };
   const W = { fonts: .2, load: .3, logos: .3, scene: .2 };
   const settle = k => { parts[k] = 1; };
@@ -19,7 +19,8 @@ export function initPreloader() {
   document.readyState === 'complete' ? settle('load') : addEventListener('load', () => settle('load'), { once: true });
 
   const bundled = Object.values(window.STREAMCLOUD_ITEM_LOGOS || {});
-  const logos = [...new Set(bundled.length ? bundled : Object.values(window.MAHIFLIX_LOGOS || {}))];
+  /* Only preload a few first-screen marks. The rest of the catalog logos load lazily with their cards. */
+  const logos = [...new Set(bundled.length ? bundled : Object.values(window.MAHIFLIX_LOGOS || {}))].slice(0, 4);
   if (!logos.length) settle('logos');
   else {
     let n = 0; const one = () => { if (++n >= logos.length) settle('logos'); else parts.logos = n / logos.length; };
