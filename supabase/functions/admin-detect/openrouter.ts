@@ -15,7 +15,9 @@ const SYSTEM_PROMPT = [
 export async function askOpenRouter(page: PageInfo, section: string): Promise<OpenRouterResult | null> {
   const key = Deno.env.get("OPENROUTER_API_KEY");
   if (!key || key.trim() === "এপিয়াই") throw new Error("OpenRouter API key is not configured.");
-  const model = (Deno.env.get("OPENROUTER_MODEL") ?? "nvidia/nemotron-3.5-lightning:free").trim() || "nvidia/nemotron-3.5-lightning:free";
+  // OpenRouter's router alias chooses an available free text model for each
+  // request. An explicit OPENROUTER_MODEL remains an administrator override.
+  const model = (Deno.env.get("OPENROUTER_MODEL") ?? "openrouter/free").trim() || "openrouter/free";
   const prompt = [
     `Listing type: ${section}`,
     "name: title/product name only. description: one neutral sentence under 220 characters.",
