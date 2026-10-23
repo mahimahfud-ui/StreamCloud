@@ -175,7 +175,7 @@
   function setAdminScreen(mode, feature, push) {
     var ov = $(".scx-ov");
     if (!ov) return;
-    if (mode === "feature" && !$(".scx-tabs", ov)) mode = "catalogue";
+    if (!$(".scx-tabs", ov)) mode = "auth";
     screenMode = mode;
     screenFeature = feature || "";
     ov.classList.toggle("ux-admin-catalogue", mode === "catalogue");
@@ -207,7 +207,7 @@
     if (!tab || screenMode !== "catalogue") return;
     var ov = $(".scx-ov");
     if (!ov || ov.hidden || !ov.contains(tab)) return;
-    var label = (tab.textContent || "").replace("✦", "").trim();
+    var label = (tab.getAttribute("aria-label") || tab.textContent || "").replace("✦", "").trim();
     if (/^log\s*out$/i.test(label)) return;
     setAdminScreen("feature", label, true);
   }, true);
