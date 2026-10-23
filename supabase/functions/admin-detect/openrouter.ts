@@ -15,9 +15,12 @@ const SYSTEM_PROMPT = [
 export async function askOpenRouter(page: PageInfo, section: string): Promise<OpenRouterResult | null> {
   const key = Deno.env.get("OPENROUTER_API_KEY");
   if (!key || key.trim() === "এপিয়াই") throw new Error("OpenRouter API key is not configured.");
-  // OpenRouter's router alias chooses an available free text model for each
-  // request. An explicit OPENROUTER_MODEL remains an administrator override.
-  const model = (Deno.env.get("OPENROUTER_MODEL") ?? "openrouter/free").trim() || "openrouter/free";
+  // Keep OpenRouter on free inference by default. A non-free model override is
+  // honoured only when the administrator explicitly enables paid fallback.
+  const paidOptIn = Deno.env.get("ENABLE_PAID_FALLBACK")?.trim().toLowerCase() === "true";
+  const configuredModel = (Deno.env.get("OPENROUTER_MODEL") ?? "").trim();
+  const isFreeModel = configuredModel === "openrouter/free" || /:free$/i.test(configuredModel);
+  const model = configuredModel && (paidOptIn || isFreeModel) ? configuredModel : "openrouter/free";
   const prompt = [
     `Listing type: ${section}`,
     "name: title/product name only. description: one neutral sentence under 220 characters.",
