@@ -41,6 +41,7 @@
     t = t.toLowerCase();
     if (/overview|dashboard/.test(t)) return "overview";
     if (/add/.test(t)) return "add";
+    if (/lookup|search/.test(t)) return "search";
     if (/copilot|ai studio/.test(t)) return "ai";
     if (/catalogue/.test(t)) return "layers";
     if (/content/.test(t)) return "list";
@@ -103,7 +104,6 @@
     O + ".ux-sticky{top:76px;padding:9px 10px;border:1px solid var(--u-ln);border-radius:15px;background:var(--u-sf)}" +
     O + ".ux-thumb,.ux-art{background:linear-gradient(135deg,var(--u-acs),rgba(229,9,20,.16));color:var(--u-actx)}" +
     O + ".ux-pill{border-radius:999px;padding:5px 11px;font-size:11.5px;background:var(--u-sf2);color:var(--u-tx);border-color:var(--u-ln)}.scx-ov button.ux-pill.on{background:" + G + ";border-color:transparent;color:#fff}" +
-    O + ".ux-cardprev{" + SURF + ";background:var(--u-sf2)}" +
     O + ".ux-meter,.ux-prog{background:var(--u-ln)}.scx-ov .ux-prog i{background:" + G + "}.scx-ov .ux-meter i{background:#10b981}.scx-ov .ux-meter.mid i{background:#f59e0b}.scx-ov .ux-meter.low i{background:#ef4444}" +
     O + ".ux-fillrow{border-top-color:var(--u-ln)}.scx-ov .ux-live{color:#10b981}" +
     /* Responsive viewport fit across mobile browsers; keep full Admin controls visible. */
