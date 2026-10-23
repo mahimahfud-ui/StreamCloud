@@ -179,6 +179,7 @@ try {
   assert.ok(await page.locator('input[aria-label="Admin PIN"]').isVisible(), "Admin icon should open the PIN gate");
   await page.keyboard.press("Escape");
   await page.waitForFunction(() => document.querySelector(".scx-ov")?.hidden === true);
+  await page.waitForFunction(() => !document.body.classList.contains("ux-page"));
 
   // The page module injects and wires the Music Apps tab after the original page scripts.
   await page.locator('.mode[data-mode="music"]').waitFor({ timeout: 15000 });
