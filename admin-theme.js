@@ -247,9 +247,15 @@
   function autoOpen() {
     if (location.hash !== "#admin") return;
     var n = 0, timer = setInterval(function () {
+      var ov = $(".scx-ov");
+      if (ov && !ov.hidden) { clearInterval(timer); return; }
       var ic = $("#adminIcon");
-      if (ic) { clearInterval(timer); ic.click(); }
-      else if (++n > 50) clearInterval(timer);
+      if (ic) {
+        ic.click();
+        ov = $(".scx-ov");
+        if (ov && !ov.hidden) { clearInterval(timer); return; }
+      }
+      if (++n > 50) clearInterval(timer);
     }, 100);
   }
   var queued = false;
