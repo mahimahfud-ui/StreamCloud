@@ -70,9 +70,6 @@
     O + ".scx-head h2{margin:0;font-size:18px;font-weight:800;color:var(--u-tx);white-space:nowrap}" +
     O + ".ux-gsearch{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,calc(100% - 360px));max-width:340px;min-width:190px;margin:0;flex:none}.ux-gsearch input{width:100%;min-width:0;padding:9px 14px 9px 36px!important;border-radius:999px!important}.ux-gsearch svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--u-dm);pointer-events:none}" +
     O + ".ux-tools{margin-left:0}" + O + ".ux-gsearch+.ux-tools{margin-left:0}" +
-    O + ".ux-themebtn{width:40px;height:40px;display:grid;place-items:center;padding:0;border-radius:14px;background:linear-gradient(145deg,#6366f1,#8b5cf6);border:1px solid rgba(165,180,252,.4);color:#fff;box-shadow:0 6px 18px rgba(99,102,241,.22);transition:transform .22s ease,box-shadow .22s ease,filter .22s ease}" +
-    O + ".ux-themebtn:hover{transform:rotate(8deg) translateY(-1px);box-shadow:0 9px 24px rgba(99,102,241,.34);filter:brightness(1.08)}" +
-    O + ".ux-themebtn:focus-visible{outline:2px solid var(--u-actx);outline-offset:3px}" +
     O + ".scx-x{width:36px;height:36px;display:grid;place-items:center;padding:0;border-radius:50%;background:var(--u-sf2);border:1px solid var(--u-ln);color:var(--u-tx)}" +
     O + ".scx-box>div:nth-child(2){max-width:1320px;margin:0 auto;padding:24px 22px 40px}" +
     /* desktop sidebar */
@@ -129,29 +126,16 @@
   st.textContent = css;
   (document.head || document.documentElement).appendChild(st);
 
-  /* ---------- dark / light switch ---------- */
+  /* ---------- admin theme preference ---------- */
   function theme() {
     try { return localStorage.getItem(TK) === "light" ? "light" : "dark"; }
     catch (e) { return "dark"; }
   }
-  function setIcon(b) {
-    b.textContent = "";
-    b.appendChild(svg(theme() === "dark" ? "sun" : "moon", 17));
-    b.title = theme() === "dark" ? "Switch to light mode" : "Switch to dark mode";
-    b.setAttribute("aria-label", b.title);
-  }
   function applyTheme(ov) {
     if (ov.dataset.uxTheme !== theme()) ov.dataset.uxTheme = theme();
-    var b = $(".ux-themebtn");
-    if (b) setIcon(b);
-  }
-  function toggle() {
-    try { localStorage.setItem(TK, theme() === "dark" ? "light" : "dark"); } catch (e) { /* ignore */ }
-    var ov = $(".scx-ov");
-    if (ov) applyTheme(ov);
   }
 
-  /* ---------- header search + theme button ---------- */
+  /* ---------- header search ---------- */
   function globalSearch(q) {
     var t = $(".ux-protab");
     if (!t) return;
@@ -170,12 +154,6 @@
       inp.addEventListener("keydown", function (e) { if (e.key === "Enter" && inp.value.trim()) { e.preventDefault(); globalSearch(inp.value.trim()); } });
       var wrap = h("div", { class: "ux-gsearch" }, [svg("search", 16), inp]);
       head.insertBefore(wrap, $(".ux-tools") || head.lastChild);
-    }
-    var tools = $(".ux-tools");
-    if (tools && !$(".ux-themebtn", tools)) {
-      var b = h("button", { class: "ux-tbtn ux-themebtn", type: "button", onclick: toggle });
-      setIcon(b);
-      tools.appendChild(b);
     }
   }
 
