@@ -117,7 +117,7 @@
 
   /* ---------- theme ---------- */
   function theme() { try { return localStorage.getItem(TK) === "light" ? "light" : "dark"; } catch (e) { return "dark"; } }
-  function setIcon(b) { b.textContent = ""; b.appendChild(svg(theme() === "dark" ? "sun" : "moon", 17)); b.title = theme() === "dark" ? "Switch to light mode" : "Switch to dark mode"; b.setAttribute("aria-label", b.title); }
+  function setIcon(b) { var dark = theme() === "dark", label = dark ? "Switch to light mode" : "Switch to dark mode"; if (b.getAttribute("aria-label") === label && b.firstChild) return; b.textContent = ""; b.appendChild(svg(dark ? "sun" : "moon", 17)); b.title = label; b.setAttribute("aria-label", label); }
   function applyTheme(ov) { if (ov.dataset.uxTheme !== theme()) ov.dataset.uxTheme = theme(); var b = $(".ux-themebtn"); if (b) setIcon(b); }
   function toggle() { try { localStorage.setItem(TK, theme() === "dark" ? "light" : "dark"); } catch (e) { /* ignore */ } var ov = $(".scx-ov"); if (ov) applyTheme(ov); }
 
