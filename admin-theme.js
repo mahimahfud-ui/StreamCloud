@@ -148,7 +148,62 @@
   var st = document.createElement("style");
   st.id = "ux-theme-campus";
   st.textContent = css;
-  (document.head || document.documentElement).appendChild(st);
+  var mobileStyle = document.createElement("style");
+  mobileStyle.id = "ux-admin-mobile-layout";
+  mobileStyle.textContent =
+    ".scx-ov .ux-admin-mobile-shell{display:none!important}" +
+    "@media(max-width:899px){" +
+      ".scx-ov.ux-admin-mobile .scx-box{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;box-sizing:border-box!important}" +
+      ".scx-ov.ux-admin-mobile .scx-head{position:sticky!important;top:0!important;z-index:30!important;flex:none!important;box-sizing:border-box!important;width:100%!important;min-width:0!important}" +
+      ".scx-ov.ux-admin-mobile .ux-gsearch{display:none!important}" +
+      ".scx-ov.ux-admin-mobile .ux-admin-nav-screen{display:none!important}" +
+      ".scx-ov.ux-admin-mobile-hub .ux-admin-body{display:none!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body{display:block!important;position:relative!important;float:none!important;inset:auto!important;transform:none!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:14px 12px calc(30px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body>.scx-tabs{display:none!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body>:not(.scx-tabs):not(.ux-admin-nav-screen){display:block;position:relative!important;float:none!important;inset:auto!important;transform:none!important;clear:both;width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;box-sizing:border-box!important;overflow-wrap:anywhere}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body .scx-two,.scx-ov.ux-admin-mobile-feature .ux-admin-body .scx-stat-grid,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-stats,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-grid{grid-template-columns:minmax(0,1fr)!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-bar,.scx-ov.ux-admin-mobile-feature .ux-admin-body .scx-actions,.scx-ov.ux-admin-mobile-feature .ux-admin-body .ux-acts{display:flex;flex-wrap:wrap;min-width:0;max-width:100%}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=range]),.scx-ov.ux-admin-mobile-feature .ux-admin-body select,.scx-ov.ux-admin-mobile-feature .ux-admin-body textarea{width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-size:16px!important}" +
+      ".scx-ov.ux-admin-mobile-feature .ux-admin-body img,.scx-ov.ux-admin-mobile-feature .ux-admin-body table{max-width:100%}" +
+      ".scx-ov.ux-admin-mobile-hub .ux-admin-mobile-shell{display:flex!important;position:relative!important;flex:1 0 auto!important;flex-direction:column!important;align-self:stretch!important;gap:16px!important;width:100%!important;max-width:100%!important;min-width:0!important;min-height:0!important;margin:0!important;padding:18px 14px calc(28px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important;overflow:visible!important;background:transparent!important;isolation:isolate}" +
+      ".scx-ov.ux-admin-mobile-shell,.scx-ov .ux-admin-mobile-shell *{box-sizing:border-box}" +
+      ".scx-ov .ux-admin-mobile-intro{display:grid;gap:6px;min-width:0;width:100%}" +
+      ".scx-ov .ux-admin-mobile-eyebrow{margin:0;color:#ff5962;font-size:10px;font-weight:850;letter-spacing:.16em;text-transform:uppercase;overflow-wrap:anywhere}" +
+      ".scx-ov .ux-admin-mobile-title{margin:0;color:#f5f5f7;font-size:clamp(24px,6vw,30px);font-weight:850;line-height:1.08;letter-spacing:-.035em;overflow-wrap:anywhere}" +
+      ".scx-ov .ux-admin-mobile-description{margin:2px 0 0;color:#a1a1aa;font-size:13px;line-height:1.55;overflow-wrap:anywhere}" +
+      ".scx-ov .ux-admin-mobile-search{display:flex;align-items:center;gap:8px;min-width:0;width:100%;margin:0;padding:6px;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:#121216}" +
+      ".scx-ov .ux-admin-mobile-search input{flex:1 1 auto!important;width:1px!important;min-width:0!important;margin:0!important;padding:11px 10px!important;border:0!important;background:transparent!important;box-shadow:none!important;font-size:16px!important}" +
+      ".scx-ov .ux-admin-mobile-search button{flex:none;min-height:42px;padding:0 13px;border:0;border-radius:11px;background:#e50914;color:#fff;font-size:12px;font-weight:800}" +
+      ".scx-ov .ux-admin-mobile-section-label{margin:0 0 2px;color:#d4d4d8;font-size:12px;font-weight:800;letter-spacing:.04em}" +
+      ".scx-ov .ux-admin-mobile-list{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:0!important;list-style:none!important}" +
+      ".scx-ov .ux-admin-mobile-item{position:relative!important;display:grid!important;grid-template-columns:44px minmax(0,1fr) 18px!important;align-items:center!important;gap:12px!important;width:100%!important;min-width:0!important;min-height:82px!important;margin:0!important;padding:13px 12px!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:16px!important;background:linear-gradient(135deg,#18181d,#111115)!important;color:#f5f5f7!important;text-align:left!important;white-space:normal!important;overflow:visible!important;box-shadow:0 7px 20px rgba(0,0,0,.22)!important;cursor:pointer!important;transform:none;appearance:none;-webkit-appearance:none}" +
+      ".scx-ov .ux-admin-mobile-item:focus-visible{outline:2px solid #ff5962!important;outline-offset:2px!important}" +
+      ".scx-ov .ux-admin-mobile-item:active{border-color:rgba(229,9,20,.55)!important;background:#202026!important}" +
+      ".scx-ov .ux-admin-mobile-icon{display:grid!important;place-items:center!important;flex:none!important;width:44px!important;height:44px!important;border:1px solid rgba(229,9,20,.28)!important;border-radius:13px!important;background:rgba(229,9,20,.12)!important;color:#ff5962!important}" +
+      ".scx-ov .ux-admin-mobile-icon svg{display:block;width:22px;height:22px;max-width:none}" +
+      ".scx-ov .ux-admin-mobile-copy{display:flex!important;flex-direction:column!important;gap:5px!important;min-width:0!important;width:100%!important}" +
+      ".scx-ov .ux-admin-mobile-item-title{display:block!important;margin:0!important;color:#f5f5f7!important;font-size:14px!important;font-weight:800!important;line-height:1.25!important;overflow-wrap:anywhere!important;white-space:normal!important}" +
+      ".scx-ov .ux-admin-mobile-item-description{display:block!important;margin:0!important;color:#a1a1aa!important;font-size:11.5px!important;font-weight:500!important;line-height:1.45!important;overflow-wrap:anywhere!important;white-space:normal!important}" +
+      ".scx-ov .ux-admin-mobile-count{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;margin-top:2px;padding:3px 7px;border:1px solid rgba(255,255,255,.09);border-radius:999px;color:#d4d4d8;background:rgba(255,255,255,.035);font-size:10px;font-weight:700}" +
+      ".scx-ov .ux-admin-mobile-chevron{display:block;color:#8d8d98;font-size:23px;line-height:1;text-align:right}" +
+      ".scx-ov.ux-admin-mobile-hub .scx-head{grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-rows:auto!important;gap:8px!important;padding:12px 12px!important}" +
+      ".scx-ov.ux-admin-mobile-hub .scx-head .ux-admin-back{grid-column:1!important;grid-row:1!important;min-height:36px!important;padding:7px 9px!important;font-size:11px!important}" +
+      ".scx-ov.ux-admin-mobile-hub .scx-head h2{grid-column:2!important;grid-row:1!important;min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:15px!important;line-height:1.2!important}" +
+      ".scx-ov.ux-admin-mobile-hub .scx-head .scx-x{grid-column:3!important;grid-row:1!important}" +
+      ".scx-ov.ux-admin-mobile-hub .ux-admin-back[hidden]{display:none!important}" +
+      ".scx-ov.ux-admin-mobile-feature .scx-head{grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-rows:auto!important;gap:8px!important;padding:12px 10px!important}" +
+      ".scx-ov.ux-admin-mobile-feature .scx-head .ux-admin-back{grid-column:1!important;grid-row:1!important;min-height:36px!important;padding:7px 9px!important;font-size:11px!important}" +
+      ".scx-ov.ux-admin-mobile-feature .scx-head h2{grid-column:2!important;grid-row:1!important;min-width:0!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:14px!important;line-height:1.2!important}" +
+      ".scx-ov.ux-admin-mobile-feature .scx-head .scx-x{grid-column:3!important;grid-row:1!important}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-head{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:auto!important;padding:12px 14px!important}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-head h2{grid-column:1!important;grid-row:1!important;white-space:normal!important;overflow-wrap:anywhere!important}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2){display:block!important;width:100%!important;max-width:100%!important;margin:0!important;padding:22px 16px calc(30px + env(safe-area-inset-bottom))!important;box-sizing:border-box!important}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2) .scx-actions{display:flex;flex-wrap:wrap;gap:8px}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2) label{display:grid;gap:8px;width:100%}" +
+      ".scx-ov.ux-admin-mobile-auth .scx-box>div:nth-child(2) input{width:100%;min-width:0;box-sizing:border-box;font-size:16px!important}" +
+      ".scx-ov.ux-admin-mobile-auth .ux-gsearch{display:none!important}" +
+    "}";
+  (document.head || document.documentElement).appendChild(mobileStyle);
 
   /* ---------- header search ---------- */
   function globalSearch(q) {
@@ -291,22 +346,161 @@
   function tabSignature(tabs) {
     return $$(".scx-tab", tabs).map(tabLabel).join("|");
   }
+  function isMobileAdminViewport() {
+    return !!(window.matchMedia && window.matchMedia("(max-width: 899px)").matches);
+  }
+  function ensureMobileAdminShell(ov) {
+    var box = $(".scx-box", ov);
+    if (!box) return null;
+    var shell = $(".ux-admin-mobile-shell", box);
+    if (!shell) {
+      shell = h("div", { class: "ux-admin-mobile-shell", "aria-label": "Mobile Admin navigation" });
+      /* Keep the original header and content container at their original child indexes. */
+      box.appendChild(shell);
+    }
+    return shell;
+  }
+  function makeMobileAdminItem(title, description, icon, click, count) {
+    var b = h("button", { class: "ux-admin-mobile-item", type: "button", "aria-label": title });
+    b.appendChild(h("span", { class: "ux-admin-mobile-icon" }, [svg(icon || "dot", 22)]));
+    var copy = h("span", { class: "ux-admin-mobile-copy" });
+    copy.appendChild(h("span", { class: "ux-admin-mobile-item-title", text: title }));
+    copy.appendChild(h("span", { class: "ux-admin-mobile-item-description", text: description || "" }));
+    if (count) copy.appendChild(h("span", { class: "ux-admin-mobile-count", text: count }));
+    b.appendChild(copy);
+    b.appendChild(h("span", { class: "ux-admin-mobile-chevron", text: "›", "aria-hidden": "true" }));
+    b.addEventListener("click", click);
+    return b;
+  }
+  function renderMobileAdminNavigation(ov, tabs) {
+    var body = tabs.parentNode;
+    body.classList.add("ux-admin-body");
+    var shell = ensureMobileAdminShell(ov);
+    if (!shell) return;
+    ov.classList.add("ux-admin-mobile");
+    ov.classList.remove("ux-admin-auth", "ux-admin-mobile-auth");
+
+    if (navLevel === "feature") {
+      var oldScreen = $(".ux-admin-nav-screen", body);
+      if (oldScreen) oldScreen.remove();
+      ov.classList.add("ux-admin-mobile-feature", "ux-admin-feature");
+      ov.classList.remove("ux-admin-mobile-hub", "ux-admin-categories", "ux-admin-subcategories");
+      var titleFeature = $("#scxTitle", ov);
+      setText(titleFeature, navFeature || "Admin");
+      var backFeature = $(".ux-admin-back", ov);
+      if (backFeature) {
+        backFeature.hidden = false;
+        backFeature.setAttribute("aria-label", "Return to the previous Admin menu");
+        setText(backFeature, "← Back");
+      }
+      shell.setAttribute("aria-hidden", "true");
+      return;
+    }
+
+    if (navLevel !== "subcategories") { navLevel = "categories"; navCategory = ""; navFeature = ""; }
+    var group = navLevel === "subcategories" ? groupById(navCategory) : null;
+    if (navLevel === "subcategories" && !group) {
+      navLevel = "categories"; navCategory = ""; navFeature = "";
+    }
+    ov.classList.add("ux-admin-mobile-hub");
+    ov.classList.remove("ux-admin-mobile-feature", "ux-admin-feature");
+    ov.classList.toggle("ux-admin-categories", navLevel === "categories");
+    ov.classList.toggle("ux-admin-subcategories", navLevel === "subcategories");
+
+    var title = $("#scxTitle", ov);
+    setText(title, navLevel === "categories" ? "StreamCloud Admin" : group.label);
+    var back = $(".ux-admin-back", ov);
+    if (back) {
+      back.hidden = navLevel === "categories";
+      back.setAttribute("aria-label", "Back to Admin categories");
+      setText(back, "← Back");
+    }
+    shell.setAttribute("aria-hidden", "false");
+
+    var signature = tabSignature(tabs);
+    var screenKey = navLevel + "|" + navCategory + "|" + signature;
+    if (shell.getAttribute("data-screen-key") === screenKey) return;
+    shell.textContent = "";
+    shell.setAttribute("data-screen-key", screenKey);
+
+    var intro = h("div", { class: "ux-admin-mobile-intro" });
+    var list = h("div", { class: "ux-admin-mobile-list" });
+    if (navLevel === "categories") {
+      intro.appendChild(h("p", { class: "ux-admin-mobile-eyebrow", text: "STREAMCLOUD · ADMIN" }));
+      intro.appendChild(h("h3", { class: "ux-admin-mobile-title", text: "Admin workspace" }));
+      intro.appendChild(h("p", { class: "ux-admin-mobile-description", text: "Choose a section to continue. Each tool opens separately, so the controls stay clear on your phone." }));
+      var searchForm = h("form", { class: "ux-admin-mobile-search", role: "search", "aria-label": "Search catalogue" });
+      var searchInput = h("input", { type: "search", placeholder: "Search catalogue…", "aria-label": "Search catalogue" });
+      var searchButton = h("button", { type: "submit", text: "Search" });
+      searchForm.appendChild(searchInput);
+      searchForm.appendChild(searchButton);
+      searchForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var q = searchInput.value.trim();
+        if (q) globalSearch(q);
+      });
+      shell.appendChild(intro);
+      shell.appendChild(searchForm);
+      shell.appendChild(h("p", { class: "ux-admin-mobile-section-label", text: "ALL ADMIN SECTIONS" }));
+      ADMIN_GROUPS.forEach(function (g) {
+        var available = g.items.filter(function (item) { return !!findAdminTab(item.label, tabs); }).length;
+        list.appendChild(makeMobileAdminItem(g.label, g.desc, g.icon, function () {
+          setAdminScreen("subcategories", g.id, "", true);
+        }, available + (available === 1 ? " tool" : " tools")));
+      });
+    } else {
+      intro.appendChild(h("p", { class: "ux-admin-mobile-eyebrow", text: "ADMIN CATEGORY" }));
+      intro.appendChild(h("h3", { class: "ux-admin-mobile-title", text: group.label }));
+      intro.appendChild(h("p", { class: "ux-admin-mobile-description", text: group.desc + ". Choose one tool to open its full mobile workspace." }));
+      group.items.forEach(function (item) {
+        var target = findAdminTab(item.label, tabs);
+        if (!target) return;
+        var label = tabLabel(target) || item.label;
+        list.appendChild(makeMobileAdminItem(label, item.desc, iconKey(label), function () {
+          setAdminScreen("feature", group.id, label, true);
+          target.click();
+        }));
+      });
+      if (!list.childNodes.length) {
+        list.appendChild(h("p", { class: "ux-admin-mobile-description", text: "These tools are still loading. Return to the categories screen and try again in a moment." }));
+      }
+      shell.appendChild(intro);
+      shell.appendChild(h("p", { class: "ux-admin-mobile-section-label", text: "TOOLS IN THIS CATEGORY" }));
+    }
+    shell.appendChild(list);
+  }
+
   function renderAdminNavigation() {
     var ov = $(".scx-ov");
     var tabs = ov && $(".scx-tabs", ov);
     if (!ov || ov.hidden) return;
+    var mobile = isMobileAdminViewport();
     if (!tabs) {
       navLevel = "auth"; navCategory = ""; navFeature = "";
-      ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-feature");
-      ov.classList.add("ux-admin-auth");
+      ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-feature", "ux-admin-mobile-hub", "ux-admin-mobile-feature");
       var backAuth = $(".ux-admin-back", ov); if (backAuth) backAuth.hidden = true;
+      if (mobile) {
+        ov.classList.add("ux-admin-mobile", "ux-admin-mobile-auth", "ux-admin-auth");
+        var authShell = $(".ux-admin-mobile-shell", ov); if (authShell) authShell.setAttribute("aria-hidden", "true");
+      } else {
+        ov.classList.remove("ux-admin-mobile", "ux-admin-mobile-auth");
+        ov.classList.add("ux-admin-auth");
+      }
       return;
     }
-    ov.classList.remove("ux-admin-auth");
+    ov.classList.remove("ux-admin-auth", "ux-admin-mobile-auth");
     if (!navLevel || navLevel === "auth") {
       navLevel = "categories"; navCategory = ""; navFeature = "";
       pushRootState();
     }
+    if (mobile) {
+      renderMobileAdminNavigation(ov, tabs);
+      return;
+    }
+    ov.classList.remove("ux-admin-mobile", "ux-admin-mobile-hub", "ux-admin-mobile-feature", "ux-admin-mobile-auth");
+    var box = $(".scx-box", ov);
+    var mobileShell = $(".ux-admin-mobile-shell", box);
+    if (mobileShell) mobileShell.setAttribute("aria-hidden", "true");
     var body = tabs.parentNode;
     body.classList.add("ux-admin-body");
     var screen = $(".ux-admin-nav-screen", body);
@@ -335,9 +529,9 @@
         intro.appendChild(h("p", { class: "ux-admin-nav-eyebrow", text: "STREAMCLOUD · ADMIN" }));
         intro.appendChild(h("h3", { text: "Choose a category" }));
         intro.appendChild(h("p", { text: "Open a category first. Its subcategories will appear on the next screen." }));
-        ADMIN_GROUPS.forEach(function (group) {
-          grid.appendChild(makeAdminNavCard(group.label, group.desc, group.icon, function () {
-            setAdminScreen("subcategories", group.id, "", true);
+        ADMIN_GROUPS.forEach(function (g) {
+          grid.appendChild(makeAdminNavCard(g.label, g.desc, g.icon, function () {
+            setAdminScreen("subcategories", g.id, "", true);
           }));
         });
       } else {
@@ -353,10 +547,9 @@
         group.items.forEach(function (item) {
           var target = findAdminTab(item.label, tabs);
           if (!target) return;
-          var title = tabLabel(target) || item.label;
-          var icon = iconKey(title);
-          grid.appendChild(makeAdminNavCard(title, item.desc, icon, function () {
-            setAdminScreen("feature", group.id, title, true);
+          var label = tabLabel(target) || item.label;
+          grid.appendChild(makeAdminNavCard(label, item.desc, iconKey(label), function () {
+            setAdminScreen("feature", group.id, label, true);
             target.click();
           }));
         });
@@ -452,6 +645,7 @@
   function start() {
     autoOpen();
     new MutationObserver(sched).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden", "class"] });
+    window.addEventListener("resize", sched, { passive: true });
     sched();
   }
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
