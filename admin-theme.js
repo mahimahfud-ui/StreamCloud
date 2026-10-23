@@ -3,7 +3,7 @@
    Load LAST after admin-ultra.js, admin-ai-plus.js and admin-polish.js. */
 (function () {
   "use strict";
-  if (document.getElementById("ux-theme-campus")) return;
+  if (window.__STREAMCLOUD_ADMIN_UI_V4 || document.querySelector('script[src*="admin-ui-v4.js"]') || document.getElementById("ux-theme-campus")) return;
 
   var NS = "http://www.w3.org/2000/svg";
   var P = {

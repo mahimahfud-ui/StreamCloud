@@ -5,6 +5,7 @@
    Open from the admin icon or your-site/#admin. Remove this file to restore the old look. */
 (function () {
   "use strict";
+  window.__STREAMCLOUD_ADMIN_UI_V4 = true;
   var NS = "http://www.w3.org/2000/svg", TK = "scx-ux-theme";
   var P = {
     overview: "M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z", add: "M12 5v14M5 12h14", ai: "M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16v4M17 18h4",
