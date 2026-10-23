@@ -20,10 +20,8 @@
     "@keyframes ux-rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}" +
     "@keyframes ux-grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}" +
     "@keyframes ux-toast{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}" +
-    ".scx-ov:not([hidden]):not(.ux-dock){animation:ux-fade .22s ease-out}" +
-    ".scx-ov:not([hidden]):not(.ux-dock) .scx-box{animation:ux-pop .34s " + EASE + "}" +
-    ".scx-ov.ux-dock:not([hidden]) .scx-box{animation:ux-slide .34s " + EASE + "}" +
-    "@media(max-width:700px){.scx-ov.ux-dock:not([hidden]) .scx-box{animation:ux-rise .34s " + EASE + "}}" +
+    ".scx-ov:not([hidden]){animation:ux-fade .22s ease-out}" +
+    ".scx-ov:not([hidden]) .scx-box{animation:ux-pop .34s " + EASE + "}" +
     /* tab content fades in on tab switch (direct children only; typing/filtering won't replay it) */
     ".scx-box>div:nth-child(2)>:not(.scx-tabs){animation:ux-rise .3s " + EASE + " both}" +
     /* buttons, tabs, chips, pills */
@@ -42,7 +40,7 @@
     ".ux-thumb img,.ux-art img,.ux-fillrow img{animation:ux-fade .35s ease both}" +
     ".ux-meter i{transform-origin:left;animation:ux-grow .6s " + EASE + " both;transition:width .4s " + EASE + "}" +
     ".ux-prog i{transition:width .35s " + EASE + "}" +
-    /* toast + live preview on the real site */
+    /* toast and page transitions */
     ".ux-toast{animation:ux-toast .3s " + EASE + " both}" +
     "html,body{transition:background-color .3s ease,color .3s ease}" +
     "}";
