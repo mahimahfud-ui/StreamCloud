@@ -164,3 +164,16 @@ main .app-card p{min-height:40px}
   main .track{gap:8px!important;padding-left:8px!important;padding-right:8px!important}
 }
 
+
+
+/* Cross-browser viewport safety for phones and tablets. Keeps the layout inside the visual width
+   while preserving normal browser zoom and pinch-to-zoom accessibility. */
+html,body{width:100%;max-width:100%;min-width:0}
+body{min-height:100vh;min-height:100dvh}
+@media(max-width:899px){
+  html,body{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+  .hero,.hero-in,.mode-wrap,.mode-switch,main,.row-section,.track,.finale,.finale-in,footer{min-width:0;max-width:100%}
+  .hero-in,.mode-wrap,.mode-switch,main .track{box-sizing:border-box}
+  main .track{width:100%}
+  .mode-switch{max-width:100%}
+}
