@@ -154,7 +154,7 @@ try {
     await reply({ error: "Unexpected mocked Supabase endpoint." }, 404);
   });
   const page = await context.newPage();
-  page.on("pageerror", (error) => failures.push("Uncaught page error: " + error.message));
+  page.on("pageerror", (error) => { if (failures.length < 12) failures.push("Uncaught page error: " + (error.stack || error.message)); });
   page.on("response", (response) => {
     try {
       if (new URL(response.url()).origin === ORIGIN && response.status() >= 400) {
@@ -296,7 +296,7 @@ try {
   await context.close();
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
-  mobile.on("pageerror", (error) => failures.push("Mobile uncaught page error: " + error.message));
+  mobile.on("pageerror", (error) => { if (failures.length < 12) failures.push("Mobile uncaught page error: " + (error.stack || error.message)); });
   await mobile.goto(ORIGIN, { waitUntil: "domcontentloaded" });
   await mobile.waitForSelector("#sitesView .card", { timeout: 15000 });
   const dimensions = await mobile.evaluate(() => ({
