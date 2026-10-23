@@ -514,7 +514,7 @@
     var mobile = isMobileAdminViewport();
     if (!tabs) {
       navLevel = "auth"; navCategory = ""; navSubcategory = ""; navFeature = "";
-      ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-feature", "ux-admin-mobile-hub", "ux-admin-mobile-feature");
+      ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-tools", "ux-admin-feature", "ux-admin-mobile-hub", "ux-admin-mobile-feature");
       var backAuth = $(".ux-admin-back", ov); if (backAuth) backAuth.hidden = true;
       if (mobile) {
         ov.classList.add("ux-admin-mobile", "ux-admin-mobile-auth", "ux-admin-auth");
@@ -527,7 +527,7 @@
     }
     ov.classList.remove("ux-admin-auth", "ux-admin-mobile-auth");
     if (!navLevel || navLevel === "auth") {
-      navLevel = "categories"; navCategory = ""; navFeature = "";
+      navLevel = "categories"; navCategory = ""; navSubcategory = ""; navFeature = "";
       pushRootState();
     }
     if (mobile) {
@@ -647,8 +647,8 @@
       return;
     }
     if (!$(".scx-tabs", ov)) {
-      navLevel = "auth";
-      ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-feature");
+      navLevel = "auth"; navCategory = ""; navSubcategory = ""; navFeature = "";
+      ov.classList.remove("ux-admin-categories", "ux-admin-subcategories", "ux-admin-tools", "ux-admin-feature", "ux-admin-mobile-hub", "ux-admin-mobile-feature");
       ov.classList.add("ux-admin-auth");
       return;
     }
