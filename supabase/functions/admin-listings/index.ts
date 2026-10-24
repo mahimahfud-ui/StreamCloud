@@ -13,8 +13,10 @@ const SETTINGS_DEFAULT = {
   sections: {
     sites: { visible: true, title: "Movie Websites" },
     apps: { visible: true, title: "Movie Apps" },
+    music: { visible: true, title: "Music Apps" },
+    gaming: { visible: true, title: "Gaming Websites" },
     recs: { visible: true, title: "Recommendations" },
-    order: ["sites", "apps", "recs"],
+    order: ["sites", "apps", "music", "gaming", "recs"],
   },
   content: { overrides: {}, hidden: [], order: {} },
 };
