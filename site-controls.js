@@ -9,16 +9,17 @@
       sites: { visible: true, title: "Movie Websites" },
       apps: { visible: true, title: "Movie Apps" },
       music: { visible: true, title: "Music Apps" },
+      gaming: { visible: true, title: "Gaming Websites" },
       recs: { visible: true, title: "Recommendations" },
-      order: ["sites", "apps", "music", "recs"]
+      order: ["sites", "apps", "music", "gaming", "recs"]
     },
     content: { overrides: {}, hidden: [], deleted: [], order: {} }
   };
-  var original = { sites: [], apps: [], music: [] };
-  var dynamic = { sites: new Map(), apps: new Map(), music: new Map() };
+  var original = { sites: [], apps: [], music: [], gaming: [] };
+  var dynamic = { sites: new Map(), apps: new Map(), music: new Map(), gaming: new Map() };
   var settings = DEFAULTS;
-  var registry = { sites: [], apps: [], music: [], movie: [], series: [] };
-  var manual = { sites: false, apps: false, music: false };
+  var registry = { sites: [], apps: [], music: [], gaming: [], movie: [], series: [] };
+  var manual = { sites: false, apps: false, music: false, gaming: false };
   var styleNode = null;
   var siteSettingsStyle = null;
 
@@ -123,7 +124,7 @@
     }
     styleNode.textContent =
       ".track{grid-template-columns:repeat(var(--sc-cols-d,3),minmax(0,1fr))!important;gap:var(--sc-gap,22px)!important}" +
-      "#sitesView .card,#appsView .card,#musicView .card{aspect-ratio:var(--sc-aspect,1/1)!important}" +
+      "#sitesView .card,#appsView .card,#musicView .card,#gamingView .card{aspect-ratio:var(--sc-aspect,1/1)!important}" +
       ".logo-card img{object-fit:var(--sc-image-fit,contain)!important}" +
       ".card{border-radius:var(--sc-radius,4px)!important}" +
       ".sc-hidden-section{display:none!important}" +
@@ -223,12 +224,14 @@
     var sites = document.getElementById("sitesView");
     var apps = document.getElementById("appsView");
     var music = document.getElementById("musicView");
+    var gaming = document.getElementById("gamingView");
     var recs = document.getElementById("recs");
     var empty = document.getElementById("empty");
     [
       [sites, sections.sites, "sites"],
       [apps, sections.apps, "apps"],
       [music, sections.music, "music"],
+      [gaming, sections.gaming, "gaming"],
       [recs, sections.recs, "recs"]
     ].forEach(function (p) {
       if (!p[0]) return;
@@ -244,12 +247,11 @@
         }
       }
     });
-    var order = Array.isArray(sections.order) ? sections.order.slice() : ["sites", "apps", "music", "recs"];
-    if (order.indexOf("music") < 0) { var recIndex = order.indexOf("recs"); order.splice(recIndex < 0 ? order.length : recIndex, 0, "music"); }
-    ["sites", "apps", "recs"].forEach(function (key) { if (order.indexOf(key) < 0) order.push(key); });
+    var order = Array.isArray(sections.order) ? sections.order.slice() : ["sites", "apps", "music", "gaming", "recs"];
+    ["sites", "apps", "music", "gaming", "recs"].forEach(function (key) { if (order.indexOf(key) < 0) { var recIndex = order.indexOf("recs"); order.splice(recIndex < 0 ? order.length : recIndex, 0, key); } });
     var modeWrap = document.querySelector(".mode-switch");
-    var modeMap = { sites: sites, apps: apps, music: music };
-    var modes = ["sites", "apps", "music"].slice();
+    var modeMap = { sites: sites, apps: apps, music: music, gaming: gaming };
+    var modes = ["sites", "apps", "music", "gaming"].slice();
     if (modeWrap) {
       modes.sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); });
       modes.forEach(function (key) {
@@ -258,7 +260,7 @@
       });
     }
     if (main) {
-      order.filter(function (key) { return key === "sites" || key === "apps" || key === "music" || key === "recs"; }).forEach(function (key) {
+      order.filter(function (key) { return key === "sites" || key === "apps" || key === "music" || key === "gaming" || key === "recs"; }).forEach(function (key) {
         var node = key === "recs" ? recs : modeMap[key];
         if (node) main.appendChild(node);
       });
@@ -274,7 +276,8 @@
       if (typeof S !== "undefined") controlCatalog("sites", S);
       if (typeof A !== "undefined") controlCatalog("apps", A);
       if (typeof M !== "undefined") controlCatalog("music", M);
-      if (typeof renderView === "function") { renderView("sites"); renderView("apps"); renderView("music"); }
+      if (typeof G !== "undefined") controlCatalog("gaming", G);
+      if (typeof renderView === "function") { renderView("sites"); renderView("apps"); renderView("music"); renderView("gaming"); }
     } catch (e) { console.warn("StreamCloud catalog controls could not be applied.", e); }
     applyAppearance();
     applySiteSettings();
