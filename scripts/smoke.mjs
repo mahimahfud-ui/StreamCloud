@@ -196,7 +196,7 @@ try {
 
   await page.locator('.mode[data-mode="gaming"]').waitFor({ timeout: 8000 });
   await page.locator('.mode[data-mode="gaming"]').click();
-  await page.waitForFunction(() => window.STREAMCLOUD_ACTIVE_CATEGORY === "gaming");
+  await page.waitForFunction(() => document.querySelector('.mode[data-mode="gaming"]')?.classList.contains("active"));
   assert.equal(await page.locator("#gamingView .card").count(), 1, "Gaming Websites should show the GTA browser-game listing");
   await page.locator("#gamingView .card").click();
   await page.waitForFunction(() => document.getElementById("detailModal")?.classList.contains("open"));
