@@ -314,6 +314,7 @@
   original.sites = typeof S !== "undefined" ? S.slice() : [];
   original.apps = typeof A !== "undefined" ? A.slice() : [];
   original.music = typeof M !== "undefined" ? M.slice() : [];
+  original.gaming = typeof G !== "undefined" ? G.slice() : [];
 
   window.STREAMCLOUD_SETTINGS_READY = (function () {
     if (!BASE || !CFG.anonKey) { applySettings(DEFAULTS); return Promise.resolve(DEFAULTS); }
