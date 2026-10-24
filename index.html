@@ -700,7 +700,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     else if(sort==="newest")data.sort((a,b)=>Number(b.new)-Number(a.new)||qualityScore(b)-qualityScore(a));
     else if(sort==="name")data.sort((a,b)=>a.name.localeCompare(b.name));
     else data.sort((a,b)=>qualityScore(b)-qualityScore(a));
-    const typed=data.map(item=>Object.assign({},item,{kind:mode==="sites"?"site":"app"}));
+    const typed=data.map(item=>Object.assign({},item,{kind:mode==="sites"||mode==="gaming"?"site":"app"}));
     const target=document.getElementById(mode==="sites"?"sitesView":mode==="gaming"?"gamingView":mode==="music"?"musicView":"appsView");
     if(mode==="sites"){
       target.innerHTML=typed.length?rowHTML("Movie Websites",typed,{kind:"site",note:"Hand-picked by Mahi · Scores are estimates"}):"";
