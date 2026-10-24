@@ -194,6 +194,17 @@ try {
   await page.waitForFunction(() => window.STREAMCLOUD_ACTIVE_CATEGORY === "music");
   assert.ok(await page.locator("#appsView .card").count() > 0, "Music apps should render");
 
+  await page.locator('.mode[data-mode="gaming"]').waitFor({ timeout: 8000 });
+  await page.locator('.mode[data-mode="gaming"]').click();
+  await page.waitForFunction(() => window.STREAMCLOUD_ACTIVE_CATEGORY === "gaming");
+  assert.equal(await page.locator("#gamingView .card").count(), 1, "Gaming Websites should show the GTA browser-game listing");
+  await page.locator("#gamingView .card").click();
+  await page.waitForFunction(() => document.getElementById("detailModal")?.classList.contains("open"));
+  assert.equal(await page.locator("#detailTitle").textContent(), "GTA V Browser Game", "Gaming listing should open its details");
+  assert.match(await page.locator("#detailDescription").textContent(), /not an official Rockstar Games service/i, "Gaming listing should show its third-party warning");
+  await page.keyboard.press("Escape");
+  await page.waitForFunction(() => !document.getElementById("detailModal")?.classList.contains("open"));
+
   await page.locator('.mode[data-mode="sites"]').click();
   const search = page.locator("#q");
   await search.fill("Movy");
