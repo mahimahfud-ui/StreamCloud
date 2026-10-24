@@ -71,7 +71,7 @@
     apply(); toast("Filters reset");
   });
   var mo = new MutationObserver(apply);
-  ["sitesView", "appsView"].forEach(function (id) { var v = document.getElementById(id); if (v) mo.observe(v, { childList: true, subtree: true }); });
+  ["sitesView", "appsView", "musicView", "gamingView"].forEach(function (id) { var v = document.getElementById(id); if (v) mo.observe(v, { childList: true, subtree: true }); });
   ["input", "change", "click"].forEach(function (ev) { document.addEventListener(ev, function () { setTimeout(apply, 0); }); });
 
   /* Recently visited (recorded only when a card or link is activated) */
@@ -85,7 +85,7 @@
   function paint() {
     var list = recents(); panel.hidden = !list.length;
     $("ul", panel).innerHTML = list.map(function (x) {
-      return "<li><a href='" + esc(x.url) + "' target='_blank' rel='noopener noreferrer' data-rname='" + esc(x.name) + "' data-rtype='" + esc(x.type) + "'><span class='sc-dot' aria-hidden='true'>" + esc(x.name.slice(0, 2).toUpperCase()) + "</span><span>" + esc(x.name) + "</span><small>" + (x.type === "site" ? "Website" : x.type === "music" ? "Music app" : "Movie app") + "</small></a></li>";
+      return "<li><a href='" + esc(x.url) + "' target='_blank' rel='noopener noreferrer' data-rname='" + esc(x.name) + "' data-rtype='" + esc(x.type) + "'><span class='sc-dot' aria-hidden='true'>" + esc(x.name.slice(0, 2).toUpperCase()) + "</span><span>" + esc(x.name) + "</span><small>" + (x.type === "site" ? "Website" : x.type === "gaming" ? "Gaming website" : x.type === "music" ? "Music app" : "Movie app") + "</small></a></li>";
     }).join("");
   }
   function remember(item, type) {
@@ -96,10 +96,10 @@
     setTimeout(paint, 0);
   }
   $("#scRecentClear").addEventListener("click", function () { store.del(RK); paint(); toast("History cleared"); });
-  function typeOf(c) { return c.closest("#sitesView") ? "site" : (c.dataset.category === "music" ? "music" : "movie"); }
+  function typeOf(c) { return c.closest("#sitesView") ? "site" : c.closest("#gamingView") ? "gaming" : (c.dataset.category === "music" ? "music" : "movie"); }
   function find(name, type) {
-    var C = cat(), list = type === "site" ? C.sites : C.apps;
-    return list.filter(function (i) { return String(i.name).toLowerCase() === String(name).toLowerCase() && (type === "site" || (i.appType || "movie") === type); })[0];
+    var C = cat(), list = type === "site" ? C.sites : type === "gaming" ? (C.gaming || []) : C.apps;
+    return list.filter(function (i) { return String(i.name).toLowerCase() === String(name).toLowerCase() && (type === "site" || type === "gaming" || (i.appType || "movie") === type); })[0];
   }
   /* Capture clicks before the site's own navigation handlers run. */
   window.addEventListener("click", function (e) {
@@ -107,9 +107,9 @@
     var r = t.closest(".sc-recent a");
     if (r) { remember(find(r.dataset.rname, r.dataset.rtype), r.dataset.rtype); return; }
     if (t.closest("#detailVisit")) {
-      var siteView = $("#sitesView");
-      var type = siteView && siteView.classList.contains("active") ? "site" : null, n = $("#detailTitle").textContent;
-      var item = type ? find(n, "site") : (find(n, "movie") || find(n, "music"));
+      var siteView = $("#sitesView"), gamingView = $("#gamingView");
+      var type = siteView && siteView.classList.contains("active") ? "site" : gamingView && gamingView.classList.contains("active") ? "gaming" : null, n = $("#detailTitle").textContent;
+      var item = type ? find(n, type) : (find(n, "movie") || find(n, "music"));
       if (item) remember(item, type || item.appType || "movie");
       return;
     }
