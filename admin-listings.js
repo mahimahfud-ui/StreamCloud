@@ -623,7 +623,7 @@
   function defaultSettings() {
     return {
       schemaVersion: 1, site: {}, appearance: {},
-      sections: { sites: { visible: true, title: "Movie Websites" }, apps: { visible: true, title: "Movie Apps" }, recs: { visible: true, title: "Recommendations" }, order: ["sites", "apps", "recs"] },
+      sections: { sites: { visible: true, title: "Movie Websites" }, apps: { visible: true, title: "Movie Apps" }, music: { visible: true, title: "Music Apps" }, gaming: { visible: true, title: "Gaming Websites" }, recs: { visible: true, title: "Recommendations" }, order: ["sites", "apps", "music", "gaming", "recs"] },
       content: { overrides: {}, hidden: [], deleted: [], order: {} }
     };
   }
@@ -784,17 +784,16 @@
 
     wrap.appendChild(h("h3", { text: "Section visibility and order" }));
     var sectionFields = {};
-    [["sites", "Movie Websites"], ["apps", "Movie Apps"], ["music", "Music Apps"], ["recs", "Recommendations"]].forEach(function (p) {
+    [["sites", "Movie Websites"], ["apps", "Movie Apps"], ["music", "Music Apps"], ["gaming", "Gaming Websites"], ["recs", "Recommendations"]].forEach(function (p) {
       var sec = sectionObject(settings, p[0], p[1]);
       var show = checkbox("Show " + p[1], sec.visible !== false);
       var title = field(p[1] + " title", sec.title || p[1], "text", { maxlength: "100" });
       wrap.appendChild(h("div", { class: "scx-row" }, [show.wrap, title.wrap]));
       sectionFields[p[0]] = { show: show.input, title: title.input };
     });
-    var savedOrder = Array.isArray(settings.sections.order) ? settings.sections.order.slice() : ["sites", "apps", "music", "recs"];
-    if (savedOrder.indexOf("music") < 0) { var recIndex = savedOrder.indexOf("recs"); savedOrder.splice(recIndex < 0 ? savedOrder.length : recIndex, 0, "music"); }
-    ["sites", "apps", "recs"].forEach(function (key) { if (savedOrder.indexOf(key) < 0) savedOrder.push(key); });
-    var secOrder = field("Section order (comma-separated: sites, apps, music, recs)", savedOrder.join(", "), "text");
+    var savedOrder = Array.isArray(settings.sections.order) ? settings.sections.order.slice() : ["sites", "apps", "music", "gaming", "recs"];
+    ["sites", "apps", "music", "gaming", "recs"].forEach(function (key) { if (savedOrder.indexOf(key) < 0) { var recIndex = savedOrder.indexOf("recs"); savedOrder.splice(recIndex < 0 ? savedOrder.length : recIndex, 0, key); } });
+    var secOrder = field("Section order (comma-separated: sites, apps, music, gaming, recs)", savedOrder.join(", "), "text");
     wrap.appendChild(secOrder.wrap);
 
     wrap.appendChild(h("div", { class: "scx-divider" }));
@@ -816,7 +815,7 @@
     var group = h("select", { class: "scx-in", "aria-label": "Card category" });
     options(group, [
       { value: "sites", label: "Websites" }, { value: "apps", label: "Movie Apps" },
-      { value: "music", label: "Music Apps" }, { value: "movie", label: "Movies" }, { value: "series", label: "Web Series" }
+      { value: "music", label: "Music Apps" }, { value: "gaming", label: "Gaming Websites" }, { value: "movie", label: "Movies" }, { value: "series", label: "Web Series" }
     ], ui.controlSection || "sites");
     var itemSelect = h("select", { class: "scx-in", "aria-label": "Select card" });
     var selectRow = h("div", { class: "scx-row" }, [
@@ -1011,8 +1010,8 @@
         var f = sectionFields[p[0]];
         next.sections[p[0]] = { visible: f.show.checked, title: f.title.value.trim().slice(0, 100) || p[1] };
       });
-      var order = secOrder.input.value.split(",").map(function (x) { return x.trim().toLowerCase(); }).filter(function (x) { return ["sites", "apps", "music", "recs"].indexOf(x) >= 0; });
-      if (new Set(order).size !== 4 || ["sites", "apps", "music", "recs"].some(function (x) { return order.indexOf(x) < 0; })) { say(msg, "err", "Section order must contain sites, apps, music, and recs exactly once."); return; }
+      var order = secOrder.input.value.split(",").map(function (x) { return x.trim().toLowerCase(); }).filter(function (x) { return ["sites", "apps", "music", "gaming", "recs"].indexOf(x) >= 0; });
+      if (new Set(order).size !== 5 || ["sites", "apps", "music", "gaming", "recs"].some(function (x) { return order.indexOf(x) < 0; })) { say(msg, "err", "Section order must contain sites, apps, music, gaming, and recs exactly once."); return; }
       next.sections.order = order;
       next.appearance.desktopColumns = Number(colsD.input.value);
       next.appearance.tabletColumns = Number(colsT.input.value);
