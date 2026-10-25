@@ -375,7 +375,7 @@ try {
   await clickAdminFeature(page, "All Cards", "All Cards");
   await page.getByText("Edit and arrange cards").waitFor({ timeout: 8000 });
   await page.locator('select[aria-label="Card category"]').selectOption("sites");
-  await page.locator('select[aria-label="Select card"] option').filter({ hasText: "Smoke test listing" }).waitFor({ timeout: 8000 });
+  await page.locator('select[aria-label="Select card"] option').filter({ hasText: "Smoke test listing" }).waitFor({ state: "attached", timeout: 8000 });
   await page.locator('select[aria-label="Select card"]').selectOption({ label: "Smoke test listing" });
   const descField = page.locator('textarea.scx-in').first();
   await descField.fill("Updated by All Cards smoke test");
