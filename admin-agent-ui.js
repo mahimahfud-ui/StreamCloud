@@ -147,6 +147,37 @@
     card.appendChild(el("h4", { text: p.summary || "Proposed changes" }));
     card.appendChild(el("p", { text: "Risk: " + String(p.risk || "medium").toUpperCase() + " · Status: " + String(p.status || "pending") }));
     if (p.explanation) card.appendChild(el("p", { text: p.explanation }));
+    function printable(value) {
+      if (value === null) return "null";
+      if (value === undefined) return "not set";
+      return typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
+    }
+    if (p.proposalType === "listing_action" && p.actionPayload) {
+      var ca = p.actionPayload;
+      card.appendChild(el("p", { text: "CATALOG ACTION · " + String(ca.action || "update").toUpperCase() +
+        (ca.section ? " · " + String(ca.section) : "") +
+        (ca.targetName ? " · " + String(ca.targetName) : "") }));
+      var values = ca.fields || {};
+      if (Object.keys(values).length) {
+        var detail = el("details", { className: "sc-agent-file", open: true });
+        detail.appendChild(el("summary", { text: "Review listing fields" }));
+        detail.appendChild(el("pre", { text: JSON.stringify(values, null, 2), style: "margin:0;padding:10px;max-height:220px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#101010;color:#ddd;font:11px/1.5 ui-monospace,monospace" }));
+        card.appendChild(detail);
+      } else if (ca.targetId) {
+        card.appendChild(el("p", { text: "Selected item: " + String(ca.targetName || "") + " · " + String(ca.targetUrl || "") }));
+      }
+    }
+    if (p.proposalType === "site_settings" && p.actionPayload) {
+      var sa = p.actionPayload;
+      var settingsDetail = el("details", { className: "sc-agent-file", open: true });
+      settingsDetail.appendChild(el("summary", { text: "Review site settings before / after" }));
+      var diff = el("div", { className: "sc-agent-diff" });
+      var oldPanel = el("div", {}); oldPanel.appendChild(el("label", { text: "CURRENT" }));
+      oldPanel.appendChild(el("pre", { text: printable(sa.before), style: "margin:0;padding:10px;max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#101010;color:#ddd;font:11px/1.5 ui-monospace,monospace" }));
+      var nextPanel = el("div", {}); nextPanel.appendChild(el("label", { text: "PROPOSED" }));
+      nextPanel.appendChild(el("pre", { text: printable(sa.changes), style: "margin:0;padding:10px;max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-word;background:#101010;color:#ddd;font:11px/1.5 ui-monospace,monospace" }));
+      diff.appendChild(oldPanel); diff.appendChild(nextPanel); settingsDetail.appendChild(diff); card.appendChild(settingsDetail);
+    }
     (p.files || []).forEach(function (f) {
       var details = el("details", { className: "sc-agent-file", open: false });
       details.appendChild(el("summary", { text: (f.created ? "＋ " : "✎ ") + f.path + " · " + (f.operationCount || (f.previews || []).length) + " operation(s)" }));
