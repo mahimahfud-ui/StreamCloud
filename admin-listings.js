@@ -206,13 +206,25 @@
     lastFocus = document.activeElement;
     overlay.hidden = false;
     document.body.style.overflow = "hidden";
-    if (session && session.expiresAt > Date.now()) showHome("overview"); else { setSession(null); showPin(); }
+    if (session && session.expiresAt > Date.now()) showHome("ai"); else { setSession(null); showPin(); }
   }
   function closeModal() {
     if (!overlay || overlay.hidden) return;
+    // Lock this browser session immediately, even if the logout request is offline.
+    var closingSession = session && session.token ? session : null;
+    setSession(null);
     overlay.hidden = true;
     document.body.style.overflow = "";
     if (lastFocus && lastFocus.focus) lastFocus.focus();
+    if (closingSession && configured) {
+      fetch(BASE + "/functions/v1/admin-listings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: CFG.anonKey, "x-admin-token": closingSession.token },
+        credentials: "omit",
+        body: JSON.stringify({ action: "logout" }),
+        keepalive: true
+      }).catch(function () { /* Local lock still applies if offline. */ });
+    }
   }
   function msgBox() { return h("div", { class: "scx-msg", role: "alert", hidden: true }); }
   function say(el, kind, text) { el.hidden = !text; el.className = "scx-msg " + (kind || ""); el.textContent = text || ""; }
@@ -248,30 +260,18 @@
 
   /* --- Home with tabs --- */
   function showHome(tab, notice) {
-    ui.view = tab; titleEl.textContent = "Admin Dashboard"; bodyEl.textContent = "";
-    var tabs = h("nav", { class: "scx-tabs", "aria-label": "Admin features" });
+    ui.view = tab; titleEl.textContent = "StreamCloud Studio"; bodyEl.textContent = "";
+    var tabs = h("nav", { class: "scx-tabs", "aria-label": "StreamCloud admin workspaces" });
     [
-      { id: "overview", label: "Overview", icon: "▦", desc: "Totals and recent activity" },
-      { id: "add", label: "Add item", icon: "＋", desc: "Add a movie, service or app" },
-      { id: "ai", label: "Title lookup", icon: "⌕", desc: "Find verified title details" },
-      { id: "manage", label: "Content", icon: "▤", desc: "Select, publish, move or delete items" },
-      { id: "layout", label: "Cards & Layout", icon: "▥", desc: "Arrange cards and visibility" },
-      { id: "appearance", label: "Appearance", icon: "◐", desc: "Theme, colours and spacing" },
-      { id: "site", label: "Site settings", icon: "⚙", desc: "Announcement and visitor controls" },
-      { id: "activity", label: "Activity", icon: "◷", desc: "Review admin history" },
-      { id: "data", label: "Backup", icon: "⇅", desc: "Export or import data" },
-      { id: "pin", label: "Change PIN", icon: "◈", desc: "Update admin access PIN" },
-      { id: "logout", label: "Log out", icon: "↗", desc: "End your admin session" }
+      { id: "ai", label: "Movies & Series", icon: "▣", desc: "IMDb / OMDb verified title lookup" },
+      { id: "layout", label: "All Cards", icon: "▤", desc: "Browse by category · edit, hide, delete" },
+      { id: "logout", label: "Log out", icon: "↗", desc: "Lock admin and close this panel" }
     ].forEach(function (item) {
       tabs.appendChild(h("button", {
         class: "scx-tab" + (tab === item.id ? " on" : ""),
         type: "button", "aria-label": item.label, "aria-current": tab === item.id ? "page" : false,
         onclick: function () {
-          if (item.id === "add") resetAdd();
-          if (item.id === "logout") {
-            api("admin-listings", { action: "logout" }).catch(function () {}).finally(function () { setSession(null); showPin(); });
-            return;
-          }
+          if (item.id === "logout") { closeModal(); return; }
           showHome(item.id);
         }
       }, [
@@ -283,10 +283,10 @@
     bodyEl.appendChild(tabs);
     var msg = msgBox(); bodyEl.appendChild(msg);
     if (notice) say(msg, notice.kind, notice.text);
-    if (tab === "manage") showManage(msg);
-    else if (tab === "add") showAdd(msg);
+    if (tab === "layout") showLayout(msg);
     else if (tab === "ai") showAiStudio(msg);
-    else if (tab === "layout") showLayout(msg);
+    else if (tab === "add") { resetAdd(); showAdd(msg); }
+    else if (tab === "manage") showManage(msg);
     else if (tab === "appearance") showAppearance(msg);
     else if (tab === "site") showSiteSettings(msg);
     else if (tab === "activity") showActivity(msg);
