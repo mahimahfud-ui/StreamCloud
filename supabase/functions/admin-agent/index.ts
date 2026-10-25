@@ -449,6 +449,21 @@ async function audit(prompt:string,threadId:string):Promise<any>{
 }
 
 
+
+function sourceExcerpt(path:string,content:string,prompt:string):string{
+ if(content.length<=5200)return content;
+ const lines=content.split("\n"),terms=prompt.toLowerCase().split(/[^a-z0-9_-]+/).filter((t:string)=>t.length>3).slice(0,24);
+ const windows:Array<{a:number;b:number}>=[{a:0,b:18}];
+ for(let i=0;i<lines.length;i++){const low=lines[i].toLowerCase();if(terms.some((t:string)=>low.includes(t)))windows.push({a:Math.max(0,i-3),b:Math.min(lines.length,i+6)});}
+ windows.sort((a,b)=>a.a-b.a);
+ const merged:Array<{a:number;b:number}>=[];
+ for(const w of windows){const last=merged[merged.length-1];if(last&&w.a<=last.b+2)last.b=Math.max(last.b,w.b);else merged.push({...w});}
+ let out="";
+ for(const w of merged){const part="\n// "+path+" lines "+(w.a+1)+"-"+w.b+"\n"+lines.slice(w.a,w.b).map((line,i)=>(w.a+i+1)+": "+line).join("\n");if(out.length+part.length>5200)break;out+=part+"\n";}
+ if(out.length<500&&lines.length>18)out+="\n// "+path+" ending\n"+lines.slice(-Math.min(18,lines.length)).join("\n").slice(0,Math.max(0,5200-out.length));
+ return out.slice(0,5200)||content.slice(0,5200);
+}
+
 async function collectRelevantSource(prompt:string):Promise<any>{
  const meta=await gh(""),branch=env("GITHUB_BRANCH")||String(meta.default_branch||"main"),head=await headSha(branch),tree=await getTree(head);
  const files=tree.filter((x:any)=>x.type==="blob"&&allowedPath(String(x.path||""))&&Number(x.size||0)<180000).map((x:any)=>String(x.path||""));
@@ -473,7 +488,7 @@ async function collectRelevantSource(prompt:string):Promise<any>{
  if(!selected.length)for(const path of preferred){if(files.includes(path)&&!selected.includes(path))selected.push(path);if(selected.length>=3)break;}
  const excerpts:any[]=[];
  for(const path of selected){
-  try{const f=await readFile(path,head);excerpts.push({path,excerpt:compactContext(path,f.content,prompt).slice(0,5200)});}
+  try{const f=await readFile(path,head);excerpts.push({path,excerpt:sourceExcerpt(path,f.content,prompt)});}
   catch(e){excerpts.push({path,error:String((e as Error).message||"Could not read file").slice(0,120)});}
  }
  return{repo:meta.full_name||repo,branch,headSha:head,files:excerpts};
