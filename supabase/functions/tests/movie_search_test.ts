@@ -40,6 +40,7 @@ Deno.test("ranking prefers exact title and matching release year", () => {
   nodeAssert.equal(ranked[0].year, "2021");
   nodeAssert.equal(ranked[0].score, 115);
   nodeAssert.ok(ranked.find((candidate) => candidate.id === 3)!.score < ranked[0].score);
+  nodeAssert.ok(ranked.find((candidate) => candidate.id === 3)!.score < 68, "a wrong-year match must not be selected silently");
 });
 
 Deno.test("ranking recognises common typos and original titles", () => {
