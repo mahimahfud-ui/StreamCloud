@@ -246,6 +246,75 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
 .admin-icon:hover{transform:translateY(-2px);background:rgba(229,9,20,.25);border-color:rgba(229,9,20,.65)}
 .admin-icon:focus-visible{outline:2px solid #fff;outline-offset:3px}
 </style>
+
+<style id="facebook-style-search">
+/* Wider pill-shaped search, inspired by familiar social search fields. */
+.nav-tools .search,
+.nav-tools .search.open {
+  width: clamp(220px, 28vw, 360px);
+  height: 46px;
+  padding: 0 14px;
+  gap: 0;
+  border: 1px solid #393939;
+  border-radius: 999px;
+  background: #242424;
+  backdrop-filter: blur(10px);
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.nav-tools .search:focus-within {
+  border-color: #595959;
+  background: #292929;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.06);
+}
+.nav-tools .search button {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  color: #aaa;
+  transition: color .2s ease;
+}
+.nav-tools .search:focus-within button { color: #fff; }
+.nav-tools .search input,
+.nav-tools .search.open input {
+  flex: 1 1 auto;
+  width: 0;
+  min-width: 0;
+  height: 100%;
+  margin-left: 10px;
+  opacity: 1;
+  color: #f5f5f5;
+  font-size: 14px;
+}
+.nav-tools .search input::placeholder { color: #a8a8a8; opacity: 1; }
+
+/* Give the hero title a little more breathing room below the search/nav. */
+.hero { padding-top: 106px; }
+
+@media (max-width: 760px) {
+  nav { justify-content: flex-start; padding: 12px 4%; }
+  nav .logo { flex: 0 0 38px; }
+  .nav-tools { width: calc(100vw - 112px); right: 4%; }
+  .nav-tools .search,
+  .nav-tools .search.open {
+    width: 100%;
+    max-width: none;
+    height: 42px;
+    padding: 0 12px;
+  }
+  .nav-tools .search button {
+    flex-basis: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  .nav-tools .search input,
+  .nav-tools .search.open input {
+    font-size: 13px;
+    margin-left: 8px;
+  }
+  .hero { padding-top: 94px; }
+}
+</style>
+
 </head>
 <body>
 <div class="cinema-fallback" aria-hidden="true"></div>
