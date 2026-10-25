@@ -195,13 +195,13 @@ async function status():Promise<any>{
 }
 async function deployFunction(slug:string,tree:any[],ref:string):Promise<any>{
  if(!mgmtToken)return{target:slug,status:"skipped",message:"SC_SUPABASE_MANAGEMENT_TOKEN is not configured."};
- const prefix="supabase/functions/"+slug+"/",entries=tree.filter(x=>x.type==="blob"&&String(x.path||"").startsWith(prefix)&&/\.(?:ts|js|json|jsonc|wasm|txt|toml)$/i.test(String(x.path)));
+ const prefix="supabase/functions/"+slug+"/",sharedPrefix="supabase/functions/_shared/",entries=tree.filter(x=>x.type==="blob"&&(String(x.path||"").startsWith(prefix)||String(x.path||"").startsWith(sharedPrefix))&&/\.(?:ts|js|json|jsonc|wasm|txt|toml)$/i.test(String(x.path)));
  if(!entries.length)return{target:slug,status:"skipped",message:"No source files in committed tree."};
  const entrypoint=entries.some(x=>x.path===prefix+"index.ts")?"index.ts":entries.some(x=>x.path===prefix+"source/index.ts")?"source/index.ts":"";
  if(!entrypoint)return{target:slug,status:"skipped",message:"No index entrypoint."};
  let verifyJwt=slug!=="admin-agent";try{const r=await fetch("https://api.supabase.com/v1/projects/"+encodeURIComponent(projectRef)+"/functions/"+encodeURIComponent(slug),{headers:{Authorization:"Bearer "+mgmtToken},signal:AbortSignal.timeout(10000)});if(r.ok){const m=await r.json();if(typeof m.verify_jwt==="boolean")verifyJwt=m.verify_jwt;}}catch{}
  const form=new FormData();form.append("metadata",JSON.stringify({name:slug,entrypoint_path:entrypoint,verify_jwt:verifyJwt}));
- for(const f of entries){const path=String(f.path),file=await readFile(path,ref);form.append("file",new Blob([file.content],{type:"application/octet-stream"}),path.slice(prefix.length));}
+ for(const f of entries){const path=String(f.path),file=await readFile(path,ref);const relative=path.startsWith(prefix)?path.slice(prefix.length):"_shared/"+path.slice(sharedPrefix.length);form.append("file",new Blob([file.content],{type:"application/octet-stream"}),relative);}
  const r=await fetch("https://api.supabase.com/v1/projects/"+encodeURIComponent(projectRef)+"/functions/deploy?slug="+encodeURIComponent(slug),{method:"POST",headers:{Authorization:"Bearer "+mgmtToken},body:form,signal:AbortSignal.timeout(65000)});
  const d=await r.json().catch(()=>({}));if(!r.ok)return{target:slug,status:"failed",message:"Supabase deploy returned HTTP "+r.status+". Verify token scope edge_functions_write."};return{target:slug,status:"deployed",version:d.version||null,files:entries.length,verifyJwt};
 }
