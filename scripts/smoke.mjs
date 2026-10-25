@@ -60,6 +60,7 @@ try {
       published: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), position: 0, ads: 1
     }],
     activity: [],
+    settingsUpdatedAt: "2026-01-01T00:00:00.000Z",
     calls: []
   };
   await context.route("https://husydmiujigyonlxbuuj.supabase.co/**", async (route) => {
@@ -83,12 +84,46 @@ try {
       return;
     }
     if (reqUrl.pathname.startsWith("/rest/v1/site_settings")) {
-      await reply([{ settings: mockState.settings, updated_at: new Date().toISOString() }]);
+      if (req.method() === "GET") {
+        await reply([{ id: "global", settings: mockState.settings, updated_at: mockState.settingsUpdatedAt || "2026-01-01T00:00:00.000Z" }]);
+        return;
+      }
+      const body = req.postDataJSON() || {};
+      mockState.settings = body.settings || mockState.settings;
+      mockState.settingsUpdatedAt = body.updated_at || new Date().toISOString();
+      await reply([{ id: "global", settings: mockState.settings, updated_at: mockState.settingsUpdatedAt }]);
       return;
     }
     if (reqUrl.pathname.startsWith("/rest/v1/listings")) {
-      await reply([]);
-      return;
+      const params = reqUrl.searchParams;
+      const idFilter = (params.get("id") || "").replace(/^eq\./, "");
+      if (req.method() === "GET") {
+        let rows = mockState.listings.slice();
+        if ((params.get("published") || "") === "eq.true") rows = rows.filter((x) => x.published);
+        if (idFilter) rows = rows.filter((x) => x.id === idFilter);
+        await reply(rows);
+        return;
+      }
+      if (req.method() === "POST") {
+        const body = req.postDataJSON() || {};
+        const row = { ...body, id: body.id || crypto.randomUUID(), created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+        mockState.listings.push(row);
+        await reply([row]);
+        return;
+      }
+      if (req.method() === "PATCH") {
+        const body = req.postDataJSON() || {};
+        const rows = mockState.listings.filter((x) => !idFilter || x.id === idFilter);
+        rows.forEach((x) => Object.assign(x, body, { updated_at: new Date().toISOString() }));
+        await reply(rows);
+        return;
+      }
+      if (req.method() === "DELETE") {
+        const rows = mockState.listings.filter((x) => !idFilter || x.id === idFilter);
+        mockState.listings = mockState.listings.filter((x) => idFilter && x.id !== idFilter);
+        await reply(rows);
+        return;
+      }
     }
     if (reqUrl.pathname === "/functions/v1/admin-login") {
       const body = req.postDataJSON();
@@ -172,6 +207,47 @@ try {
       if (body.action === "logout") { await reply({ ok: true }); return; }
       if (body.action === "import") { await reply({ ok: true, added: 0, skipped: 0, errors: [] }); return; }
       await reply({ error: "Unknown mock action." }, 400);
+      return;
+    }
+    if (reqUrl.pathname === "/functions/v1/admin-agent") {
+      const body = req.postDataJSON() || {};
+      mockState.agentCalls = mockState.agentCalls || [];
+      mockState.agentCalls.push(body);
+      if (requestHeaders["x-admin-token"] !== mockToken) {
+        await reply({ error: "Admin session expired." }, 401);
+        return;
+      }
+      if (body.action === "status") {
+        await reply({
+          github: { configured: true, connected: true, canPush: true, repo: "mahimahfud-ui/StreamCloud", branch: "main" },
+          ai: { configured: ["Gemini"], enabled: ["Gemini"], paidFallback: false },
+          supabase: { database: true, managementApiConfigured: true, projectRef: "husydmiujigyonlxbuuj" }
+        });
+        return;
+      }
+      if (body.action === "history") { await reply({ threadId: body.threadId || null, messages: [], proposal: null }); return; }
+      if (body.action === "chat") { await reply({ threadId: body.threadId || "22222222-2222-4222-8222-222222222222", reply: "Mock StreamCloud AI response." }); return; }
+      if (body.action === "plan") {
+        await reply({
+          threadId: "22222222-2222-4222-8222-222222222222",
+          reply: "Prepared an app listing action for review.",
+          proposal: {
+            id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", summary: "Add smoke-test app", risk: "low", status: "pending",
+            proposalType: "listing_action",
+            actionPayload: { action: "create", section: "apps", summary: "Add smoke-test app", fields: { section: "apps", category: "General", name: "AI smoke app", url: "https://example.com/ai-smoke", url_key: "example.com/ai-smoke", published: true } },
+            files: [], deploymentStatus: []
+          }
+        });
+        return;
+      }
+      if (body.action === "apply") {
+        const row = { id: "22222222-2222-4222-8222-222222222223", section: "apps", category: "General", name: "AI smoke app", url: "https://example.com/ai-smoke", url_key: "example.com/ai-smoke", published: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), ads: 1 };
+        mockState.listings.push(row);
+        await reply({ ok: true, reply: "Catalogue change completed: CREATE · AI smoke app · Movie Apps.", action: "create", listingId: row.id, proposalId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" });
+        return;
+      }
+      if (body.action === "reject") { await reply({ ok: true }); return; }
+      await reply({ error: "Unknown mock AI-agent action." }, 400);
       return;
     }
     await reply({ error: "Unexpected mocked Supabase endpoint." }, 404);
