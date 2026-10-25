@@ -143,7 +143,7 @@
   function appendProposal(p) {
     if (!messagesBox || !p) return;
     activeProposal = p;
-    var card = el("section", { className: "sc-agent-proposal" });
+    var card = el("section", { className: "sc-agent-proposal", "data-proposal-id": String(p.id || "") });
     card.appendChild(el("h4", { text: p.summary || "Proposed changes" }));
     card.appendChild(el("p", { text: "Risk: " + String(p.risk || "medium").toUpperCase() + " · Status: " + String(p.status || "pending") }));
     if (p.explanation) card.appendChild(el("p", { text: p.explanation }));
@@ -309,10 +309,11 @@
       message("assistant", d.reply || "Patch apply step returned.");
       if (d.commitUrl) message("assistant", "GitHub commit: " + d.commitUrl);
       activeProposal = null;
+      Array.prototype.forEach.call(messagesBox.querySelectorAll(".sc-agent-proposal"), function (node) {
+        if (node.getAttribute("data-proposal-id") === String(p.id)) node.remove();
+      });
+      appendProposal({ id:p.id, summary:p.summary, risk:p.risk, status:"applied", appliedCommitSha:d.commitSha, deploymentStatus:d.deployment || [], files:p.files });
       statusRefresh().catch(function () {});
-      if (d.deployment && d.deployment.length) {
-        appendProposal({ id:p.id, summary:p.summary, risk:p.risk, status:"applied", appliedCommitSha:d.commitSha, deploymentStatus:d.deployment, files:p.files });
-      }
     }).catch(function (e) {
       if (wait && wait.parentNode) wait.remove();
       showError(e.message || "Could not apply patch.");
@@ -324,6 +325,9 @@
     setBusy(true);
     request("reject", { proposalId: p.id }).then(function () {
       message("assistant", "Patch plan বাতিল করা হয়েছে। GitHub source পরিবর্তন করা হয়নি।");
+      Array.prototype.forEach.call(messagesBox.querySelectorAll(".sc-agent-proposal"), function (node) {
+        if (node.getAttribute("data-proposal-id") === String(p.id)) node.remove();
+      });
       activeProposal = null;
     }).catch(function (e) { showError(e.message); }).finally(function () { setBusy(false); });
   }
