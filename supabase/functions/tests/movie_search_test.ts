@@ -20,6 +20,12 @@ Deno.test("movie query parser extracts years and explicit media type", () => {
   nodeAssert.deepEqual(parseMovieQuery("The Bear series"), {
     title: "The Bear", year: null, mediaType: "tv",
   });
+  nodeAssert.deepEqual(parseMovieQuery("The Office TV Series (2005)"), {
+    title: "The Office", year: 2005, mediaType: "tv",
+  });
+  nodeAssert.deepEqual(parseMovieQuery("Breaking Bad S2"), {
+    title: "Breaking Bad", year: null, mediaType: "tv",
+  });
   nodeAssert.equal(parseMovieQuery("Dune (2201)").year, null);
 });
 
