@@ -91,7 +91,7 @@ Deno.test("listing AI adapters parse provider responses and router falls back af
     Deno.env.set("GROQ_API_KEY", "test-groq-key");
     Deno.env.set("OPENROUTER_API_KEY", "test-openrouter-key");
     Deno.env.set("VENICE_API_KEY", "test-venice-key");
-    Deno.env.delete("ENABLE_PAID_FALLBACK");
+    Deno.env.set("ENABLE_PAID_FALLBACK", "true");
 
     globalThis.fetch = async (input: RequestInfo | URL) => {
       const host = urlOf(input).hostname;
