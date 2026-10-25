@@ -129,7 +129,7 @@ While signed into the StreamCloud admin panel, open the browser developer consol
   if (!cfg.url || !cfg.anonKey || !session?.token) {
     throw new Error("Open StreamCloud Admin and sign in first.");
   }
-  const response = await fetch(cfg.url.replace(/\\/+$/, "") + "/functions/v1/admin-detect", {
+  const response = await fetch(cfg.url.replace(/\/+$/, "") + "/functions/v1/admin-detect", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
