@@ -252,9 +252,81 @@ async function planListingAction(prompt:string,threadId:string,intent:any):Promi
  await saveMessage(threadId,"assistant",reply,{proposalId:row.id,risk,proposalType:"listing_action"});await activity("agent.plan.catalogue",summary,{proposalId:row.id,action,section,target});
  return{threadId,reply,proposal:Object.assign(clientProposal(row),{explanation:"This changes only the selected Supabase catalogue listing after you confirm Apply changes."})};
 }
+
+function normalizeSettingChanges(raw:any):any {
+ if(!raw||typeof raw!=="object"||Array.isArray(raw))throw new Error("The AI did not supply valid settings changes.");
+ const out:any={},siteKeys=["title","description","keywords","instagramUrl","themeColor","heroVisible","heroEyebrow","heroTitle","heroDescription","announcementEnabled","announcement","announcementLink","announcementLabel"];
+ const siteMax:Record<string,number>={title:100,description:300,keywords:300,instagramUrl:500,heroEyebrow:80,heroTitle:100,heroDescription:300,announcement:240,announcementLink:500,announcementLabel:36};
+ if(raw.site&&typeof raw.site==="object"){
+  out.site={};for(const k of siteKeys)if(raw.site[k]!==undefined){const v=raw.site[k];
+   if(k==="heroVisible"||k==="announcementEnabled"){if(typeof v!=="boolean")throw new Error(k+" must be true or false.");out.site[k]=v;}
+   else if(k==="themeColor"){if(typeof v!=="string"||!/^#[0-9a-f]{6}$/i.test(v))throw new Error("Theme color must be a hex value such as #141414.");out.site[k]=v;}
+   else if(k==="instagramUrl"||k==="announcementLink"){out.site[k]=v?secureListingUrl(v):"";}
+   else if(typeof v==="string")out.site[k]=v.replace(/[\u0000-\u001f\u007f]/g," ").trim().slice(0,siteMax[k]||300);
+   else throw new Error("Invalid value for site setting "+k+".");
+  }if(!Object.keys(out.site).length)delete out.site;
+ }
+ if(raw.appearance&&typeof raw.appearance==="object"){
+  out.appearance={};const keys=["background","panel","card","text","dim","accent","border","fontFamily","fontSize","imageFit","desktopColumns","tabletColumns","mobileColumns","gap","radius","aspectRatio"];
+  for(const k of keys)if(raw.appearance[k]!==undefined){const v=raw.appearance[k];
+   if(["background","panel","card","text","dim","accent","border"].includes(k)){if(typeof v!=="string"||!/^#[0-9a-f]{6}$/i.test(v))throw new Error(k+" must be a hex color.");out.appearance[k]=v;}
+   else if(k==="fontFamily"){if(typeof v!=="string"||!/^[A-Za-z0-9 ,."'_-]{1,80}$/.test(v))throw new Error("Font family contains unsupported characters.");out.appearance[k]=v;}
+   else if(k==="imageFit"){if(!["contain","cover","fill"].includes(v))throw new Error("Image fit must be contain, cover or fill.");out.appearance[k]=v;}
+   else if(k==="aspectRatio"){if(!["1 / 1","2 / 3","16 / 9","4 / 3"].includes(v))throw new Error("Unsupported card aspect ratio.");out.appearance[k]=v;}
+   else if(["fontSize","desktopColumns","tabletColumns","mobileColumns","gap","radius"].includes(k)){const n=Number(v),limits:Record<string,[number,number]>={fontSize:[12,20],desktopColumns:[1,8],tabletColumns:[1,6],mobileColumns:[1,3],gap:[0,48],radius:[0,32]};if(!Number.isFinite(n)||n<limits[k][0]||n>limits[k][1])throw new Error("Value out of range for "+k+".");out.appearance[k]=n;}
+  }if(!Object.keys(out.appearance).length)delete out.appearance;
+ }
+ if(raw.sections&&typeof raw.sections==="object"){
+  out.sections={};const allowed=["sites","apps","music","gaming","recs"];
+  for(const s of allowed)if(raw.sections[s]!==undefined){const v=raw.sections[s];if(!v||typeof v!=="object"||Array.isArray(v))throw new Error("Invalid section settings.");const next:any={};
+   if(v.visible!==undefined){if(typeof v.visible!=="boolean")throw new Error("Section visibility must be true or false.");next.visible=v.visible;}
+   if(v.title!==undefined){if(typeof v.title!=="string"||!v.title.trim())throw new Error("Section title cannot be empty.");next.title=v.title.trim().slice(0,100);}
+   if(!Object.keys(next).length)throw new Error("No supported setting for section "+s+".");out.sections[s]=next;
+  }
+  if(raw.sections.order!==undefined){const order=raw.sections.order;if(!Array.isArray(order)||order.length!==5||new Set(order).size!==5||order.some((x:any)=>!allowed.includes(x)))throw new Error("Section order must contain sites, apps, music, gaming and recs exactly once.");out.sections.order=order.slice();}
+  if(!Object.keys(out.sections).length)delete out.sections;
+ }
+ if(!Object.keys(out).length)throw new Error("No supported site settings were found in the request.");return out;
+}
+function mergeSettingChanges(current:any,changes:any):any {
+ const next=current&&typeof current==="object"&&!Array.isArray(current)?JSON.parse(JSON.stringify(current)):{};
+ for(const root of ["site","appearance"])if(changes[root])next[root]=Object.assign({},next[root]&&typeof next[root]==="object"?next[root]:{},changes[root]);
+ if(changes.sections){next.sections=next.sections&&typeof next.sections==="object"?next.sections:{};for(const s of ["sites","apps","music","gaming","recs"])if(changes.sections[s])next.sections[s]=Object.assign({},next.sections[s]||{},changes.sections[s]);if(changes.sections.order)next.sections.order=changes.sections.order.slice();}
+ return next;
+}
+function settingSnapshot(current:any,changes:any):any {
+ const out:any={};for(const root of ["site","appearance","sections"])if(changes[root]){out[root]={};
+  if(root==="site"||root==="appearance")for(const k of Object.keys(changes[root]))out[root][k]=current?.[root]?.[k]===undefined?null:current[root][k];
+  else for(const k of Object.keys(changes[root])){if(k==="order")out.sections.order=current?.sections?.order===undefined?null:current.sections.order;else for(const field of Object.keys(changes[root][k]))out.sections[k]=Object.assign({},out.sections[k]||{},{[field]:current?.sections?.[k]?.[field]===undefined?null:current.sections[k][field]});}
+ }return out;
+}
+async function planSiteSettings(prompt:string,threadId:string,intent:any):Promise<any>{
+ const changes=normalizeSettingChanges(intent.settingsChanges||intent.changes);
+ const rows=await db("site_settings?select=id,settings,updated_at&id=eq.global&limit=1"),row=Array.isArray(rows)?rows[0]:null,current=row?.settings&&typeof row.settings==="object"?row.settings:{};
+ const summary=String(intent.summary||"Update StreamCloud site settings").slice(0,800),risk="low";
+ const payload={action:"update_site_settings",summary,changes,before:settingSnapshot(current,changes),baseUpdatedAt:row?.updated_at||null};
+ const inserted=await db("admin_agent_proposals","POST",{thread_id:threadId,prompt,summary,risk,files:[],base_commit_sha:"site-settings-only",proposal_type:"site_settings",action_payload:payload,status:"pending"},"return=representation");
+ const p=Array.isArray(inserted)?inserted[0]:null;if(!p?.id)throw new Error("Could not store the settings preview.");
+ const reply=summary+"\n\nPrepared a reviewable site-settings change. Check the settings preview and press Apply changes to confirm. Nothing has changed yet.";
+ await saveMessage(threadId,"assistant",reply,{proposalId:p.id,risk,proposalType:"site_settings"});await activity("agent.plan.settings",summary,{proposalId:p.id,changes});
+ return{threadId,reply,proposal:Object.assign(clientProposal(p),{explanation:"Only the validated settings shown below will change. Unrelated setting values are preserved."})};
+}
+async function applySiteSettingsProposal(p:any):Promise<any>{
+ const a=p.action_payload||{},rows=await db("site_settings?select=id,settings,updated_at&id=eq.global&limit=1"),row=Array.isArray(rows)?rows[0]:null;
+ if(String(row?.updated_at||"")!==String(a.baseUpdatedAt||"")){await db("admin_agent_proposals?id=eq."+p.id,"PATCH",{status:"stale",error_text:"Site settings changed after preview.",updated_at:new Date().toISOString()},"return=minimal");throw new Error("Site settings changed after the preview. Prepare a new plan.");}
+ const current=row?.settings&&typeof row.settings==="object"?row.settings:{},changes=normalizeSettingChanges(a.changes),next=mergeSettingChanges(current,changes),stamp=new Date().toISOString();
+ const result=row?await db("site_settings?id=eq.global","PATCH",{settings:next,updated_at:stamp},"return=representation"):await db("site_settings","POST",{id:"global",settings:next,updated_at:stamp},"return=representation");
+ if(!Array.isArray(result)||!result.length)throw new Error("Supabase did not confirm the settings update.");
+ const reply="StreamCloud site settings updated in Supabase. Changed groups: "+Object.keys(changes).join(", ")+". Unrelated settings were preserved.";
+ await db("admin_agent_proposals?id=eq."+p.id,"PATCH",{status:"applied",updated_at:new Date().toISOString()},"return=minimal");await activity("agent.settings.apply",String(p.summary||"Update site settings"),{proposalId:p.id,groups:Object.keys(changes)});
+ if(UUID.test(String(p.thread_id||"")))await saveMessage(p.thread_id,"assistant",reply,{proposalId:p.id,action:"update_site_settings"});
+ return{ok:true,reply,proposalId:p.id,settingsUpdated:true};
+}
 async function plan(prompt:string,threadId:string):Promise<any>{
- const classifySystem="Classify the authenticated StreamCloud admin request. Return JSON only: {\"type\":\"listing_action\"|\"code_change\",\"action\":\"create|update|delete|hide|show|move|\",\"section\":\"movie|series|sites|apps|music|\",\"target\":\"exact listing name or empty\",\"summary\":\"short description\",\"fields\":{}}. Choose listing_action only for a clear request to create/edit/delete/hide/show/move a catalogue card in the Supabase listings database. UI/style/backend code, schema/auth, global design or settings requests must be code_change. For listing_action, include only supplied/clearly requested field values. Never invent a URL; create requires the URL literally supplied in the user's request. For update/delete/hide/show/move target must be the exact requested item name. Static public cards may not be in the database; the server will direct those to All Cards.";
- try{const x=parseJSON((await ai(classifySystem,JSON.stringify({request:prompt}),true)).text);if(x&&x.type==="listing_action")return await planListingAction(prompt,threadId,x);}catch(e){if(String((e as Error).message||"").includes("No exact Supabase listing")||String((e as Error).message||"").includes("Provide a valid")||String((e as Error).message||"").includes("HTTPS")||String((e as Error).message||"").includes("exact")||String((e as Error).message||"").includes("category")||String((e as Error).message||"").includes("listing"))throw e;console.warn("[admin-agent] classifier fallback",String(e).slice(0,150));}
+ const system="Classify the authenticated StreamCloud admin request. Return JSON only: {\"type\":\"listing_action|site_settings|code_change\",\"action\":\"create|update|delete|hide|show|move\",\"section\":\"movie|series|sites|apps|music\",\"target\":\"exact listing name\",\"summary\":\"short description\",\"fields\":{},\"settingsChanges\":{}}. Choose listing_action for adding, updating, deleting, hiding, showing or moving a Supabase catalogue listing. Choose site_settings only for global preferences such as site title, hero, announcement, color/font/grid settings, or section order/visibility/title; return those changes using the exact settingsChanges keys. Choose code_change for UI/CSS/HTML/component logic, custom backend code, Supabase functions, authentication/security, database schema or migrations. Never invent URLs or claim a change is applied.";
+ let x:any=null;try{x=parseJSON((await ai(system,JSON.stringify({request:prompt}),true)).text);}catch(e){console.warn("[admin-agent] classifier fallback",String(e).slice(0,150));}
+ if(x&&x.type==="listing_action")return await planListingAction(prompt,threadId,x);
+ if(x&&x.type==="site_settings")return await planSiteSettings(prompt,threadId,x);
  return await planCodeChanges(prompt,threadId);
 }
 
@@ -363,7 +435,7 @@ async function apply(proposalId:string,confirmed:boolean):Promise<any>{
  if(!UUID.test(proposalId))throw new Error("Invalid proposal ID.");
  const records=await db("admin_agent_proposals?select=*&id=eq."+proposalId+"&limit=1"),p=Array.isArray(records)?records[0]:null;
  if(!p)throw new Error("Proposal was not found.");if(p.status!=="pending")throw new Error("This proposal is already "+p.status+".");if(p.risk==="high"&&!confirmed)throw new Error("High-risk change requires explicit confirmation.");
- if(p.proposal_type==="listing_action")return await applyListingProposal(p,confirmed);
+ if(p.proposal_type==="listing_action")return await applyListingProposal(p,confirmed);if(p.proposal_type==="site_settings")return await applySiteSettingsProposal(p);
  const meta=await gh(""),branch=env("GITHUB_BRANCH")||String(meta.default_branch||"main"),base=await headSha(branch);
  if(base!==p.base_commit_sha){await db("admin_agent_proposals?id=eq."+proposalId,"PATCH",{status:"stale",error_text:"Branch changed after plan.",updated_at:new Date().toISOString()},"return=minimal");throw new Error("GitHub changed after the preview. Prepare the patch again against latest main.");}
  const tree=await getTree(base),exists=new Set(tree.filter(x=>x.type==="blob").map(x=>String(x.path))),contents=new Map<string,string>();
