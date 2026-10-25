@@ -348,78 +348,70 @@ try {
   await page.locator("#wlModal .wl-x").click();
   await page.waitForFunction(() => document.getElementById("wlModal")?.classList.contains("open") !== true);
 
-  // Exercise the admin dashboard using a mocked backend so tests never change production data.
+  // Exercise the simplified StreamCloud admin workspaces using a mocked backend.
   await page.locator("#adminIcon").click();
   await page.locator('input[aria-label="Admin PIN"]').fill("smoke-pin");
   await page.getByRole("button", { name: "Unlock" }).click();
-  await page.getByText("Recent admin activity").waitFor({ timeout: 8000 });
+  await page.getByRole("button", { name: "Find verified metadata" }).waitFor({ timeout: 8000 });
   await page.locator(".ux-l1 .ux-c").first().waitFor({ timeout: 5000 });
-  assert.ok(await page.locator(".ux-l1 .ux-c").count() >= 4, "Admin v4 should group features into category navigation");
-  assert.ok(await page.locator(".ux-l2 .ux-s").count() > 0, "Admin v4 should show sub-category navigation");
-  assert.doesNotMatch(await page.locator(".scx-ov").innerText(), /\bAI\b|Gemini|GroqCloud|OpenAI GPT/i, "Admin UI should not show AI/provider branding");
-  const themeToggle = page.locator(".ux-themebtn");
-  await themeToggle.waitFor({ timeout: 5000 });
-  const themeBefore = await themeToggle.getAttribute("aria-label");
-  await themeToggle.click();
-  assert.notEqual(await themeToggle.getAttribute("aria-label"), themeBefore, "Admin theme switch should toggle between dark and light");
-  assert.ok(mockState.calls.some((x) => x.action === "overview"), "Admin overview API should be called after PIN login");
+  assert.ok(await page.locator(".ux-l1 .ux-c").count() >= 4, "Admin should expose the four simplified workspaces");
+  assert.ok(await page.locator(".ux-l1 .ux-c").filter({ hasText: "Movies & Series" }).count() === 1, "Movie/series lookup should have a dedicated workspace");
+  assert.ok(await page.locator(".ux-l1 .ux-c").filter({ hasText: "All Cards" }).count() === 1, "All Cards should be a dedicated workspace");
+  assert.ok(await page.locator(".ux-l1 .ux-c").filter({ hasText: "StreamCloud AI" }).count() === 1, "AI chatbot should be a dedicated workspace");
+  assert.doesNotMatch(await page.locator(".scx-ov").innerText(), /Gemini|GroqCloud|OpenAI GPT|Anthropic|DeepSeek|OpenRouter|Cloudflare Workers AI/i, "Admin UI should not expose AI-provider branding");
+  assert.equal(await page.locator(".ux-themebtn").isVisible().catch(() => false), false, "The admin workspace should keep its StreamCloud dark styling without a theme toggle");
 
-  await clickAdminFeature(page, "Title Tools", "Title lookup");
-  assert.equal(await page.locator('select[aria-label*="provider" i]').count(), 0, "Title lookup should not expose AI-provider selectors");
-  assert.equal(await page.getByText(/AI provider|GroqCloud|Gemini AI|OpenAI GPT/i).count(), 0, "Title lookup should not reveal provider names");
+  await clickAdminFeature(page, "Movies & Series", "Movies & Series");
   await page.getByLabel("Movie / web-series title").fill("Example Film");
   await page.locator('.scx-grid input[type="number"]').fill("2024");
-
   await page.getByRole("button", { name: "Find verified metadata" }).click();
   await page.getByText("Verified test synopsis.").waitFor({ timeout: 8000 });
-  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.title === "Example Film"), "Title lookup should request metadata through the admin-detect endpoint");
-  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.aiProvider === "auto"), "Title lookup should delegate routing to the server");
+  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.title === "Example Film"), "Movies & Series should use the server-side verified metadata lookup");
+  assert.ok(mockState.calls.some((x) => x.mode === "title-lookup" && x.aiProvider === "auto"), "Movie/series lookup should keep provider routing server-side");
   await page.getByRole("button", { name: "Use this title in Add item" }).click();
-  assert.ok(await page.locator("input.scx-in").evaluateAll((els) => els.some((el) => el.value === "Example Film")), "AI Studio metadata should transfer into Add item for review");
-  assert.equal(await page.locator('select[aria-label*="provider" i]').count(), 0, "Add item should not expose AI-provider selectors");
-  assert.equal(await page.getByText(/Detect with AI|AI provider|GroqCloud|Gemini AI|OpenAI GPT/i).count(), 0, "Add item should not reveal AI/provider details");
-  await page.getByRole("button", { name: "Detect details" }).click();
-  await page.waitForFunction(() => Array.from(document.querySelectorAll("input.scx-in")).some((el) => el.value === "Detected by OpenAI"));
-  assert.ok(mockState.calls.some((x) => x.url && x.aiProvider === "auto"), "Add item should use server-side routing");
-
-  await clickAdminFeature(page, "Catalogue", "Content");
-  await page.getByText("Smoke test listing").waitFor({ timeout: 8000 });
-  await page.locator(".ux-l2 .ux-s").filter({ hasText: "Content" }).waitFor({ timeout: 5000 });
-  assert.equal(await page.getByRole("button", { name: "Delete selected", exact: true }).count(), 1, "Content should show only one shared delete action");
-  assert.equal(await page.getByRole("button", { name: "Delete", exact: true }).count(), 0, "Listing rows should not duplicate the shared delete action");
-  assert.equal(await page.getByRole("button", { name: "Hide", exact: true }).count(), 1, "Visibility should use the shared bulk action instead of per-row duplicates");
-  assert.equal(await page.locator(".scx-item .scx-actions button").count(), 1, "Each listing row should keep only its Edit action");
-  await page.locator('input[data-listing-id="' + mockListingId + '"]').check();
-  await page.getByRole("button", { name: "Hide", exact: true }).click();
-  await page.getByText("Bulk action saved.").waitFor({ timeout: 8000 });
-  assert.ok(mockState.calls.some((x) => x.action === "bulk" && x.operation === "hide" && x.ids.includes(mockListingId)), "Bulk hide should use the protected admin API");
-  assert.equal(mockState.listings[0].published, false, "Bulk hide should persist the visibility change");
-  await page.locator('input[data-listing-id="' + mockListingId + '"]').check();
-  page.once("dialog", (dialog) => dialog.accept());
-  await page.getByRole("button", { name: "Delete selected", exact: true }).click();
-  await page.waitForFunction((id) => !Array.from(document.querySelectorAll("input[data-listing-id]")).some((el) => el.dataset.listingId === id), mockListingId, { timeout: 8000 });
-  assert.ok(mockState.calls.some((x) => x.action === "bulk" && x.operation === "delete" && x.ids.includes(mockListingId)), "The shared delete button should delete one selected listing");
-  assert.equal(mockState.listings.some((x) => x.id === mockListingId), false, "Bulk delete should remove the selected listing");
-
-  await clickAdminFeature(page, "Site Design", "Cards & Layout");
+  assert.ok(await page.locator("input.scx-in").evaluateAll((els) => els.some((el) => el.value === "Example Film")), "Verified movie metadata should transfer to the add form for review");
+  assert.equal(await page.locator('select[aria-label*="provider" i]').count(), 0, "Title lookup should not expose provider selectors");
+  
+  await clickAdminFeature(page, "All Cards", "All Cards");
   await page.getByText("Edit and arrange cards").waitFor({ timeout: 8000 });
-  await page.getByRole("button", { name: "Save section and grid settings" }).waitFor({ timeout: 8000 });
+  await page.locator('select[aria-label="Card category"]').selectOption("sites");
+  await page.locator('select[aria-label="Select card"] option').filter({ hasText: "Smoke test listing" }).waitFor({ timeout: 8000 });
+  await page.locator('select[aria-label="Select card"]').selectOption({ label: /Smoke test listing/ });
+  const descField = page.locator('textarea.scx-in').first();
+  await descField.fill("Updated by All Cards smoke test");
   await page.getByRole("button", { name: "Save card changes", exact: true }).click();
   await page.getByText("Saved to the database. Changes apply to visitors after the page refreshes.").waitFor({ timeout: 8000 });
-  assert.ok(mockState.calls.some((x) => x.action === "settings-save" && x.settings?.content?.overrides), "Card field editing should persist through the settings API");
-  await clickAdminFeature(page, "Site Design", "Appearance");
-  await page.locator('.scx-in[type="color"]').first().waitFor({ timeout: 8000 });
-  await clickAdminFeature(page, "Site Design", "Site settings");
-  await page.getByLabel("Show announcement to visitors").check();
-  await page.getByLabel("Announcement message").fill("Smoke-test announcement");
-  await page.getByRole("button", { name: "Save site controls" }).click();
+  const siteKey = "db:" + mockListingId;
+  assert.equal(mockState.settings.content.overrides[siteKey].description, "Updated by All Cards smoke test", "All Cards should persist catalog card edits through Supabase site settings");
+  let smokeCard = page.locator(".scx-order-row").filter({ hasText: "Smoke test listing" });
+  await smokeCard.getByRole("button", { name: "Hide", exact: true }).click();
   await page.getByText("Saved to the database. Changes apply to visitors after the page refreshes.").waitFor({ timeout: 8000 });
-  assert.equal(mockState.settings.site.announcement, "Smoke-test announcement", "Site settings should persist announcement content");
-  assert.equal(mockState.settings.site.announcementEnabled, true, "Site settings should persist announcement visibility");
-  assert.equal(await page.locator("#streamcloud-announcement").textContent().then((t) => t.includes("Smoke-test announcement")), true, "Announcement should render on the public page after saving");
-  await clickAdminFeature(page, "Security & Data", "Log out");
-  await page.locator('input[aria-label="Admin PIN"]').waitFor({ timeout: 8000 });
-  assert.ok(mockState.calls.some((x) => x.action === "logout"), "Admin logout should revoke the current session");
+  assert.ok(mockState.settings.content.hidden.includes(siteKey), "All Cards should be able to hide a card");
+  smokeCard = page.locator(".scx-order-row").filter({ hasText: "Smoke test listing" });
+  page.once("dialog", (dialog) => dialog.accept());
+  await smokeCard.getByRole("button", { name: "Delete", exact: true }).click();
+  await page.getByText("Saved to the database. Changes apply to visitors after the page refreshes.").waitFor({ timeout: 8000 });
+  assert.ok(mockState.settings.content.deleted.includes(siteKey), "All Cards should be able to remove a card from the public catalog");
+
+  await clickAdminFeature(page, "StreamCloud AI", "StreamCloud AI");
+  await page.locator(".sc-agent-compose textarea").waitFor({ timeout: 8000 });
+  await page.getByRole("button", { name: "Refresh status" }).click();
+  await page.getByText("AI ready").waitFor({ timeout: 8000 });
+  const task = "Add an app called AI smoke app in Movie Apps with URL https://example.com/ai-smoke";
+  await page.locator(".sc-agent-compose textarea").fill(task);
+  await page.getByRole("button", { name: "Plan changes" }).click();
+  await page.getByText("CATALOG ACTION", { exact: false }).waitFor({ timeout: 8000 });
+  assert.ok(mockState.agentCalls.some((x) => x.action === "plan" && x.message === task), "AI should prepare a reviewable catalogue action");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Apply changes", exact: true }).click();
+  await page.getByText(/Catalogue change completed: CREATE/, { timeout: 8000 }).waitFor();
+  assert.ok(mockState.agentCalls.some((x) => x.action === "apply"), "Catalogue write actions must require the Apply confirmation");
+  assert.ok(mockState.listings.some((x) => x.name === "AI smoke app"), "The AI Apply action should update the mocked catalogue");
+
+  await page.locator(".ux-l1 .ux-c").filter({ hasText: "Log out" }).click();
+  await page.waitForFunction(() => document.querySelector(".scx-ov")?.hidden === true, { timeout: 8000 });
+  assert.equal(await page.evaluate(() => sessionStorage.getItem("streamcloud-admin-session")), null, "Leaving the admin panel should immediately clear the local admin session");
+  assert.ok(mockState.calls.some((x) => x.action === "logout"), "Admin exit should request server-side session revocation");
 
   await context.close();
 
