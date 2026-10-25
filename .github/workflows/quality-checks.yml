@@ -27,6 +27,14 @@ jobs:
       - name: Validate JavaScript, JSON, and local assets
         run: npm run lint
 
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Test Supabase Edge Function providers and fallback
+        run: deno test --allow-env tests
+        working-directory: supabase/functions
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
