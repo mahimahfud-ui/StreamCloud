@@ -285,7 +285,7 @@
     if (notice) say(msg, notice.kind, notice.text);
     if (tab === "layout") showLayout(msg);
     else if (tab === "ai") showAiStudio(msg);
-    else if (tab === "add") { resetAdd(); showAdd(msg); }
+    else if (tab === "add") showAdd(msg);
     else if (tab === "manage") showManage(msg);
     else if (tab === "appearance") showAppearance(msg);
     else if (tab === "site") showSiteSettings(msg);
