@@ -130,7 +130,7 @@ export function scoreMovieCandidate(candidate: {
   const candidateYear = validYear(candidate.year);
   if (requestedYear !== null) {
     if (candidateYear === requestedYear) score += 15;
-    else if (candidateYear !== null) score -= 28;
+    else if (candidateYear !== null) score -= 40;
     else score -= 5;
   }
   return Math.max(0, Math.min(115, Math.round(score)));
