@@ -44,7 +44,7 @@ export async function askCloudflare(page: PageInfo, section: string): Promise<Li
   }
   const model = (Deno.env.get("CLOUDFLARE_MODEL") ?? "@cf/meta/llama-3.1-8b-instruct").trim() || "@cf/meta/llama-3.1-8b-instruct";
   if (!/^[@A-Za-z0-9._/-]+$/.test(model) || model.includes("..")) throw new Error("CLOUDFLARE_MODEL contains invalid characters.");
-  const modelPath = model.split("/").map((part) => encodeURIComponent(part)).join("/");
+  const modelPath = model.split("/").map((part) => encodeURIComponent(part).replace(/%40/gi, "@")).join("/");
   const url = "https://api.cloudflare.com/client/v4/accounts/" + encodeURIComponent(accountId) + "/ai/run/" + modelPath;
   let response: Response;
   try {
