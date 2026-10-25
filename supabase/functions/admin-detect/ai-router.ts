@@ -4,8 +4,12 @@ import { askGroq } from "./groq.ts";
 import { askOpenAI } from "./openai.ts";
 import { askOpenRouter } from "./openrouter.ts";
 import { askDeepSeek } from "./deepseek.ts";
+import { askAnthropic } from "./anthropic.ts";
+import { askVenice } from "./venice.ts";
+import { askCloudflare, cloudflareCredentials, isCloudflareConfigured } from "./cloudflare.ts";
+import { askShannon } from "./shannon.ts";
 
-type Provider = "gemini" | "groq" | "openrouter" | "deepseek" | "openai";
+type Provider = "gemini" | "groq" | "openrouter" | "deepseek" | "openai" | "anthropic" | "venice" | "cloudflare" | "shannon";
 type Task = "metadata" | "summary";
 type AIResult = {
   name: string | null;
@@ -23,18 +27,29 @@ const ENV_KEY: Record<Provider, string> = {
   openrouter: "OPENROUTER_API_KEY",
   deepseek: "DEEPSEEK_API_KEY",
   openai: "OPENAI_API_KEY",
+  anthropic: "ANTHROPIC_API_KEY",
+  venice: "VENICE_API_KEY",
+  cloudflare: "CLOUDFLARE_API_TOKEN",
+  shannon: "SHANNON_API_KEY",
 };
 
-// Short-lived, per-isolate health memory prevents repeated attempts against a
-// provider that just rejected its key, hit a quota, or returned a transient error.
-// This is only an optimization: every new isolate rechecks providers.
+// Short-lived per-isolate health memory reduces repeated requests to a provider
+// that just rejected its key, hit a quota, or returned a transient error.
+// Every new isolate rechecks providers.
 const providerCooldownUntil = new Map<Provider, number>();
 
 function providerKey(provider: Provider): string {
-  const value = provider === "deepseek"
-    ? (Deno.env.get("DEEPSEEK_API_KEY") || Deno.env.get("DeepSeek"))
-    : Deno.env.get(ENV_KEY[provider]);
-  return (value ?? "").trim();
+  if (provider === "deepseek") return (Deno.env.get("DEEPSEEK_API_KEY") || Deno.env.get("DeepSeek") || "").trim();
+  if (provider === "venice") {
+    return (Deno.env.get("VENICE_API_KEY") || Deno.env.get("VENICEAI_API_KEY") ||
+      Deno.env.get("VENICE") || Deno.env.get("Venice AI") || "").trim();
+  }
+  if (provider === "cloudflare") return cloudflareCredentials().token;
+  if (provider === "shannon") {
+    return (Deno.env.get("SHANNON_API_KEY") || Deno.env.get("SHANNONAI_API_KEY") ||
+      Deno.env.get("SHANNON_AI_API_KEY") || Deno.env.get("Shannon AI") || "").trim();
+  }
+  return (Deno.env.get(ENV_KEY[provider]) ?? "").trim();
 }
 
 function paidFallbackEnabled(): boolean {
@@ -44,8 +59,9 @@ function paidFallbackEnabled(): boolean {
 function isConfigured(provider: Provider): boolean {
   const key = providerKey(provider);
   if (!key || key === "এপিয়াই" || /^YOUR_.+_KEY$/i.test(key)) return false;
-  // Keep potentially billable providers out of automatic fallback unless explicitly enabled.
-  if ((provider === "deepseek" || provider === "openai") && !paidFallbackEnabled()) return false;
+  // Do not silently spend on providers traditionally requiring paid API billing.
+  if ((provider === "deepseek" || provider === "openai" || provider === "anthropic") && !paidFallbackEnabled()) return false;
+  if (provider === "cloudflare" && !isCloudflareConfigured()) return false;
   return (providerCooldownUntil.get(provider) ?? 0) <= Date.now();
 }
 
@@ -77,24 +93,23 @@ function useful(result: AIResult | null, task: Task): result is AIResult {
 }
 
 function orderFor(section: string, task: Task): Provider[] {
-  // Use Gemini for summaries; its response is then checked for a usable description.
+  // Prefer Gemini for synopsis work; all configured fallbacks remain available.
   if (task === "summary") {
-    return ["gemini", "groq", "openrouter", "deepseek", "openai"];
+    return ["gemini", "groq", "openrouter", "cloudflare", "venice", "shannon", "anthropic", "deepseek", "openai"];
   }
-  // Groq's strict JSON-schema support is a good first choice for metadata extraction.
+  // Keep the existing fast/free providers first, then continue across every configured adapter.
   if (section === "movie" || section === "series") {
-    return ["groq", "gemini", "openrouter", "deepseek", "openai"];
+    return ["groq", "gemini", "openrouter", "cloudflare", "venice", "shannon", "anthropic", "deepseek", "openai"];
   }
-  // Website/app/music extraction uses Groq first. OpenRouter can choose a free,
-  // feature-compatible model dynamically; paid OpenAI remains the final fallback.
   if (section === "music" || section === "apps" || section === "sites") {
-    return ["groq", "openrouter", "deepseek", "gemini", "openai"];
+    return ["groq", "openrouter", "cloudflare", "venice", "shannon", "gemini", "anthropic", "deepseek", "openai"];
   }
-  return ["groq", "gemini", "openrouter", "deepseek", "openai"];
+  return ["groq", "gemini", "openrouter", "cloudflare", "venice", "shannon", "anthropic", "deepseek", "openai"];
 }
+
 function shortError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error ?? "unknown error");
-  return message.replace(/[\r\n]+/g, " ").slice(0, 180);
+  return message.replace(/[\r\n]+/g, " ").replace(/Bearer\s+\S+/gi, "Bearer [redacted]").slice(0, 180);
 }
 
 export async function askAutoAI(
@@ -104,16 +119,22 @@ export async function askAutoAI(
 ): Promise<{ result: AIResult | null; provider: Provider | null; note: string }> {
   const order = orderFor(section, task);
   const failures: string[] = [];
+  let configuredCount = 0;
 
   for (const provider of order) {
     if (!isConfigured(provider)) continue;
+    configuredCount++;
     try {
       let result: AIResult | null;
       if (provider === "gemini") result = await askGemini(page, section);
       else if (provider === "groq") result = await askGroq(page, section);
       else if (provider === "openrouter") result = await askOpenRouter(page, section);
       else if (provider === "deepseek") result = await askDeepSeek(page, section);
-      else result = await askOpenAI(page, section);
+      else if (provider === "openai") result = await askOpenAI(page, section);
+      else if (provider === "anthropic") result = await askAnthropic(page, section);
+      else if (provider === "venice") result = await askVenice(page, section);
+      else if (provider === "cloudflare") result = await askCloudflare(page, section);
+      else result = await askShannon(page, section);
 
       if (!useful(result, task)) {
         const error = new Error("Provider returned no usable structured result.");
@@ -123,8 +144,7 @@ export async function askAutoAI(
       }
 
       rememberProviderSuccess(provider);
-      const note = "Details processed successfully using " + provider + ".";
-      return { result, provider, note };
+      return { result, provider, note: "Details processed successfully using " + provider + "." };
     } catch (error) {
       const detail = shortError(error);
       failures.push(provider + ": " + detail);
@@ -134,9 +154,17 @@ export async function askAutoAI(
     }
   }
 
+  if (!configuredCount) {
+    return {
+      result: null,
+      provider: null,
+      note: "No eligible AI provider is configured for this task. Check the provider secrets and enable ENABLE_PAID_FALLBACK only if paid-provider fallback is intended.",
+    };
+  }
   return {
     result: null,
     provider: null,
-    note: "Some details could not be filled automatically. Available source metadata has been kept; please review the fields before saving.",
+    note: "Configured AI providers could not return usable listing details (" + failures.join("; ").slice(0, 800) +
+      "). Available source metadata has been kept; please review the fields before saving.",
   };
 }
