@@ -109,7 +109,7 @@ The Admin Listing detector uses server-side Supabase Edge Function secrets only.
 
 Cloudflare also accepts the legacy `Cloudflare` secret when it contains a JSON object with token and account ID fields. If only that legacy secret is used, keep its token and account ID server-side.
 
-The optional `ENABLE_PAID_FALLBACK=true` setting enables automatic Anthropic, DeepSeek, and OpenAI fallback. It is off by default to avoid unexpected paid API usage. Without it, configured non-gated providers are still attempted in sequence, and a failing provider does not stop the remaining eligible providers from being tried.
+The optional `ENABLE_PAID_FALLBACK=true` setting enables automatic Cloudflare Workers AI, Venice, Shannon AI, Anthropic, DeepSeek, and OpenAI fallback. It is off by default to avoid unexpected usage-based or paid API calls. Without it, Gemini, Groq, and OpenRouter are attempted in a free-first sequence (subject to each account plan and quota), and a failing provider does not stop the remaining eligible providers from being tried.
 
 Default model choices are deliberately overridable with the model secrets above. Confirm model access and account quota for each provider in its own dashboard; a secret's presence does not prove that the key is valid or has usable quota.
 
