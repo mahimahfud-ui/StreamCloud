@@ -62,9 +62,9 @@ export function parseMovieQuery(value: unknown, yearOverride?: unknown, mediaOve
       title = title.slice(0, suffix.index).trim().replace(/[([]\s*$/, "").trim();
     }
   }
-  const endType = title.match(/\s+(web\s*series|tv\s*show|series|movie|film|s\d{1,2})$/i);
+  const endType = title.match(/\s+(tv\s*series|web\s*series|tv\s*show|series|movie|film|s\d{1,2})$/i);
   if (endType) {
-    mediaType = /web\s*series|series|tv\s*show|^s\d{1,2}$/i.test(endType[1]) ? "tv" : "movie";
+    mediaType = /web\s*series|tv\s*(?:series|show)|series|^s\d{1,2}$/i.test(endType[1]) ? "tv" : "movie";
     title = title.slice(0, endType.index).trim();
   }
   if (mediaOverride === "movie" || mediaOverride === "tv") mediaType = mediaOverride;
