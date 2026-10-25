@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { isAmbiguousMovieMatch, parseMovieQuery, rankMovieCandidates, scoreMovieCandidate, type SearchMediaType } from "./search-utils.ts";
 
 const allowedOrigins = new Set([
   "https://mahimahfud-ui.github.io",
@@ -27,30 +28,6 @@ function allowed(req: Request): boolean {
 }
 function clean(value: unknown, max: number) {
   return typeof value === "string" ? value.trim().replace(/[\u0000-\u001f]/g, "").slice(0, max) : "";
-}
-function normalizeTitle(value: unknown): string {
-  return clean(value, 200).toLocaleLowerCase().normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim().replace(/\s+/g, " ");
-}
-function titleMatchScore(candidate: unknown, query: string): number {
-  const title = normalizeTitle(candidate);
-  const q = normalizeTitle(query);
-  if (!title || !q) return 0;
-  if (title === q) return 100;
-  if (title.startsWith(q + " ") || q.startsWith(title + " ")) return 75;
-  const qt = q.split(" ").filter(Boolean);
-  const tt = new Set(title.split(" ").filter(Boolean));
-  const overlap = qt.filter(token => tt.has(token)).length / Math.max(qt.length, 1);
-  return Math.round(overlap * 50);
-}
-function titleOf(item: any, mediaType: "movie" | "tv") {
-  return mediaType === "tv" ? String(item.name || "") : String(item.title || "");
-}
-function dateOf(item: any, mediaType: "movie" | "tv") {
-  return mediaType === "tv" ? item.first_air_date : item.release_date;
 }
 async function tmdb(path: string, key: string) {
   const url = new URL("https://api.themoviedb.org/3/" + path);
@@ -81,63 +58,109 @@ function providerSearchOptions(query: string) {
     verified: false,
   }));
 }
-async function fallbackLookup(query: string, region: string) {
+async function fallbackLookup(
+  query: string,
+  region: string,
+  year: number | null = null,
+  mediaType: SearchMediaType | null = null,
+) {
   const encoded = encodeURIComponent(query);
-  let selected: any = null;
-  let mediaType: "movie" | "tv" = "tv";
-  let poster: string | null = null;
-  let year = "";
-  let overview = "";
-  // TVmaze is a no-key catalog for TV series and provides poster art.
-  try {
-    const tv = await getJson("https://api.tvmaze.com/search/shows?q=" + encoded);
-    if (Array.isArray(tv) && tv.length) {
-      const ranked = tv.map((entry: any) => ({ entry, score: titleMatchScore(entry.show?.name, query) }))
-        .sort((a: any, b: any) => b.score - a.score);
-      const best = ranked[0];
-      const entry = best && best.score >= 50 ? best.entry : null;
-      if (entry?.show) {
-        selected = entry.show;
-        mediaType = "tv";
-        poster = selected.image?.original || selected.image?.medium || null;
-        year = String(selected.premiered || "").slice(0, 4);
-        overview = clean(String(selected.summary || "").replace(/<[^>]*>/g, " "), 500);
-      }
-    }
-  } catch (e) { console.warn("[movie-availability] TVmaze fallback:", e instanceof Error ? e.message : "failed"); }
-  // Apple's public Search API is used as a no-key movie metadata/poster fallback.
-  if (!selected) {
-    try {
-      const apple = await getJson("https://itunes.apple.com/search?term=" + encoded + "&media=movie&entity=movie&limit=10&country=" + (region.toLowerCase() === "bd" ? "us" : region.toLowerCase()));
-      const results = Array.isArray(apple.results) ? apple.results : [];
-      const ranked = results.map((item: any) => ({ item, score: titleMatchScore(item.trackName, query) }))
-        .sort((a: any, b: any) => b.score - a.score);
-      const best = ranked[0];
-      const item = best && best.score >= 50 ? best.item : null;
-      if (item) {
-        selected = item;
-        mediaType = "movie";
-        poster = typeof item.artworkUrl100 === "string" ? item.artworkUrl100.replace("100x100bb", "600x900bb") : null;
-        year = String(item.releaseDate || "").slice(0, 4);
-        overview = clean(item.longDescription || item.shortDescription || "", 500);
-      }
-    } catch (e) { console.warn("[movie-availability] Apple fallback:", e instanceof Error ? e.message : "failed"); }
-  }
-  const options = providerSearchOptions(query);
-  const title = selected ? clean(mediaType === "tv" ? selected.name : selected.trackName, 160) : query;
   const justWatchRegion = region.toLowerCase() === "gb" ? "uk" : region.toLowerCase();
   const watchLink = "https://www.justwatch.com/" + justWatchRegion + "/search?q=" + encoded;
+  const options = providerSearchOptions(query);
+  const lookups: Array<Promise<unknown>> = [];
+  const labels: Array<"tv" | "movie"> = [];
+  if (mediaType !== "movie") {
+    labels.push("tv");
+    lookups.push(getJson("https://api.tvmaze.com/search/shows?q=" + encoded));
+  }
+  if (mediaType !== "tv") {
+    labels.push("movie");
+    const country = region.toLowerCase();
+    lookups.push((async () => {
+      let result = await getJson("https://itunes.apple.com/search?term=" + encoded + "&media=movie&entity=movie&limit=10&country=" + country);
+      if ((!Array.isArray((result as Record<string, unknown>).results) ||
+        ((result as Record<string, unknown>).results as unknown[]).length === 0) && country !== "us") {
+        result = await getJson("https://itunes.apple.com/search?term=" + encoded + "&media=movie&entity=movie&limit=10&country=us");
+      }
+      return result;
+    })());
+  }
+
+  const settled = await Promise.allSettled(lookups);
+  const candidates: Array<{
+    type: "tv" | "movie";
+    item: any;
+    title: string;
+    year: string;
+    overview: string;
+    poster: string | null;
+    score: number;
+    popularity: number;
+  }> = [];
+  settled.forEach((result, index) => {
+    const type = labels[index];
+    if (result.status !== "fulfilled") {
+      console.warn("[movie-availability] fallback catalog unavailable:", type);
+      return;
+    }
+    const payload = result.value as Record<string, unknown>;
+    if (type === "tv") {
+      const entries = Array.isArray(result.value) ? result.value as Array<Record<string, any>> : [];
+      entries.forEach((entry) => {
+        const show = entry?.show;
+        if (!show) return;
+        const title = clean(show.name, 160);
+        const foundYear = String(show.premiered || "").slice(0, 4);
+        const score = scoreMovieCandidate({ title, originalTitle: show.name, year: foundYear }, query, year);
+        candidates.push({
+          type, item: show, title, year: foundYear,
+          overview: clean(String(show.summary || "").replace(/<[^>]*>/g, " "), 500),
+          poster: show.image?.original || show.image?.medium || null,
+          score, popularity: Number(show.rating?.average || 0),
+        });
+      });
+    } else {
+      const results = Array.isArray(payload.results) ? payload.results as Array<Record<string, any>> : [];
+      results.forEach((item) => {
+        const title = clean(item.trackName, 160);
+        const foundYear = String(item.releaseDate || "").slice(0, 4);
+        const score = scoreMovieCandidate({ title, originalTitle: item.trackCensoredName, year: foundYear }, query, year);
+        candidates.push({
+          type, item, title, year: foundYear,
+          overview: clean(item.longDescription || item.shortDescription || "", 500),
+          poster: typeof item.artworkUrl100 === "string" ? item.artworkUrl100.replace(/100x100bb/i, "600x900bb") : null,
+          score, popularity: Number(item.trackCount || 0),
+        });
+      });
+    }
+  });
+
+  candidates.sort((a, b) => b.score - a.score || b.popularity - a.popularity);
+  const selected = candidates.find((candidate) => candidate.score >= 68);
+  if (!selected) {
+    return {
+      found: true,
+      mediaType: mediaType || "unknown",
+      movie: { id: null, title: query, year: year ? String(year) : "", overview: "", poster: null },
+      region, options, watchLink, message: "No close catalog match was found. Official provider searches are available; availability is not independently verified.",
+      source: "official-provider-search", verifiedAvailability: false,
+    };
+  }
   return {
     found: true,
-    mediaType,
-    movie: { id: selected?.id ?? selected?.trackId ?? null, title, year, overview, poster },
-    region,
-    options,
-    watchLink,
-    message: selected
-      ? "Metadata and thumbnail supplied by a public catalog. Provider links open official service searches; availability is not independently verified."
-      : "No catalog match was found. Provider links open official service searches; availability is not independently verified.",
-    source: selected ? (mediaType === "tv" ? "TVmaze" : "Apple Search API") : "official-provider-search",
+    mediaType: selected.type,
+    movie: {
+      id: selected.item?.id ?? selected.item?.trackId ?? null,
+      title: selected.title,
+      year: selected.year || (year ? String(year) : ""),
+      overview: selected.overview,
+      poster: selected.poster,
+    },
+    region, options, watchLink,
+    message: "Fallback metadata came from " + (selected.type === "tv" ? "TVmaze" : "Apple Search API") +
+      ". Official provider links open external search pages; title availability is not independently verified.",
+    source: selected.type === "tv" ? "TVmaze" : "Apple Search API",
     verifiedAvailability: false,
   };
 }
@@ -149,10 +172,24 @@ serve(async (req) => {
   if (!allowed(req)) return json({ error: "Too many searches. Please wait a minute and try again." }, 429, origin);
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON body." }, 400, origin); }
-  const query = clean(body.title, 120);
+  const rawQuery = clean(body.title, 200);
+  const parsed = parseMovieQuery(rawQuery, body.year, body.mediaType);
+  const query = parsed.title;
+  const year = parsed.year;
+  const mediaType = parsed.mediaType;
   const region = clean(body.region, 2).toUpperCase() || "BD";
   if (query.length < 2) return json({ error: "Enter at least two characters for the title." }, 422, origin);
+  if (body.year !== undefined && body.year !== null && body.year !== "" && year === null) {
+    return json({ error: "Release year must be between 1870 and 2100." }, 422, origin);
+  }
   if (!/^[A-Z]{2}$/.test(region)) return json({ error: "Invalid region code." }, 422, origin);
+  const selectedId = body.selectedId === undefined || body.selectedId === null || body.selectedId === ""
+    ? null
+    : Number(body.selectedId);
+  const selectedType = body.selectedType === "movie" || body.selectedType === "tv" ? body.selectedType : null;
+  if (selectedId !== null && (!Number.isSafeInteger(selectedId) || selectedId <= 0 || !selectedType)) {
+    return json({ error: "Invalid selected movie/series candidate." }, 400, origin);
+  }
 
   const key = Deno.env.get("TMDB_API_KEY")?.trim();
   // Do not fail just because TMDB isn't configured: use public no-key catalogs and official provider search links.
@@ -167,48 +204,142 @@ serve(async (req) => {
     }
   }
   try {
-    const encoded = encodeURIComponent(query);
-    const [movieSearch, tvSearch] = await Promise.all([
-      tmdb("search/movie?query=" + encoded + "&include_adult=false&language=en-US&page=1", key),
-      tmdb("search/tv?query=" + encoded + "&include_adult=false&language=en-US&page=1", key),
-    ]);
-    const candidates = [
-      ...(Array.isArray(movieSearch.results) ? movieSearch.results.map((item: any) => ({ item, mediaType: "movie" as const })) : []),
-      ...(Array.isArray(tvSearch.results) ? tvSearch.results.map((item: any) => ({ item, mediaType: "tv" as const })) : []),
-    ];
-    if (!candidates.length) return json({ found: false, query, message: "No matching movie or series was found." }, 200, origin);
-    candidates.sort((a, b) => {
-      const scoreA = titleMatchScore(titleOf(a.item, a.mediaType), query);
-      const scoreB = titleMatchScore(titleOf(b.item, b.mediaType), query);
-      return scoreB - scoreA || Number(b.item.popularity || 0) - Number(a.item.popularity || 0);
-    });
-    const selected = candidates[0];
-    if (titleMatchScore(titleOf(selected.item, selected.mediaType), query) < 50) {
-      return json({ found: false, query, message: "No sufficiently close title match was found. Try the full official title or include the release year." }, 200, origin);
+    let selected: {
+      item: Record<string, any>;
+      mediaType: SearchMediaType;
+      score: number;
+    } | null = null;
+
+    if (selectedId !== null && selectedType) {
+      const item = await tmdb(selectedType + "/" + selectedId, key);
+      const selectedTitle = selectedType === "tv" ? item.name : item.title;
+      const selectedYear = String(selectedType === "tv" ? item.first_air_date || "" : item.release_date || "").slice(0, 4);
+      selected = {
+        item,
+        mediaType: selectedType,
+        score: scoreMovieCandidate({
+          title: selectedTitle,
+          originalTitle: selectedType === "tv" ? item.original_name : item.original_title,
+          year: selectedYear,
+        }, query, year),
+      };
+    } else {
+      const encoded = encodeURIComponent(query);
+      const requests: Array<{ mediaType: SearchMediaType; promise: Promise<any> }> = [];
+      if (mediaType !== "tv") {
+        const movieUrl = new URL("https://api.themoviedb.org/3/search/movie");
+        movieUrl.searchParams.set("query", query);
+        movieUrl.searchParams.set("include_adult", "false");
+        movieUrl.searchParams.set("language", "en-US");
+        movieUrl.searchParams.set("page", "1");
+        if (year) movieUrl.searchParams.set("year", String(year));
+        requests.push({ mediaType: "movie", promise: tmdb(movieUrl.pathname.replace(/^\/3\//, "") + movieUrl.search, key) });
+      }
+      if (mediaType !== "movie") {
+        const tvUrl = new URL("https://api.themoviedb.org/3/search/tv");
+        tvUrl.searchParams.set("query", query);
+        tvUrl.searchParams.set("include_adult", "false");
+        tvUrl.searchParams.set("language", "en-US");
+        tvUrl.searchParams.set("page", "1");
+        if (year) tvUrl.searchParams.set("first_air_date_year", String(year));
+        requests.push({ mediaType: "tv", promise: tmdb(tvUrl.pathname.replace(/^\/3\//, "") + tvUrl.search, key) });
+      }
+      const searched = await Promise.allSettled(requests.map((request) => request.promise));
+      const candidates: ReturnType<typeof rankMovieCandidates>[number][] = [];
+      searched.forEach((result, index) => {
+        if (result.status !== "fulfilled") {
+          console.warn("[movie-availability] TMDB search failed for", requests[index].mediaType);
+          return;
+        }
+        const rows = Array.isArray(result.value.results) ? result.value.results as Array<Record<string, unknown>> : [];
+        candidates.push(...rankMovieCandidates(rows, requests[index].mediaType, query, year));
+      });
+      candidates.sort((a, b) => b.score - a.score || b.voteCount - a.voteCount || b.popularity - a.popularity);
+      if (!candidates.length) {
+        return json({
+          found: false, query: rawQuery,
+          message: "No matching movie or series was found. Try an official title, an alternate title, or add the release year.",
+        }, 200, origin);
+      }
+
+      if (isAmbiguousMovieMatch(candidates)) {
+        const topScore = candidates[0].score;
+        const choices = candidates
+          .filter((candidate) => candidate.score >= Math.max(30, topScore - 18))
+          .slice(0, 5)
+          .map((candidate) => ({
+            id: candidate.id,
+            mediaType: candidate.mediaType,
+            title: candidate.title,
+            year: candidate.year,
+            poster: candidate.poster,
+            overview: candidate.overview,
+          }));
+        return json({
+          found: false, query: rawQuery, candidates: choices,
+          message: "Several titles are close to your search. Select the correct title and year to check availability.",
+          region, source: "TMDB",
+        }, 200, origin);
+      }
+      selected = { item: candidates[0] as unknown as Record<string, any>, mediaType: candidates[0].mediaType, score: candidates[0].score };
+      // The selected result came from search and already contains all fields needed below.
     }
+
+    if (!selected) {
+      return json({ found: false, query: rawQuery, message: "No matching title was found." }, 200, origin);
+    }
+
     const item = selected.item;
-    const mediaType = selected.mediaType;
-    const availability = await tmdb(mediaType + "/" + encodeURIComponent(String(item.id)) + "/watch/providers", key);
+    const type = selected.mediaType;
+    const id = Number(item.id);
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      throw new Error("The title catalog returned an invalid result ID.");
+    }
+    const title = clean(type === "tv" ? item.name : item.title, 160);
+    const release = type === "tv" ? item.first_air_date : item.release_date;
+    const resultYear = typeof release === "string" ? release.slice(0, 4) : "";
+    const overview = clean(item.overview, 500);
+    const posterPath = typeof item.poster_path === "string" && item.poster_path.startsWith("/")
+      ? item.poster_path
+      : null;
+    const availability = await tmdb(type + "/" + encodeURIComponent(String(id)) + "/watch/providers", key);
     const regionData = availability.results?.[region] || null;
     const categories = ["free", "ads", "flatrate", "rent", "buy"];
-    const options = categories.flatMap((category) => (Array.isArray(regionData?.[category]) ? regionData[category] : []).map((p: any) => ({
-      name: clean(p.provider_name, 100),
-      logo: p.logo_path ? "https://image.tmdb.org/t/p/w92" + p.logo_path : null,
+    const options = categories.flatMap((category) => (Array.isArray(regionData?.[category]) ? regionData[category] : []).map((provider: any) => ({
+      name: clean(provider.provider_name, 100),
+      logo: typeof provider.logo_path === "string" && provider.logo_path.startsWith("/")
+        ? "https://image.tmdb.org/t/p/w92" + provider.logo_path
+        : null,
       type: category,
-      url: typeof regionData?.link === "string" ? regionData.link : "https://www.justwatch.com/" + region.toLowerCase() + "/search?q=" + encoded,
+      url: typeof regionData?.link === "string" ? regionData.link : "https://www.justwatch.com/" + region.toLowerCase() + "/search?q=" + encodeURIComponent(query),
       verified: true,
     })));
     return json({
-      found: true, mediaType,
-      movie: { id: item.id, title: clean(titleOf(item, mediaType), 160), year: typeof dateOf(item, mediaType) === "string" ? dateOf(item, mediaType).slice(0, 4) : "", overview: clean(item.overview, 500), poster: item.poster_path ? "https://image.tmdb.org/t/p/w500" + item.poster_path : null },
+      found: true, mediaType: type,
+      movie: { id, title, year: resultYear, overview, poster: posterPath ? "https://image.tmdb.org/t/p/w500" + posterPath : null },
       region, options,
-      watchLink: typeof regionData?.link === "string" ? regionData.link : "https://www.justwatch.com/" + region.toLowerCase() + "/search?q=" + encoded,
+      watchLink: typeof regionData?.link === "string" ? regionData.link : "https://www.justwatch.com/" + (region.toLowerCase() === "gb" ? "uk" : region.toLowerCase()) + "/search?q=" + encodeURIComponent(query),
       message: options.length ? "Availability information supplied by TMDB/JustWatch." : "No verified streaming provider data was returned for this region.",
       source: "TMDB/JustWatch", verifiedAvailability: options.length > 0,
     }, 200, origin);
   } catch (error) {
     console.error("[movie-availability]", error instanceof Error ? error.message : "request failed");
-    // If TMDB is configured but temporarily unavailable, still return usable official provider searches.
-    return json({ ...(await fallbackLookup(query, region)), message: "TMDB could not confirm current availability. Official provider searches are available instead.", verifiedAvailability: false }, 200, origin);
+    try {
+      return json({
+        ...(await fallbackLookup(query, region, year, mediaType)),
+        message: "TMDB could not confirm current availability. Fallback metadata and official provider searches are available instead.",
+        verifiedAvailability: false,
+      }, 200, origin);
+    } catch {
+      const options = providerSearchOptions(query);
+      return json({
+        found: true, mediaType: mediaType || "unknown",
+        movie: { id: null, title: query, year: year ? String(year) : "", overview: "", poster: null },
+        region, options,
+        watchLink: "https://www.justwatch.com/" + (region.toLowerCase() === "gb" ? "uk" : region.toLowerCase()) + "/search?q=" + encodeURIComponent(query),
+        message: "The title catalog is temporarily unavailable. Official provider search links are available; availability is not independently verified.",
+        source: "official-provider-search", verifiedAvailability: false,
+      }, 200, origin);
+    }
   }
 });
