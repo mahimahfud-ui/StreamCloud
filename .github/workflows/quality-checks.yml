@@ -40,3 +40,12 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run browser smoke tests
         run: node scripts/smoke.mjs
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Test Supabase Edge Function providers and fallback
+        run: deno test --node-modules-dir=auto --allow-env tests/ai_router_test.ts
+        working-directory: supabase/functions
+

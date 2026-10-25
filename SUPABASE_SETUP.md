@@ -88,3 +88,29 @@ The repository's `listings-config.js` is already configured with the project's p
 cd supabase/functions && cp -r . /tmp/fn && cd /tmp/fn && deno test --allow-env tests   # unit tests
 npm run lint                                                                              # repo checks
 ```
+
+
+## Listing AI provider fallback
+
+The Admin Listing detector uses server-side Supabase Edge Function secrets only. Never place provider keys in HTML, JavaScript, repository files, or browser storage.
+
+| Provider | Secret(s) | Optional model override |
+| --- | --- | --- |
+| Gemini | `GEMINI_API_KEY` | `GEMINI_MODEL` |
+| Groq | `GROQ_API_KEY` | `GROQ_MODEL` |
+| OpenRouter | `OPENROUTER_API_KEY` | `OPENROUTER_MODEL` |
+| Venice | `VENICE_API_KEY` | `VENICE_MODEL` |
+| Cloudflare Workers AI | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | `CLOUDFLARE_MODEL` |
+| Shannon AI | `SHANNON_API_KEY` | `SHANNON_MODEL` |
+| Anthropic | `ANTHROPIC_API_KEY` | `ANTHROPIC_MODEL` |
+| DeepSeek | `DEEPSEEK_API_KEY` | `DEEPSEEK_MODEL` |
+| OpenAI | `OPENAI_API_KEY` | `OPENAI_MODEL` |
+| IMDb metadata | `OMDB_API_KEY` | — |
+
+Cloudflare also accepts the legacy `Cloudflare` secret when it contains a JSON object with token and account ID fields. If only that legacy secret is used, keep its token and account ID server-side.
+
+The optional `ENABLE_PAID_FALLBACK=true` setting enables automatic Cloudflare Workers AI, Venice, Shannon AI, Anthropic, DeepSeek, and OpenAI fallback. It is off by default to avoid unexpected usage-based or paid API calls. Without it, Gemini, Groq, and OpenRouter are attempted in a free-first sequence (subject to each account plan and quota), and a failing provider does not stop the remaining eligible providers from being tried.
+
+Default model choices are deliberately overridable with the model secrets above. Confirm model access and account quota for each provider in its own dashboard; a secret's presence does not prove that the key is valid or has usable quota.
+
+After updating this code, redeploy the `admin-detect` Edge Function from the reviewed branch/main commit before expecting the new adapters to run in production. The tests mock provider HTTP responses and verify response parsing and fallback order; they do not validate live provider credentials.
