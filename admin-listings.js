@@ -782,35 +782,8 @@
     var wrap = h("div", {});
     bodyEl.appendChild(wrap);
 
-    wrap.appendChild(h("h3", { text: "Section visibility and order" }));
-    var sectionFields = {};
-    [["sites", "Movie Websites"], ["apps", "Movie Apps"], ["music", "Music Apps"], ["gaming", "Gaming Websites"], ["recs", "Recommendations"]].forEach(function (p) {
-      var sec = sectionObject(settings, p[0], p[1]);
-      var show = checkbox("Show " + p[1], sec.visible !== false);
-      var title = field(p[1] + " title", sec.title || p[1], "text", { maxlength: "100" });
-      wrap.appendChild(h("div", { class: "scx-row" }, [show.wrap, title.wrap]));
-      sectionFields[p[0]] = { show: show.input, title: title.input };
-    });
-    var savedOrder = Array.isArray(settings.sections.order) ? settings.sections.order.slice() : ["sites", "apps", "music", "gaming", "recs"];
-    ["sites", "apps", "music", "gaming", "recs"].forEach(function (key) { if (savedOrder.indexOf(key) < 0) { var recIndex = savedOrder.indexOf("recs"); savedOrder.splice(recIndex < 0 ? savedOrder.length : recIndex, 0, key); } });
-    var secOrder = field("Section order (comma-separated: sites, apps, music, gaming, recs)", savedOrder.join(", "), "text");
-    wrap.appendChild(secOrder.wrap);
-
-    wrap.appendChild(h("div", { class: "scx-divider" }));
-    wrap.appendChild(h("h3", { text: "Grid sizing" }));
-    var appearance = settings.appearance;
-    var colsD = field("Desktop columns", appearance.desktopColumns == null ? 3 : appearance.desktopColumns, "number", { min: "1", max: "8" });
-    var colsT = field("Tablet columns", appearance.tabletColumns == null ? 2 : appearance.tabletColumns, "number", { min: "1", max: "6" });
-    var colsM = field("Mobile columns", appearance.mobileColumns == null ? 1 : appearance.mobileColumns, "number", { min: "1", max: "3" });
-    var gap = field("Card gap (px)", appearance.gap == null ? 22 : appearance.gap, "number", { min: "0", max: "48" });
-    var radius = field("Card corner radius (px)", appearance.radius == null ? 4 : appearance.radius, "number", { min: "0", max: "32" });
-    var aspect = h("select", { class: "scx-in", "aria-label": "Card aspect ratio" });
-    options(aspect, [{value:"1 / 1",label:"Square (1:1)"},{value:"2 / 3",label:"Portrait (2:3)"},{value:"16 / 9",label:"Wide (16:9)"},{value:"4 / 3",label:"Landscape (4:3)"}], appearance.aspectRatio || "1 / 1");
-    var aspectWrap = h("label", { class: "scx-f" }, ["Card aspect ratio", aspect]);
-    [colsD.wrap, colsT.wrap, colsM.wrap, gap.wrap, radius.wrap, aspectWrap].forEach(function (el) { wrap.appendChild(el); });
-
-    wrap.appendChild(h("div", { class: "scx-divider" }));
     wrap.appendChild(h("h3", { text: "Edit and arrange cards" }));
+
     wrap.appendChild(h("p", { class: "scx-help", text: "Choose a card to edit its fields. Use the list below to reorder by dragging rows or to hide/show an item. These settings affect the public catalog on every device." }));
     var group = h("select", { class: "scx-in", "aria-label": "Card category" });
     options(group, [
@@ -1004,27 +977,10 @@
     }).catch(buildOptions);
     buildOptions();
 
-    var saveSection = h("button", { class: "scx-btn pri", type: "button", text: "Save section and grid settings", onclick: function () {
-      var next = cloneSettings(settings);
-      [["sites", "Movie Websites"], ["apps", "Movie Apps"], ["music", "Music Apps"], ["recs", "Recommendations"]].forEach(function (p) {
-        var f = sectionFields[p[0]];
-        next.sections[p[0]] = { visible: f.show.checked, title: f.title.value.trim().slice(0, 100) || p[1] };
-      });
-      var order = secOrder.input.value.split(",").map(function (x) { return x.trim().toLowerCase(); }).filter(function (x) { return ["sites", "apps", "music", "gaming", "recs"].indexOf(x) >= 0; });
-      if (new Set(order).size !== 5 || ["sites", "apps", "music", "gaming", "recs"].some(function (x) { return order.indexOf(x) < 0; })) { say(msg, "err", "Section order must contain sites, apps, music, gaming, and recs exactly once."); return; }
-      next.sections.order = order;
-      next.appearance.desktopColumns = Number(colsD.input.value);
-      next.appearance.tabletColumns = Number(colsT.input.value);
-      next.appearance.mobileColumns = Number(colsM.input.value);
-      next.appearance.gap = Number(gap.input.value);
-      next.appearance.radius = Number(radius.input.value);
-      next.appearance.aspectRatio = aspect.value;
-      saveSettings(next, msg, function (finalSettings) { settings = finalSettings; });
-    } });
-    wrap.appendChild(h("div", { class: "scx-actions" }, [saveSection]));
+
   }
   function showLayout(msg) {
-    bodyEl.appendChild(h("p", { class: "scx-help", text: "Card fields, visibility, section order, desktop/tablet/mobile grid columns, card spacing and ordering are stored in Supabase and shared with visitors." }));
+    bodyEl.appendChild(h("p", { class: "scx-help", text: "Search the full public catalogue by category to edit fields, change links, hide/show, reorder or remove any registered card. Global design and backend controls are handled in StreamCloud AI." }));
     loadSettings().then(function (settings) { readCatalogControls(msg, settings); }).catch(function (e) { if (!expired(e)) say(msg, "err", e.message); });
   }
   function showAppearance(msg) {
