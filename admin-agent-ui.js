@@ -19,6 +19,7 @@
   var inputBox = null;
   var sendButton = null;
   var planButton = null;
+  var auditButton = null;
 
   function el(tag, attrs, children) {
     var n = document.createElement(tag);
@@ -90,6 +91,7 @@
     busy = !!value;
     if (sendButton) sendButton.disabled = busy;
     if (planButton) planButton.disabled = busy;
+    if (auditButton) auditButton.disabled = busy;
     if (inputBox) inputBox.disabled = busy;
     if (sendButton) sendButton.textContent = busy ? "Working…" : "Send";
     if (planButton) planButton.textContent = busy ? "Preparing…" : "Plan changes";
@@ -208,11 +210,11 @@
     var hint = el("p", { className: "sc-agent-management-hint" });
     var quick = el("div", { className: "sc-agent-quick" });
     [
-      ["Scan current setup", "Check the StreamCloud repository, Supabase function health, configured AI providers and deployment readiness. Do not modify any files."],
+      ["Live health audit", "Run a live read-only health audit of this repository, latest GitHub Actions, public site, database access, configured AI providers and Supabase function status. Report evidence and warnings; do not change any files.", "audit"],
       ["Improve a feature", "Inspect the relevant StreamCloud files and propose a focused improvement. Preserve unrelated UI and behavior. Do not apply anything."],
-      ["Fix an error", "Investigate the reported StreamCloud error from source context, identify the likely cause and propose a minimal tested fix. Preserve unrelated functionality."]
+      ["Fix an error", "Investigate the reported StreamCloud error from source context, identify the likely cause and propose a minimal safe fix with relevant checks. Preserve unrelated functionality."]
     ].forEach(function (q) {
-      quick.appendChild(el("button", { className: "sc-agent-btn", type: "button", text: q[0], onclick: function () { if (inputBox) { inputBox.value = q[1]; inputBox.focus(); } } }));
+      quick.appendChild(el("button", { className: "sc-agent-btn", type: "button", text: q[0], onclick: function () { if (!inputBox) return; inputBox.value = q[1]; inputBox.focus(); if (q[2]) send(q[2]); } }));
     });
     var thread = el("div", { className: "sc-agent-thread", "aria-live": "polite", "aria-relevant": "additions" });
     messagesBox = thread;
@@ -222,11 +224,12 @@
       if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); send("chat"); }
     });
     var foot = el("div", { className: "sc-agent-compose-foot" });
-    foot.appendChild(el("span", { className: "sc-agent-hint", text: "Enter = send · Shift+Enter = newline · Plan changes only prepares a reviewable patch." }));
+    foot.appendChild(el("span", { className: "sc-agent-hint", text: "Enter = send · Shift+Enter = newline · Live audit is read-only · Plan changes previews a patch before apply." }));
     var actions = el("div", { className: "sc-agent-actions" });
     sendButton = el("button", { className: "sc-agent-btn", type: "button", text: "Send", onclick: function () { send("chat"); } });
     planButton = el("button", { className: "sc-agent-btn primary", type: "button", text: "Plan changes", onclick: function () { send("plan"); } });
-    actions.appendChild(sendButton); actions.appendChild(planButton);
+    auditButton = el("button", { className: "sc-agent-btn ghost", type: "button", text: "Run live audit", onclick: function () { if (inputBox) { inputBox.value = "Run a full live health audit of StreamCloud. Check repository, recent CI/deployment runs, public Pages response, database reachability, configured AI providers and Supabase Edge Function status. Do not change files."; send("audit"); } } });
+    actions.appendChild(sendButton); actions.appendChild(planButton); actions.appendChild(auditButton);
     foot.appendChild(actions);
     compose.appendChild(inputBox); compose.appendChild(foot);
     var topActions = el("div", { className: "sc-agent-actions" });
@@ -276,7 +279,7 @@
     message("user", prompt);
     inputBox.value = "";
     setBusy(true);
-    var wait = message("assistant", kind === "plan" ? "Repository ও প্রাসঙ্গিক source পরীক্ষা করে safe patch preview তৈরি করছি…" : "তোমার নির্দেশ বুঝে উত্তর তৈরি করছি…");
+    var wait = message("assistant", kind === "plan" ? "Repository ও প্রাসঙ্গিক source পরীক্ষা করে safe patch preview তৈরি করছি…" : kind === "audit" ? "Live repository, deployment, site ও backend health read-only ভাবে পরীক্ষা করছি…" : "তোমার নির্দেশ বুঝে উত্তর তৈরি করছি…");
     request(kind, { message: prompt, threadId: activeThread }).then(function (d) {
       if (d.threadId) {
         activeThread = d.threadId;
@@ -285,7 +288,7 @@
       if (wait && wait.parentNode) wait.remove();
       if (d.reply) message("assistant", d.reply);
       if (d.proposal) appendProposal(d.proposal);
-      if (kind === "plan") statusRefresh().catch(function () {});
+      if (kind === "plan" || kind === "audit") statusRefresh().catch(function () {});
     }).catch(function (e) {
       if (wait && wait.parentNode) wait.remove();
       showError(e.message || "Agent request failed.");
