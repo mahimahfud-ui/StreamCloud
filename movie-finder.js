@@ -34,6 +34,7 @@
   function close(){backdrop.classList.remove("open");document.body.style.overflow=""}
   function status(message, loading){content.innerHTML='<p class="sc-mf-status">'+(loading?'<span class="sc-mf-loading"></span>':'')+esc(message)+'</p>'}
   function open(){backdrop.classList.add("open");document.body.style.overflow="hidden";panel.focus()}
+  function normalizeTitle(value){return String(value||"").toLocaleLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim().replace(/\\s+/g," ")}
   function render(data, query){
     if(!data.found){status(data.message||"No matching movie was found.");return}
     var m=data.movie||{},opts=Array.isArray(data.options)?data.options:[];
@@ -53,7 +54,14 @@
       var logo=Array.isArray(s.logoSources)&&s.logoSources.length?s.logoSources[0]:"";
       return '<article class="sc-mf-site"><div class="sc-mf-site-head">'+(logo?'<img class="sc-mf-site-logo" loading="lazy" alt="" src="'+esc(logo)+'" onerror="this.style.display=\'none\'">':'')+'<div><div class="sc-mf-site-name">'+esc(s.name)+'</div><div class="sc-mf-site-domain">'+esc(domain)+'</div></div></div><div class="sc-mf-site-rank">Directory rank #'+(i+1)+' · title match not verified</div><a class="sc-mf-site-link" href="'+esc(s.url)+'" target="_blank" rel="noopener noreferrer">Open site ↗</a><a class="sc-mf-site-link" style="background:#24252c;color:#f4f4f5;border:1px solid #414149" href="'+esc(searchUrl)+'" target="_blank" rel="noopener noreferrer">Find title on site ↗</a></article>';
     }).join("");
-    content.innerHTML='<article class="sc-mf-result">'+(m.poster?'<img class="sc-mf-poster" loading="lazy" alt="" src="'+esc(m.poster)+'">':'<div class="sc-mf-poster"></div>')+'<div><h3 class="sc-mf-movie-title">'+esc(m.title)+(m.year?' ('+esc(m.year)+')':'')+'</h3><p class="sc-mf-overview">'+esc(m.overview||"No synopsis available.")+'</p>'+(opts.length?'<div class="sc-mf-options">'+list+'</div>':'<p class="sc-mf-status">No verified streaming providers were returned for '+esc(data.region||"your region")+'.</p>')+action+'</div></article>'+'<h3 class="sc-mf-movie-title" style="margin-top:18px">Search StreamCloud sites</h3><p class="sc-mf-overview">Ranked using StreamCloud directory scores. “Find title on site” searches the title on that site’s indexed pages; results are not confirmed availability.</p>'+(cards?'<div class="sc-mf-sites">'+cards+'</div>':'<p class="sc-mf-status">No catalog websites are available.</p>');
+    var bestSite=sites.length?sites[0]:null;
+    var bestDomain=bestSite?String(bestSite.domain||"").replace(/^www\\./i,""):"";
+    var bestSearch=bestSite&&bestDomain?"https://www.google.com/search?q="+encodeURIComponent('site:'+bestDomain+' "'+title+'"'):"";
+    var bestLink=data.watchLink||bestSearch;
+    var bestLabel=data.watchLink?"Open best watch-options link ↗":"Open best matching site search ↗";
+    var exactQuery=normalizeTitle(title), exactResult=normalizeTitle(m.title||"");
+    var exactMatch=!!exactQuery&&exactQuery===exactResult;
+    content.innerHTML='<article class="sc-mf-result">'+(m.poster?'<img class="sc-mf-poster" loading="lazy" alt="" src="'+esc(m.poster)+'">':'<div class="sc-mf-poster"></div>')+'<div><h3 class="sc-mf-movie-title">'+esc(m.title)+(m.year?' ('+esc(m.year)+')':'')+'</h3><p class="sc-mf-overview">'+esc(m.overview||"No synopsis available.")+'</p>'+(opts.length?'<div class="sc-mf-options">'+list+'</div>':'<p class="sc-mf-status">No verified streaming providers were returned for '+esc(data.region||"your region")+'.</p>')+action+(bestLink?'<p><a class="sc-mf-cta" style="margin-top:8px" href="'+esc(bestLink)+'" target="_blank" rel="noopener noreferrer">'+bestLabel+'</a></p>':'')+(!exactMatch?'<p class="sc-mf-note">The catalog returned “'+esc(m.title||"unknown title")+'”, which is not an exact text match for your keyword. Check the title/year before opening a provider.</p>':'')+'</div></article>'+'<h3 class="sc-mf-movie-title" style="margin-top:18px">Search StreamCloud sites</h3><p class="sc-mf-overview">Exact title query is used for site search. “Open best link” prioritizes the official watch-options search when available; otherwise it opens the highest-ranked StreamCloud site’s title search. Results are not guaranteed playback links.</p>'+(cards?'<div class="sc-mf-sites">'+cards+'</div>':'<p class="sc-mf-status">No catalog websites are available.</p>');
     sub.textContent="Region: "+(data.region||"BD")+" · Provider data from "+(data.source||"official provider search");
   }
   async function findMovie(raw){
