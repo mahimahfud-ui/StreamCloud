@@ -54,10 +54,10 @@ async function saveMessage(id:string,role:string,content:string,metadata:Record<
 }
 async function getHistory(id:string):Promise<any[]>{if(!UUID.test(id))return[];const r=await db("admin_agent_messages?select=id,role,content,metadata,created_at&thread_id=eq."+id+"&order=created_at.asc&limit=60");return Array.isArray(r)?r:[];}
 async function getLastProposal(id:string):Promise<any>{
-  if(!UUID.test(id))return null;const r=await db("admin_agent_proposals?select=id,summary,risk,files,status,base_commit_sha,applied_commit_sha,deployment_status,created_at&thread_id=eq."+id+"&order=created_at.desc&limit=1");
+  if(!UUID.test(id))return null;const r=await db("admin_agent_proposals?select=id,summary,risk,files,status,proposal_type,action_payload,base_commit_sha,applied_commit_sha,deployment_status,created_at&thread_id=eq."+id+"&order=created_at.desc&limit=1");
   if(!Array.isArray(r)||!r.length)return null;return clientProposal(r[0]);
 }
-function clientProposal(p:any):any{return{id:p.id,summary:p.summary,risk:p.risk,status:p.status,baseCommitSha:p.base_commit_sha,appliedCommitSha:p.applied_commit_sha||null,deploymentStatus:p.deployment_status||[],createdAt:p.created_at,files:(Array.isArray(p.files)?p.files:[]).map((f:any)=>({path:f.path,created:!!f.isNew,operationCount:(f.operations||[]).length,previews:f.previews||[]}))};}
+function clientProposal(p:any):any{return{id:p.id,summary:p.summary,risk:p.risk,status:p.status,proposalType:p.proposal_type||"code",actionPayload:p.action_payload||null,baseCommitSha:p.base_commit_sha,appliedCommitSha:p.applied_commit_sha||null,deploymentStatus:p.deployment_status||[],createdAt:p.created_at,files:(Array.isArray(p.files)?p.files:[]).map((f:any)=>({path:f.path,created:!!f.isNew,operationCount:(f.operations||[]).length,previews:f.previews||[]}))};}
 async function activity(action:string,name:string,details:Record<string,unknown>={}){try{await db("admin_activity","POST",{action,entity_type:"ai-agent",entity_name:cleanTitle(name),details},"return=minimal");}catch{}}
 
 type Prov={name:string;kind:string;keys:string[];free:boolean;modelEnv:string};
@@ -156,7 +156,109 @@ function riskFor(risk:string,files:any[]):string{
  if(files.some(f=>/^supabase\/migrations\//i.test(f.path))||/\b(drop table|drop column|truncate|delete from|admin_sessions|admin_credentials|security definer|rls|policy|auth|secret|token|credential|privilege)\b/i.test(t))return"high";
  if(/backend|edge function|supabase\/functions|database|package\.json|api/i.test(t))return"medium";return["low","medium","high"].includes(risk)?risk:"low";
 }
+
+function normListing(value:unknown):string {
+ return String(value||"").toLocaleLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
+}
+function secureListingUrl(raw:unknown):string {
+ if(typeof raw!=="string"||raw.length>2000)throw new Error("Provide a valid public HTTPS URL.");
+ let u:URL;try{u=new URL(raw.trim());}catch{throw new Error("Provide a valid public HTTPS URL.");}
+ const host=u.hostname.toLowerCase();
+ if(u.protocol!=="https:"||u.username||u.password||(u.port&&u.port!=="443")||!host.includes(".")||host==="localhost"||host.endsWith(".local")||host.endsWith(".internal")||host.endsWith(".lan")||/^(?:127\.|10\.|192\.168\.|169\.254\.)/.test(host)||/^172\.(?:1[6-9]|2\d|3[01])\./.test(host))throw new Error("Only public HTTPS destination links are allowed.");
+ return u.href;
+}
+function listingUrlKey(raw:string):string {
+ const u=new URL(raw);u.hostname=u.hostname.toLowerCase().replace(/^www\./,"");
+ const ignored=/^(utm_|fbclid$|gclid$|ref$|mc_)/i;const pairs:Array<[string,string]>=[];
+ u.searchParams.forEach((v,k)=>{if(!ignored.test(k))pairs.push([k,v]);});pairs.sort((a,b)=>a[0].localeCompare(b[0])||a[1].localeCompare(b[1]));
+ return u.hostname+(u.pathname.replace(/\/+$/,"")||"")+(pairs.length?"?"+pairs.map(x=>x[0]+"="+x[1]).join("&"):"");
+}
+const LISTING_SECTIONS=["movie","series","sites","apps","music"];
+const LISTING_LABEL:Record<string,string>={movie:"Movies",series:"Web Series",sites:"Websites",apps:"Movie Apps",music:"Music Apps"};
+function cleanSection(raw:unknown):string {
+ const s=String(raw||"").toLowerCase().trim();
+ const aliases:Record<string,string>={movies:"movie",films:"movie","web series":"series","tv series":"series",series:"series",websites:"sites",website:"sites",sites:"sites","movie website":"sites","movie app":"apps","movie apps":"apps",apps:"apps","music app":"music","music apps":"music",music:"music"};
+ const out=aliases[s]||s;if(!LISTING_SECTIONS.includes(out))throw new Error("Choose movie, web series, website, movie app or music app as the category.");return out;
+}
+async function readCatalogueListings():Promise<any[]> {
+ const rows=await db("listings?select=id,section,category,name,url,url_key,description,logo_url,poster_url,year,genres,imdb_id,imdb_rating,season_count,episode_count,official_url,download_url,download_verified,platform,version,ads,published,created_at,updated_at&order=created_at.desc&limit=1000");
+ return Array.isArray(rows)?rows:[];
+}
+function snapshotListing(row:any):Record<string,unknown>{return{targetId:String(row.id),targetName:String(row.name||""),targetUrl:String(row.url||""),targetUpdatedAt:String(row.updated_at||""),targetSection:String(row.section||"")};}
+async function exactCatalogueMatches(target:string,section:string):Promise<any[]> {
+ const q=normListing(target);if(!q)throw new Error("State the exact listing/card name.");
+ return (await readCatalogueListings()).filter(r=>normListing(r.name)===q&&(!section||r.section===section));
+}
+function normalizeCreateFields(section:string,raw:any):any {
+ const f=raw&&typeof raw==="object"?raw:{};const name=String(f.name||"").trim().slice(0,160);
+ const defaultCategory:Record<string,string>={movie:"Movie",series:"Web Series",sites:"General",apps:"General",music:"General"};
+ const category=String(f.category||defaultCategory[section]).trim().slice(0,60);if(!name)throw new Error("A listing title/name is required.");if(!category)throw new Error("A category is required.");
+ if(!f.url){if(section==="movie"||section==="series")throw new Error("For a movie or series, first use Movies & Series to look up exact OMDb/IMDb metadata. For another item, include its HTTPS URL.");throw new Error("Include the listing's public HTTPS URL before creating it.");}
+ const url=secureListingUrl(f.url);
+ const txt=(v:any,max:number)=>typeof v==="string"?v.trim().slice(0,max):"";
+ const integer=(v:any,min:number,max:number)=>{if(v===null||v===undefined||v==="")return null;const n=Number(v);return Number.isInteger(n)&&n>=min&&n<=max?n:null;};
+ const rating=(v:any)=>{if(v===null||v===undefined||v==="")return null;const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=10?Math.round(n*10)/10:null;};
+ const image=(v:any)=>v===null||v===undefined||v===""?null:secureListingUrl(v);
+ const genres=Array.isArray(f.genres)?f.genres.map((g:any)=>String(g||"").trim().slice(0,40)).filter(Boolean).slice(0,12):typeof f.genres==="string"?f.genres.split(",").map((g:string)=>g.trim().slice(0,40)).filter(Boolean).slice(0,12):[];
+ return{section,category,name,url,url_key:listingUrlKey(url),description:txt(f.description,1500)||null,logo_url:image(f.logo_url),poster_url:image(f.poster_url),year:integer(f.year,1870,2100),genres,imdb_id:/^tt\d{5,10}$/.test(txt(f.imdb_id,20))?txt(f.imdb_id,20):null,imdb_rating:rating(f.imdb_rating),season_count:section==="series"?integer(f.season_count,0,5000):null,episode_count:section==="series"?integer(f.episode_count,0,100000):null,official_url:image(f.official_url),download_url:image(f.download_url),download_verified:false,platform:txt(f.platform,60)||null,version:txt(f.version,60)||null,ads:[0,1,2].includes(Number(f.ads))?Number(f.ads):1,published:true};
+}
+function safePreviewFields(fields:any):Record<string,unknown>{
+ const out:Record<string,unknown>={},allowed=["section","category","name","url","description","logo_url","poster_url","year","genres","imdb_id","imdb_rating","season_count","episode_count","official_url","download_url","platform","version","ads","published"];
+ if(!fields||typeof fields!=="object")return out;for(const k of allowed)if(fields[k]!==undefined)out[k]=fields[k];return out;
+}
+async function planListingAction(prompt:string,threadId:string,intent:any):Promise<any>{
+ const action=String(intent.action||"").toLowerCase();if(!["create","update","delete","hide","show","move"].includes(action))throw new Error("Unsupported catalogue action.");
+ const section=String(intent.section||"").trim()?cleanSection(intent.section):"",summary=String(intent.summary||"Catalogue "+action).slice(0,800);
+ const risk=action==="delete"?"high":["update","move","hide"].includes(action)?"medium":"low";let payload:any={action,section,summary};
+ if(action==="create"){
+  if(!section)throw new Error("Choose the category before adding a listing.");
+  const fields=normalizeCreateFields(section,intent.fields||{}),rows=await readCatalogueListings();
+  const dup=rows.find(r=>r.section===section&&(normListing(r.name)===normListing(fields.name)||String(r.url_key||"")===fields.url_key));
+  if(dup)throw new Error("A similar listing already exists: "+dup.name+" ("+LISTING_LABEL[dup.section]+"). Use All Cards to edit it instead of creating a duplicate.");
+  payload.fields=fields;
+ }else{
+  const target=String(intent.target||intent.fields?.name||"").trim();
+  if(!target)throw new Error("State the exact name of the listing to modify.");
+  const matches=await exactCatalogueMatches(target,section);
+  if(!matches.length)throw new Error("No exact Supabase listing named \""+target+"\" was found"+(section?" in "+LISTING_LABEL[section]:"")+". If this is a static site card, open All Cards to edit, hide or delete it. Source-code changes can be planned separately.");
+  if(matches.length>1)throw new Error("More than one listing has that exact name. Specify the category so the correct card is selected.");
+  const row=matches[0];payload={...payload,...snapshotListing(row)};
+  if(action==="update"){
+   const raw=intent.fields&&typeof intent.fields==="object"?intent.fields:{},fields:Record<string,any>={};
+   const allowed=["name","category","url","description","logo_url","poster_url","year","genres","imdb_id","imdb_rating","season_count","episode_count","official_url","download_url","platform","version","ads"];
+   for(const k of allowed)if(raw[k]!==undefined)fields[k]=raw[k];if(!Object.keys(fields).length)throw new Error("Specify the fields to change, such as name, URL, poster or description.");
+   if(fields.name!==undefined){fields.name=String(fields.name).trim().slice(0,160);if(!fields.name)throw new Error("Name cannot be empty.");}
+   if(fields.category!==undefined){fields.category=String(fields.category).trim().slice(0,60);if(!fields.category)throw new Error("Category cannot be empty.");}
+   if(fields.url!==undefined){fields.url=secureListingUrl(fields.url);fields.url_key=listingUrlKey(fields.url);}
+   for(const k of ["logo_url","poster_url","official_url","download_url"])if(fields[k]!==undefined)fields[k]=fields[k]?secureListingUrl(fields[k]):null;
+   if(fields.download_url!==undefined)fields.download_verified=false;
+   if(fields.description!==undefined)fields.description=String(fields.description||"").trim().slice(0,1500)||null;
+   if(fields.year!==undefined){const n=Number(fields.year);if(fields.year===""||fields.year===null)fields.year=null;else if(!Number.isInteger(n)||n<1870||n>2100)throw new Error("Year must be between 1870 and 2100.");else fields.year=n;}
+   if(fields.imdb_rating!==undefined){const n=Number(fields.imdb_rating);if(fields.imdb_rating===""||fields.imdb_rating===null)fields.imdb_rating=null;else if(!Number.isFinite(n)||n<0||n>10)throw new Error("IMDb rating must be between 0 and 10.");else fields.imdb_rating=Math.round(n*10)/10;}
+   if(fields.genres!==undefined)fields.genres=Array.isArray(fields.genres)?fields.genres.map((x:any)=>String(x).trim().slice(0,40)).filter(Boolean).slice(0,12):String(fields.genres||"").split(",").map((x:string)=>x.trim().slice(0,40)).filter(Boolean).slice(0,12);
+   if(fields.imdb_id!==undefined){const v=String(fields.imdb_id||"").trim();if(v&&!/^tt\d{5,10}$/.test(v))throw new Error("IMDb ID should look like tt1234567.");fields.imdb_id=v||null;}
+   for(const k of ["season_count","episode_count"]){if(fields[k]!==undefined){const n=Number(fields[k]);if(fields[k]===""||fields[k]===null)fields[k]=null;else if(!Number.isInteger(n)||n<0||n>(k==="season_count"?5000:100000))throw new Error("Invalid "+k+".");else fields[k]=n;}}
+   if(fields.ads!==undefined){const n=Number(fields.ads);if(![0,1,2].includes(n))throw new Error("Ad level must be 0, 1 or 2.");fields.ads=n;}
+   payload.fields=fields;
+  }else if(action==="move"){
+   const to=cleanSection(intent.fields?.section||intent.toSection||""),category=String(intent.fields?.category||intent.category||"").trim().slice(0,60);
+   if(!category)throw new Error("Specify the destination category name for this listing.");payload.fields={section:to,category};
+  }
+ }
+ const inserted=await db("admin_agent_proposals","POST",{thread_id:threadId,prompt,summary,risk,files:[],base_commit_sha:"catalogue-only",proposal_type:"listing_action",action_payload:payload,status:"pending"},"return=representation");
+ const row=Array.isArray(inserted)?inserted[0]:null;if(!row?.id)throw new Error("Could not store the catalogue action preview.");
+ const target=payload.targetName||payload.fields?.name||"";
+ const reply=summary+"\n\nPrepared a catalogue action: "+action.toUpperCase()+(section?" · "+LISTING_LABEL[section]:"")+(target?" · "+String(target):"")+".\nNothing has changed yet. Review the preview and press Apply changes to confirm.";
+ await saveMessage(threadId,"assistant",reply,{proposalId:row.id,risk,proposalType:"listing_action"});await activity("agent.plan.catalogue",summary,{proposalId:row.id,action,section,target});
+ return{threadId,reply,proposal:Object.assign(clientProposal(row),{explanation:"This changes only the selected Supabase catalogue listing after you confirm Apply changes."})};
+}
 async function plan(prompt:string,threadId:string):Promise<any>{
+ const classifySystem="Classify the authenticated StreamCloud admin request. Return JSON only: {\"type\":\"listing_action\"|\"code_change\",\"action\":\"create|update|delete|hide|show|move|\",\"section\":\"movie|series|sites|apps|music|\",\"target\":\"exact listing name or empty\",\"summary\":\"short description\",\"fields\":{}}. Choose listing_action only for a clear request to create/edit/delete/hide/show/move a catalogue card in the Supabase listings database. UI/style/backend code, schema/auth, global design or settings requests must be code_change. For listing_action, include only supplied/clearly requested field values. Never invent a URL; create requires the URL literally supplied in the user's request. For update/delete/hide/show/move target must be the exact requested item name. Static public cards may not be in the database; the server will direct those to All Cards.";
+ try{const x=parseJSON((await ai(classifySystem,JSON.stringify({request:prompt}),true)).text);if(x&&x.type==="listing_action")return await planListingAction(prompt,threadId,x);}catch(e){if(String((e as Error).message||"").includes("No exact Supabase listing")||String((e as Error).message||"").includes("Provide a valid")||String((e as Error).message||"").includes("HTTPS")||String((e as Error).message||"").includes("exact")||String((e as Error).message||"").includes("category")||String((e as Error).message||"").includes("listing"))throw e;console.warn("[admin-agent] classifier fallback",String(e).slice(0,150));}
+ return await planCodeChanges(prompt,threadId);
+}
+
+async function planCodeChanges(prompt:string,threadId:string):Promise<any>{
  const meta=await gh("");if(meta?.permissions&&meta.permissions.push===false)throw new Error("GitHub token can read but cannot push to this repository.");
  const branch=env("GITHUB_BRANCH")||String(meta.default_branch||"main"),baseSha=await headSha(branch);if(!baseSha)throw new Error("Could not resolve GitHub branch.");
  const tree=await getTree(baseSha),existing=new Set(tree.filter(x=>x.type==="blob").map(x=>String(x.path))),paths=pathOptions(tree,prompt);
@@ -211,10 +313,57 @@ async function applyMigration(path:string,content:string):Promise<any>{
  const r=await fetch("https://api.supabase.com/v1/projects/"+encodeURIComponent(projectRef)+"/database/query",{method:"POST",headers:{Authorization:"Bearer "+mgmtToken,"Content-Type":"application/json"},body:JSON.stringify({query:content,read_only:false}),signal:AbortSignal.timeout(45000)});
  if(!r.ok)return{target:path,status:"failed",message:"SQL execution returned HTTP "+r.status+". Check database:write permission and Supabase logs."};return{target:path,status:"applied",message:"SQL migration executed."};
 }
+
+async function applyListingProposal(p:any,confirmed:boolean):Promise<any>{
+ const a=p.action_payload||{},action=String(a.action||""),section=String(a.section||""),fields=a.fields&&typeof a.fields==="object"?a.fields:{};
+ if(p.risk==="high"&&!confirmed)throw new Error("This destructive catalogue action needs high-risk confirmation.");
+ let changed:any=null;
+ if(action==="create"){
+  const row=normalizeCreateFields(section,fields),rows=await readCatalogueListings();
+  if(rows.some(r=>r.section===section&&(normListing(r.name)===normListing(row.name)||String(r.url_key||"")===row.url_key)))throw new Error("A duplicate was added after this preview. Review the catalogue and plan again.");
+  const inserted=await db("listings","POST",row,"return=representation");changed=Array.isArray(inserted)?inserted[0]:null;
+  if(!changed?.id)throw new Error("Supabase did not confirm that the listing was created.");
+ }else{
+  const id=String(a.targetId||"");if(!UUID.test(id))throw new Error("The selected catalogue target is invalid.");
+  const found=await db("listings?select=id,section,name,url,updated_at&id=eq."+encodeURIComponent(id)+"&limit=1");
+  const current=Array.isArray(found)?found[0]:null;
+  if(!current){await db("admin_agent_proposals?id=eq."+p.id,"PATCH",{status:"stale",error_text:"The target listing no longer exists.",updated_at:new Date().toISOString()},"return=minimal");throw new Error("That listing was deleted after the preview. Prepare a new plan.");}
+  if(normListing(current.name)!==normListing(a.targetName)||String(current.url||"")!==String(a.targetUrl||"")||String(current.updated_at||"")!==String(a.targetUpdatedAt||"")){
+   await db("admin_agent_proposals?id=eq."+p.id,"PATCH",{status:"stale",error_text:"The target listing changed after preview.",updated_at:new Date().toISOString()},"return=minimal");
+   throw new Error("That listing changed after the preview. Prepare a new plan before applying.");
+  }
+  if(action==="delete"){
+   const result=await db("listings?id=eq."+encodeURIComponent(id),"DELETE",undefined,"return=representation");
+   if(!Array.isArray(result)||!result.length)throw new Error("Supabase did not confirm the deletion.");
+   changed=result[0];
+  }else{
+   let patch:any={};
+   if(action==="hide")patch={published:false};
+   else if(action==="show")patch={published:true};
+   else if(action==="move")patch={section:String(fields.section||""),category:String(fields.category||"")};
+   else if(action==="update")patch=fields;
+   else throw new Error("Unsupported catalogue action.");
+   if(action==="move"&&!LISTING_SECTIONS.includes(patch.section))throw new Error("Invalid destination category.");
+   if(action==="move"&&(!patch.category||patch.category.length>60))throw new Error("Destination category must contain 1–60 characters.");
+   const result=await db("listings?id=eq."+encodeURIComponent(id),"PATCH",patch,"return=representation");
+   if(!Array.isArray(result)||!result.length)throw new Error("Supabase did not confirm the listing update.");
+   changed=result[0];
+  }
+ }
+ const summary=String(p.summary||"Applied catalogue action");
+ const target=changed?.name||a.targetName||fields.name||"listing";
+ const textReply="Catalogue change completed: "+action.toUpperCase()+" · "+target+(changed?.section?" · "+(LISTING_LABEL[changed.section]||changed.section):"")+".\nThe Supabase database confirmed the operation.";
+ await db("admin_agent_proposals?id=eq."+p.id,"PATCH",{status:"applied",deployment_status:[],updated_at:new Date().toISOString()},"return=minimal");
+ await activity("agent.catalogue.apply",summary,{proposalId:p.id,action,listingId:changed?.id||a.targetId||null,section:changed?.section||section});
+ if(UUID.test(String(p.thread_id||"")))await saveMessage(p.thread_id,"assistant",textReply,{proposalId:p.id,action,listingId:changed?.id||a.targetId||null});
+ return{ok:true,reply:textReply,action,listingId:changed?.id||a.targetId||null,proposalId:p.id};
+}
+
 async function apply(proposalId:string,confirmed:boolean):Promise<any>{
  if(!UUID.test(proposalId))throw new Error("Invalid proposal ID.");
  const records=await db("admin_agent_proposals?select=*&id=eq."+proposalId+"&limit=1"),p=Array.isArray(records)?records[0]:null;
  if(!p)throw new Error("Proposal was not found.");if(p.status!=="pending")throw new Error("This proposal is already "+p.status+".");if(p.risk==="high"&&!confirmed)throw new Error("High-risk change requires explicit confirmation.");
+ if(p.proposal_type==="listing_action")return await applyListingProposal(p,confirmed);
  const meta=await gh(""),branch=env("GITHUB_BRANCH")||String(meta.default_branch||"main"),base=await headSha(branch);
  if(base!==p.base_commit_sha){await db("admin_agent_proposals?id=eq."+proposalId,"PATCH",{status:"stale",error_text:"Branch changed after plan.",updated_at:new Date().toISOString()},"return=minimal");throw new Error("GitHub changed after the preview. Prepare the patch again against latest main.");}
  const tree=await getTree(base),exists=new Set(tree.filter(x=>x.type==="blob").map(x=>String(x.path))),contents=new Map<string,string>();
