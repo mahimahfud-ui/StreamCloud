@@ -17,11 +17,22 @@ const headersFor = (origin: string | null) => ({
 const json = (body: unknown, status = 200, origin: string | null = null) =>
   new Response(JSON.stringify(body), { status, headers: { ...headersFor(origin), "Content-Type": "application/json", "Cache-Control": "no-store" } });
 const hits = new Map<string, { count: number; expires: number }>();
+let hitChecks = 0;
 function allowed(req: Request): boolean {
   const ip = req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   const now = Date.now();
+  if ((++hitChecks % 64) === 0) {
+    for (const [key, entry] of hits) if (entry.expires <= now) hits.delete(key);
+  }
   const old = hits.get(ip);
-  if (!old || old.expires < now) { hits.set(ip, { count: 1, expires: now + 60_000 }); return true; }
+  if (!old || old.expires < now) {
+    if (hits.size >= 5000) {
+      const first = hits.keys().next().value;
+      if (first !== undefined) hits.delete(first);
+    }
+    hits.set(ip, { count: 1, expires: now + 60_000 });
+    return true;
+  }
   if (old.count >= 20) return false;
   old.count += 1;
   return true;
@@ -194,7 +205,7 @@ serve(async (req) => {
   const key = Deno.env.get("TMDB_API_KEY")?.trim();
   // Do not fail just because TMDB isn't configured: use public no-key catalogs and official provider search links.
   if (!key) {
-    try { return json(await fallbackLookup(query, region), 200, origin); }
+    try { return json(await fallbackLookup(query, region, year, mediaType), 200, origin); }
     catch (error) {
       console.error("[movie-availability] fallback failed:", error instanceof Error ? error.message : "request failed");
       return json({ found: true, mediaType: "unknown", movie: { id: null, title: query, year: "", overview: "", poster: null }, region,
