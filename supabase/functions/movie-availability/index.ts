@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 const allowedOrigins = new Set([
   "https://mahimahfud-ui.github.io",
   "https://streamcloud.ai.studio",
+  "https://streamcloud-527d.onrender.com",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
 ]);
@@ -35,6 +36,12 @@ async function tmdb(path: string, key: string) {
 function clean(value: unknown, max: number) {
   return typeof value === "string" ? value.trim().replace(/[\u0000-\u001f]/g, "").slice(0, max) : "";
 }
+function titleOf(item: any, mediaType: "movie" | "tv") {
+  return mediaType === "tv" ? String(item.name || "") : String(item.title || "");
+}
+function dateOf(item: any, mediaType: "movie" | "tv") {
+  return mediaType === "tv" ? item.first_air_date : item.release_date;
+}
 serve(async (req) => {
   const origin = req.headers.get("origin");
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: headersFor(origin) });
@@ -48,20 +55,30 @@ serve(async (req) => {
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON body." }, 400, origin); }
   const query = clean(body.title, 120);
   const region = clean(body.region, 2).toUpperCase() || "BD";
-  if (query.length < 2) return json({ error: "Enter at least two characters for the movie title." }, 422, origin);
+  if (query.length < 2) return json({ error: "Enter at least two characters for the title." }, 422, origin);
   if (!/^[A-Z]{2}$/.test(region)) return json({ error: "Invalid region code." }, 422, origin);
 
   try {
-    const search = await tmdb("search/movie?query=" + encodeURIComponent(query) + "&include_adult=false&language=en-US&page=1", key);
-    const movies = Array.isArray(search.results) ? search.results : [];
-    if (!movies.length) return json({ found: false, query, message: "No matching movie was found." }, 200, origin);
+    const encoded = encodeURIComponent(query);
+    const [movieSearch, tvSearch] = await Promise.all([
+      tmdb("search/movie?query=" + encoded + "&include_adult=false&language=en-US&page=1", key),
+      tmdb("search/tv?query=" + encoded + "&include_adult=false&language=en-US&page=1", key),
+    ]);
+    const candidates = [
+      ...(Array.isArray(movieSearch.results) ? movieSearch.results.map((item: any) => ({ item, mediaType: "movie" as const })) : []),
+      ...(Array.isArray(tvSearch.results) ? tvSearch.results.map((item: any) => ({ item, mediaType: "tv" as const })) : []),
+    ];
+    if (!candidates.length) return json({ found: false, query, message: "No matching movie or series was found." }, 200, origin);
     const q = query.toLowerCase();
-    const movie = [...movies].sort((a: any, b: any) => {
-      const ae = String(a.title || "").toLowerCase() === q ? 1 : 0;
-      const be = String(b.title || "").toLowerCase() === q ? 1 : 0;
-      return be - ae || Number(b.popularity || 0) - Number(a.popularity || 0);
-    })[0];
-    const availability = await tmdb("movie/" + encodeURIComponent(String(movie.id)) + "/watch/providers", key);
+    candidates.sort((a, b) => {
+      const ae = titleOf(a.item, a.mediaType).toLowerCase() === q ? 1 : 0;
+      const be = titleOf(b.item, b.mediaType).toLowerCase() === q ? 1 : 0;
+      return be - ae || Number(b.item.popularity || 0) - Number(a.item.popularity || 0);
+    });
+    const selected = candidates[0];
+    const item = selected.item;
+    const mediaType = selected.mediaType;
+    const availability = await tmdb(mediaType + "/" + encodeURIComponent(String(item.id)) + "/watch/providers", key);
     const regionData = availability.results?.[region] || null;
     const categories = ["free", "ads", "flatrate", "rent", "buy"];
     const options = categories.flatMap((category) => (Array.isArray(regionData?.[category]) ? regionData[category] : []).map((p: any) => ({
@@ -71,12 +88,13 @@ serve(async (req) => {
     })));
     return json({
       found: true,
+      mediaType,
       movie: {
-        id: movie.id,
-        title: clean(movie.title, 160),
-        year: typeof movie.release_date === "string" ? movie.release_date.slice(0, 4) : "",
-        overview: clean(movie.overview, 500),
-        poster: movie.poster_path ? "https://image.tmdb.org/t/p/w500" + movie.poster_path : null,
+        id: item.id,
+        title: clean(titleOf(item, mediaType), 160),
+        year: typeof dateOf(item, mediaType) === "string" ? dateOf(item, mediaType).slice(0, 4) : "",
+        overview: clean(item.overview, 500),
+        poster: item.poster_path ? "https://image.tmdb.org/t/p/w500" + item.poster_path : null,
       },
       region,
       options,
