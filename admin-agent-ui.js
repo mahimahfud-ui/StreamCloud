@@ -325,7 +325,7 @@
   }
   function applyProposal(p) {
     if (busy) return;
-    var ok = window.confirm("Apply this reviewed patch to the GitHub branch and run configured backend deployment steps?");
+    var ok = window.confirm(p.proposalType === "listing_action" ? "Apply this reviewed catalogue change to Supabase?" : p.proposalType === "site_settings" ? "Apply these reviewed site settings to Supabase?" : "Apply this reviewed code patch to GitHub and run configured backend deployment steps?");
     if (!ok) return;
     var confirmedHighRisk = false;
     if (p.risk === "high") {
