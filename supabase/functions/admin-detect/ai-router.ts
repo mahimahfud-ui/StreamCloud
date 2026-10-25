@@ -60,7 +60,8 @@ function isConfigured(provider: Provider): boolean {
   const key = providerKey(provider);
   if (!key || key === "এপিয়াই" || /^YOUR_.+_KEY$/i.test(key)) return false;
   // Do not silently spend on providers traditionally requiring paid API billing.
-  if ((provider === "deepseek" || provider === "openai" || provider === "anthropic") && !paidFallbackEnabled()) return false;
+  if ((provider === "cloudflare" || provider === "venice" || provider === "shannon" ||
+    provider === "anthropic" || provider === "deepseek" || provider === "openai") && !paidFallbackEnabled()) return false;
   if (provider === "cloudflare" && !isCloudflareConfigured()) return false;
   return (providerCooldownUntil.get(provider) ?? 0) <= Date.now();
 }
@@ -102,7 +103,7 @@ function orderFor(section: string, task: Task): Provider[] {
     return ["groq", "gemini", "openrouter", "cloudflare", "venice", "shannon", "anthropic", "deepseek", "openai"];
   }
   if (section === "music" || section === "apps" || section === "sites") {
-    return ["groq", "openrouter", "cloudflare", "venice", "shannon", "gemini", "anthropic", "deepseek", "openai"];
+    return ["groq", "openrouter", "gemini", "cloudflare", "venice", "shannon", "anthropic", "deepseek", "openai"];
   }
   return ["groq", "gemini", "openrouter", "cloudflare", "venice", "shannon", "anthropic", "deepseek", "openai"];
 }
