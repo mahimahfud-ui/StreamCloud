@@ -54,11 +54,6 @@ export function parseMovieQuery(value: unknown, yearOverride?: unknown, mediaOve
       : "movie";
     title = title.slice(startType[0].length).trim();
   }
-  const endType = title.match(/\s+(series|web\s*series|tv\s*show|movie|film)$/i);
-  if (endType) {
-    mediaType = /series|tv\s*show/i.test(endType[1]) ? "tv" : "movie";
-    title = title.slice(0, endType.index).trim();
-  }
   let year = validYear(yearOverride);
   if (year === null) {
     const suffix = title.match(/\s*[\[(]?\s*((?:18|19|20)\d{2})\s*[\])]?\s*$/);
@@ -66,6 +61,11 @@ export function parseMovieQuery(value: unknown, yearOverride?: unknown, mediaOve
       year = validYear(suffix[1]);
       title = title.slice(0, suffix.index).trim().replace(/[([]\s*$/, "").trim();
     }
+  }
+  const endType = title.match(/\s+(web\s*series|tv\s*show|series|movie|film|s\d{1,2})$/i);
+  if (endType) {
+    mediaType = /web\s*series|series|tv\s*show|^s\d{1,2}$/i.test(endType[1]) ? "tv" : "movie";
+    title = title.slice(0, endType.index).trim();
   }
   if (mediaOverride === "movie" || mediaOverride === "tv") mediaType = mediaOverride;
   return { title: safeText(title, 160), year, mediaType };
