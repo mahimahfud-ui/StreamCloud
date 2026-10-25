@@ -255,6 +255,9 @@ serve(async (req) => {
         candidates.push(...rankMovieCandidates(rows, requests[index].mediaType, query, year));
       });
       candidates.sort((a, b) => b.score - a.score || b.voteCount - a.voteCount || b.popularity - a.popularity);
+      if (searched.length && searched.every((result) => result.status === "rejected")) {
+        throw new Error("All TMDB title-search endpoints failed.");
+      }
       if (!candidates.length) {
         return json({
           found: false, query: rawQuery,
@@ -281,7 +284,7 @@ serve(async (req) => {
           region, source: "TMDB",
         }, 200, origin);
       }
-      selected = { item: candidates[0] as unknown as Record<string, any>, mediaType: candidates[0].mediaType, score: candidates[0].score };
+      selected = { item: { ...candidates[0], __rankedCandidate: true }, mediaType: candidates[0].mediaType, score: candidates[0].score };
       // The selected result came from search and already contains all fields needed below.
     }
 
@@ -295,13 +298,17 @@ serve(async (req) => {
     if (!Number.isSafeInteger(id) || id <= 0) {
       throw new Error("The title catalog returned an invalid result ID.");
     }
-    const title = clean(type === "tv" ? item.name : item.title, 160);
-    const release = type === "tv" ? item.first_air_date : item.release_date;
+    const fromRankedCandidate = item.__rankedCandidate === true;
+    const title = clean(fromRankedCandidate ? item.title : (type === "tv" ? item.name : item.title), 160);
+    const release = fromRankedCandidate ? item.year : (type === "tv" ? item.first_air_date : item.release_date);
     const resultYear = typeof release === "string" ? release.slice(0, 4) : "";
     const overview = clean(item.overview, 500);
     const posterPath = typeof item.poster_path === "string" && item.poster_path.startsWith("/")
       ? item.poster_path
       : null;
+    const posterUrl = fromRankedCandidate
+      ? (typeof item.poster === "string" ? item.poster : null)
+      : (posterPath ? "https://image.tmdb.org/t/p/w500" + posterPath : null);
     const availability = await tmdb(type + "/" + encodeURIComponent(String(id)) + "/watch/providers", key);
     const regionData = availability.results?.[region] || null;
     const categories = ["free", "ads", "flatrate", "rent", "buy"];
@@ -316,7 +323,7 @@ serve(async (req) => {
     })));
     return json({
       found: true, mediaType: type,
-      movie: { id, title, year: resultYear, overview, poster: posterPath ? "https://image.tmdb.org/t/p/w500" + posterPath : null },
+      movie: { id, title, year: resultYear, overview, poster: posterUrl },
       region, options,
       watchLink: typeof regionData?.link === "string" ? regionData.link : "https://www.justwatch.com/" + (region.toLowerCase() === "gb" ? "uk" : region.toLowerCase()) + "/search?q=" + encodeURIComponent(query),
       message: options.length ? "Availability information supplied by TMDB/JustWatch." : "No verified streaming provider data was returned for this region.",
