@@ -80,10 +80,10 @@
     var mediaType=null,year=null;
     var prefix=title.match(/^(movie|film|series|web\s*series|tv|show)\s*:\s*/i);
     if(prefix){mediaType=/^(series|web\s*series|tv|show)$/i.test(prefix[1].replace(/\s+/g," "))?"tv":"movie";title=title.slice(prefix[0].length).trim()}
-    var suffix=title.match(/\s+(series|web\s*series|tv\s*show|movie|film)$/i);
-    if(suffix){mediaType=/series|tv\s*show/i.test(suffix[1])?"tv":"movie";title=title.slice(0,suffix.index).trim()}
     var yearMatch=title.match(/\s*[\[(]?\s*((?:18|19|20)\d{2})\s*[\])]?\s*$/);
     if(yearMatch){var n=Number(yearMatch[1]);if(n>=1870&&n<=2100){year=n;title=title.slice(0,yearMatch.index).trim().replace(/[([]\s*$/,"").trim()}}
+    var suffix=title.match(/\s+(web\s*series|tv\s*show|series|movie|film|s\d{1,2})$/i);
+    if(suffix){mediaType=/web\s*series|series|tv\s*show|^s\d{1,2}$/i.test(suffix[1])?"tv":"movie";title=title.slice(0,suffix.index).trim()}
     return {title:title.slice(0,160),year:year,mediaType:mediaType};
   }
   async function findMovie(raw, selection){
