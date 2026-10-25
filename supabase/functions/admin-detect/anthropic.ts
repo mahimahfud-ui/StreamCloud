@@ -4,7 +4,7 @@ import { buildListingPrompt, isPlaceholderKey, parseListingAIResult, textFromRes
 export async function askAnthropic(page: PageInfo, section: string): Promise<ListingAIResult | null> {
   const key = Deno.env.get("ANTHROPIC_API_KEY")?.trim();
   if (isPlaceholderKey(key)) throw new Error("ANTHROPIC_API_KEY is not configured.");
-  const model = (Deno.env.get("ANTHROPIC_MODEL") ?? "claude-haiku-5-5").trim() || "claude-haiku-5-5";
+  const model = (Deno.env.get("ANTHROPIC_MODEL") ?? "claude-haiku-4-5-20251001").trim() || "claude-haiku-4-5-20251001";
   let response: Response;
   try {
     response = await fetch("https://api.anthropic.com/v1/messages", {

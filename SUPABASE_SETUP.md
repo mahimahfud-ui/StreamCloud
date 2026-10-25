@@ -85,7 +85,7 @@ The repository's `listings-config.js` is already configured with the project's p
 
 ## Tests
 ```bash
-cd supabase/functions && cp -r . /tmp/fn && cd /tmp/fn && deno test --allow-env tests   # unit tests
+cd supabase/functions && deno test --node-modules-dir=auto --allow-env tests   # complete Edge Function unit tests
 npm run lint                                                                              # repo checks
 ```
 
@@ -100,9 +100,9 @@ The Admin Listing detector uses server-side Supabase Edge Function secrets only.
 | Groq | `GROQ_API_KEY` | `GROQ_MODEL` |
 | OpenRouter | `OPENROUTER_API_KEY` | `OPENROUTER_MODEL` |
 | Venice | `VENICE_API_KEY` | `VENICE_MODEL` |
-| Cloudflare Workers AI | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | `CLOUDFLARE_MODEL` |
+| Cloudflare Workers AI | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | `CLOUDFLARE_MODEL` (default: `@cf/zai-org/glm-4.7-flash`) |
 | Shannon AI | `SHANNON_API_KEY` | `SHANNON_MODEL` |
-| Anthropic | `ANTHROPIC_API_KEY` | `ANTHROPIC_MODEL` |
+| Anthropic | `ANTHROPIC_API_KEY` | `ANTHROPIC_MODEL` (default: `claude-haiku-4-5-20251001`) |
 | DeepSeek | `DEEPSEEK_API_KEY` | `DEEPSEEK_MODEL` |
 | OpenAI | `OPENAI_API_KEY` | `OPENAI_MODEL` |
 | IMDb metadata | `OMDB_API_KEY` | — |
@@ -114,3 +114,38 @@ The optional `ENABLE_PAID_FALLBACK=true` setting enables automatic Cloudflare Wo
 Default model choices are deliberately overridable with the model secrets above. Confirm model access and account quota for each provider in its own dashboard; a secret's presence does not prove that the key is valid or has usable quota.
 
 After updating this code, redeploy the `admin-detect` Edge Function from the reviewed branch/main commit before expecting the new adapters to run in production. The tests mock provider HTTP responses and verify response parsing and fallback order; they do not validate live provider credentials.
+
+
+### Admin-only credential diagnostics
+
+The `admin-detect` function supports `{ "mode": "provider-health" }`. It runs GET-only credential probes for Gemini, Groq, OpenRouter, DeepSeek, OpenAI, Anthropic, Venice, Cloudflare Workers AI and Shannon. It does not generate AI output or return secret values. Pass `"includeOmdb": true` to also validate OMDb; this uses one OMDb metadata request.
+
+While signed into the StreamCloud admin panel, open the browser developer console and run:
+
+```js
+(async () => {
+  const cfg = window.STREAMCLOUD_SUPABASE || {};
+  const session = JSON.parse(sessionStorage.getItem("streamcloud-admin-session") || "null");
+  if (!cfg.url || !cfg.anonKey || !session?.token) {
+    throw new Error("Open StreamCloud Admin and sign in first.");
+  }
+  const response = await fetch(cfg.url.replace(/\/+$/, "") + "/functions/v1/admin-detect", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": cfg.anonKey,
+      "x-admin-token": session.token
+    },
+    body: JSON.stringify({ mode: "provider-health", includeOmdb: true })
+  });
+  const data = await response.json();
+  console.table((data.providers || []).map(({ provider, status, fallbackEnabled, detail }) =>
+    ({ provider, status, fallbackEnabled, detail })));
+  console.log("Paid fallback enabled:", data.paidFallbackEnabled);
+  if (!response.ok) console.error("Health check HTTP status:", response.status, data.error || data);
+})();
+```
+
+Statuses such as `invalid_key`, `permission_denied`, `billing_or_balance_required`, `valid_key_no_balance`, `valid_key_model_not_listed` and `network_or_timeout_error` distinguish configuration errors from account/balance problems. Cloudflare is tested via token verification plus the account's Workers AI model-list permission. No provider completion is generated. A provider may still reject a particular generation model or hit its generation quota after a successful credential probe.
+
+The diagnostic endpoint requires the same authenticated admin session as Add Listing. Never paste the session token into an issue, chat or repository.

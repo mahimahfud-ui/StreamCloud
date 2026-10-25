@@ -5,11 +5,10 @@ const assertFalse = (v: unknown, msg?: string) => nodeAssert.ok(!v, msg);
 const assertEquals = (a: unknown, b: unknown) => nodeAssert.deepEqual(a, b);
 import { isPrivateIp, normalizeUrlKey, parsePublicUrl } from "../_shared/urls.ts";
 import { validateListing } from "../_shared/listing.ts";
-import { issueToken, safeEqual, verifyToken } from "../_shared/auth.ts";
+import { getSessionToken, issueToken, sha256Hex } from "../_shared/auth.ts";
 import { extractPage } from "../admin-detect/page.ts";
 import { omdbLookup } from "../admin-detect/omdb.ts";
 
-Deno.env.set("ADMIN_SESSION_SECRET", "x".repeat(40));
 
 Deno.test("parsePublicUrl accepts public https and blocks unsafe targets", () => {
   assert(parsePublicUrl("https://example.com/a"));
@@ -43,22 +42,29 @@ Deno.test("validateListing rejects bad input and builds a safe row", () => {
   assertEquals(ok.row?.genres, ["Drama"]);
 });
 
-Deno.test("admin session token: valid, tampered, expired, missing", async () => {
-  const { token } = await issueToken();
-  assert(await verifyToken(token));
-  assertFalse(await verifyToken(token.slice(0, -2) + "xx"));
-  assertFalse(await verifyToken(null));
-  assertFalse(await verifyToken("a.b"));
-  const [payload] = token.split(".");
-  const expired = btoa(JSON.stringify({ exp: 1 })).replace(/=+$/, "");
-  assertFalse(await verifyToken(expired + "." + token.split(".")[1]));
-  assert(payload.length > 10);
+Deno.test("admin session token: hash, format, expiry and request header", async () => {
+  const { token, tokenHash, expiresAt } = await issueToken();
+  assert(/^[a-f0-9]{64}$/.test(token), "session token is 256-bit hex");
+  assertEquals(tokenHash, await sha256Hex(token));
+  assert(expiresAt > Date.now());
+  assert(expiresAt <= Date.now() + 8 * 60 * 1000 * 60 + 1000);
+
+  const validRequest = new Request("https://example.com", { headers: { "x-admin-token": token } });
+  assertEquals(getSessionToken(validRequest), token);
+  assertEquals(getSessionToken(new Request("https://example.com")), null);
+  assertEquals(getSessionToken(new Request("https://example.com", {
+    headers: { "x-admin-token": token.slice(0, -1) }
+  })), null);
+  assertEquals(getSessionToken(new Request("https://example.com", {
+    headers: { "x-admin-token": token.toUpperCase() }
+  })), null);
 });
 
-Deno.test("safeEqual", async () => {
-  assert(await safeEqual("test-secret-pin", "test-secret-pin"));
-  assertFalse(await safeEqual("test-secret-pin", "test-secret-pim"));
-  assertFalse(await safeEqual("", "test-secret-pin"));
+Deno.test("sha256Hex is deterministic", async () => {
+  assertEquals(
+    await sha256Hex("abc"),
+    "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+  );
 });
 
 Deno.test("extractPage finds icons, imdb ids and apk links", () => {

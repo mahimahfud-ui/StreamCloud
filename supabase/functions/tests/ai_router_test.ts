@@ -47,6 +47,8 @@ Deno.test("listing AI adapters parse provider responses and router falls back af
   const previousEnv = new Map(envNames.map((name) => [name, Deno.env.get(name)]));
   const originalFetch = globalThis.fetch;
   const calls: string[] = [];
+  const observedModels: Record<string, string> = {};
+  let shannonRequestHasResponseFormat = false;
   try {
     for (const name of envNames) Deno.env.delete(name);
     Deno.env.set("ANTHROPIC_API_KEY", "test-anthropic-key");
@@ -55,9 +57,14 @@ Deno.test("listing AI adapters parse provider responses and router falls back af
     Deno.env.set("CLOUDFLARE_ACCOUNT_ID", "test-account-id");
     Deno.env.set("SHANNON_API_KEY", "test-shannon-key");
 
-    globalThis.fetch = async (input: RequestInfo | URL) => {
-      const host = urlOf(input).hostname;
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const parsedUrl = urlOf(input);
+      const host = parsedUrl.hostname;
       calls.push(host);
+      const requestBody = typeof init?.body === "string" ? JSON.parse(init.body) as Record<string, unknown> : {};
+      if (host === "api.anthropic.com") observedModels.anthropic = String(requestBody.model ?? "");
+      if (host === "api.cloudflare.com") observedModels.cloudflare = decodeURIComponent(parsedUrl.pathname.split("/ai/run/")[1] ?? "");
+      if (host === "api.shannon-ai.com") shannonRequestHasResponseFormat = "response_format" in requestBody;
       if (host === "api.anthropic.com") return jsonResponse({ content: [{ type: "text", text: JSON.stringify(expected) }] });
       if (host === "api.venice.ai") return jsonResponse({ choices: [{ message: { content: JSON.stringify(expected) } }] });
       if (host === "api.cloudflare.com") return jsonResponse({ success: true, result: { response: JSON.stringify(expected) } });
@@ -74,6 +81,9 @@ Deno.test("listing AI adapters parse provider responses and router falls back af
     nodeAssert.ok(calls.includes("api.venice.ai"));
     nodeAssert.ok(calls.includes("api.cloudflare.com"));
     nodeAssert.ok(calls.includes("api.shannon-ai.com"));
+    nodeAssert.equal(observedModels.anthropic, "claude-haiku-4-5-20251001");
+    nodeAssert.equal(observedModels.cloudflare, "@cf/zai-org/glm-4.7-flash");
+    nodeAssert.equal(shannonRequestHasResponseFormat, false);
 
     // Only the first two providers will reject their credentials. Venice is the next
     // eligible fallback and should still produce a result rather than ending the cascade.

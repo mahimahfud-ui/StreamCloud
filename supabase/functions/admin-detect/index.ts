@@ -6,6 +6,7 @@ import { extractPage, type PageInfo } from "./page.ts";
 import { askGemini } from "./gemini.ts";
 import { askAutoAI } from "./ai-router.ts";
 import { omdbLookup } from "./omdb.ts";
+import { checkProviderHealth } from "./provider-health.ts";
 
 type Detected = Record<string, unknown>;
 const norm = (s: string) => s.toLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
@@ -67,6 +68,11 @@ Deno.serve(async (req) => {
   const body = await readJson(req, 4_000);
   if (!body) return json(req, { error: "Invalid request." }, 400);
   const section = String(body.section ?? "sites");
+
+  if (body.mode === "provider-health") {
+    const result = await checkProviderHealth({ includeOmdb: body.includeOmdb === true });
+    return json(req, result);
+  }
 
   if (body.mode === "title-lookup") {
     if (section !== "movie" && section !== "series") return json(req, { error: "Choose Movie or Web Series." }, 422);
