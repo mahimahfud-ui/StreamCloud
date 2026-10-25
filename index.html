@@ -315,6 +315,194 @@ body{background:radial-gradient(1200px 600px at 80% -10%,rgba(229,72,77,.08),tra
 }
 </style>
 
+
+<style id="ios-motion-polish">
+/* Calm, responsive motion polish: softer easing, smaller movement, tactile feedback. */
+:root {
+  --sc-ease-fluid: cubic-bezier(.22, 1, .36, 1);
+  --sc-ease-spring: cubic-bezier(.2, .75, .25, 1);
+  --sc-motion-fast: 160ms;
+  --sc-motion-base: 280ms;
+  --sc-motion-slow: 420ms;
+}
+html { scroll-behavior: smooth; }
+button, a, input, select, textarea, .card { -webkit-tap-highlight-color: transparent; }
+button, a, select { touch-action: manipulation; }
+
+.nav-tools .search,
+.nav-tools .search button,
+.nav-tools .search input {
+  transition:
+    width var(--sc-motion-slow) var(--sc-ease-fluid),
+    max-width var(--sc-motion-slow) var(--sc-ease-fluid),
+    background-color var(--sc-motion-base) var(--sc-ease-fluid),
+    border-color var(--sc-motion-base) var(--sc-ease-fluid),
+    box-shadow var(--sc-motion-base) var(--sc-ease-fluid),
+    color var(--sc-motion-base) var(--sc-ease-fluid),
+    opacity 220ms var(--sc-ease-fluid),
+    transform var(--sc-motion-base) var(--sc-ease-fluid);
+}
+.nav-tools .search { transform: translateZ(0); }
+.nav-tools .search:hover { border-color: rgba(255,255,255,.32); }
+.nav-tools .search:focus-within {
+  border-color: rgba(255,255,255,.42);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.055), 0 8px 24px rgba(0,0,0,.18);
+}
+.nav-tools .search:focus-within input { caret-color: var(--red); }
+.nav-tools .search button:active { transform: scale(.9); }
+
+.mode-switch {
+  transition: background-color var(--sc-motion-base) var(--sc-ease-fluid),
+              border-color var(--sc-motion-base) var(--sc-ease-fluid),
+              box-shadow var(--sc-motion-base) var(--sc-ease-fluid);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+.mode {
+  transform: translateZ(0);
+  transition:
+    transform 260ms var(--sc-ease-spring),
+    background-color var(--sc-motion-base) var(--sc-ease-fluid),
+    color 220ms var(--sc-ease-fluid),
+    box-shadow var(--sc-motion-base) var(--sc-ease-fluid);
+}
+.mode:hover { color: #eee; }
+.mode.active { transform: scale(1.015); }
+.mode:active { transform: scale(.965); }
+.filter-chip,
+.catalog-selects select,
+.btn,
+.admin-icon,
+.wl-open,
+.install-app,
+.modal-action,
+.wl-chip,
+.wl-act button,
+.arrow,
+.modal-close,
+.wl-x {
+  transition:
+    transform 220ms var(--sc-ease-spring),
+    background-color var(--sc-motion-base) var(--sc-ease-fluid),
+    color 220ms var(--sc-ease-fluid),
+    border-color var(--sc-motion-base) var(--sc-ease-fluid),
+    box-shadow var(--sc-motion-base) var(--sc-ease-fluid),
+    opacity 220ms var(--sc-ease-fluid);
+}
+.filter-chip:hover,
+.admin-icon:hover,
+.wl-open:hover,
+.install-app:hover,
+.modal-action:hover { transform: translateY(-1px); }
+.filter-chip:active,
+.btn:active,
+.admin-icon:active,
+.wl-open:active,
+.install-app:active,
+.modal-action:active,
+.wl-chip:active,
+.wl-act button:active,
+.arrow:active,
+.modal-close:active,
+.wl-x:active { transform: scale(.965); }
+
+.view.active {
+  animation: scViewEnter 360ms var(--sc-ease-fluid) both;
+  transform-origin: center top;
+}
+@keyframes scViewEnter {
+  from { opacity: 0; transform: translate3d(0, 7px, 0); filter: blur(1.5px); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+}
+
+.card {
+  transition:
+    transform 360ms var(--sc-ease-spring),
+    box-shadow 360ms var(--sc-ease-fluid),
+    border-radius var(--sc-motion-base) var(--sc-ease-fluid),
+    background-color var(--sc-motion-base) var(--sc-ease-fluid);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.card.logo-card img,
+.card .cap,
+.card .more {
+  transition:
+    transform 420ms var(--sc-ease-fluid),
+    filter 320ms var(--sc-ease-fluid),
+    opacity 240ms var(--sc-ease-fluid),
+    box-shadow 360ms var(--sc-ease-fluid),
+    background-color var(--sc-motion-base) var(--sc-ease-fluid);
+}
+.card.live { animation: scCardArrive 520ms var(--sc-ease-fluid) both; }
+@keyframes scCardArrive {
+  from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.985); filter: blur(2px); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+}
+.card.live:active {
+  transform: translate3d(0, 1px, 0) scale(.975) !important;
+  box-shadow: 0 7px 20px rgba(0,0,0,.38) !important;
+  transition-duration: 110ms;
+}
+.card:focus-visible {
+  outline: 2px solid rgba(255,255,255,.88);
+  outline-offset: 4px;
+}
+.detail-modal .modal-scrim,
+.wl-scrim {
+  transition: opacity var(--sc-motion-slow) var(--sc-ease-fluid);
+}
+.detail-modal .detail-panel {
+  animation: scModalArrive 360ms var(--sc-ease-fluid) both;
+}
+.wl-modal .wl-panel {
+  animation: scModalArrive 380ms var(--sc-ease-fluid);
+}
+@keyframes scModalArrive {
+  from { opacity: 0; transform: translate3d(0, 10px, 0) scale(.975); filter: blur(3px); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card.live:hover,
+  .card.live:focus-within {
+    transform: translate3d(0, -6px, 0) scale(1.025);
+  }
+}
+@media (hover: none) {
+  .card.live:hover { transform: none; box-shadow: none; }
+  .card.live:active { transition-duration: 110ms; }
+  .mode:hover, .filter-chip:hover, .admin-icon:hover,
+  .wl-open:hover, .install-app:hover, .modal-action:hover {
+    transform: none;
+  }
+}
+@media (max-width: 760px) {
+  .view.active { animation-duration: 300ms; }
+  .card.live { animation-duration: 430ms; }
+  .card.live:active { transform: scale(.982) !important; }
+  .mode.active { transform: none; }
+  .nav-tools .search:focus-within { box-shadow: 0 0 0 2px rgba(255,255,255,.05); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  .view.active, .card.live, .detail-modal .detail-panel, .wl-modal .wl-panel {
+    animation: none !important;
+    filter: none !important;
+  }
+  .nav-tools .search,
+  .nav-tools .search button,
+  .nav-tools .search input,
+  .mode-switch, .mode, .filter-chip, .catalog-selects select,
+  .btn, .admin-icon, .wl-open, .install-app, .modal-action,
+  .wl-chip, .wl-act button, .arrow, .modal-close, .wl-x,
+  .card, .card.logo-card img, .card .cap, .card .more {
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="cinema-fallback" aria-hidden="true"></div>
