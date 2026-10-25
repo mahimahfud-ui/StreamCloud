@@ -27,10 +27,10 @@ function safeText(value: unknown, max = 200): string {
 export function normalizeTitle(value: unknown): string {
   return safeText(value, 200)
     .normalize("NFKD")
-    .replace(/\p{M}/gu, "")
+    .replace(/([\p{Script=Latin}])\p{M}+/gu, "$1")
     .toLocaleLowerCase()
     .replace(/&/g, " and ")
-    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/[^\p{L}\p{M}\p{N}]+/gu, " ")
     .trim()
     .replace(/\s+/g, " ");
 }
