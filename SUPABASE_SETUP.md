@@ -85,7 +85,7 @@ The repository's `listings-config.js` is already configured with the project's p
 
 ## Tests
 ```bash
-cd supabase/functions && cp -r . /tmp/fn && cd /tmp/fn && deno test --allow-env tests   # unit tests
+cd supabase/functions && deno test --node-modules-dir=auto --allow-env tests   # complete Edge Function unit tests
 npm run lint                                                                              # repo checks
 ```
 
