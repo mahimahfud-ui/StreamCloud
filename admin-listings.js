@@ -241,7 +241,7 @@
       if (!pin.value) { say(msg, "err", "Enter the PIN."); return; }
       go.disabled = true; say(msg, "", "");
       api("admin-login", { pin: pin.value }).then(function (d) {
-        setSession({ token: d.token, expiresAt: d.expiresAt }); showHome("overview");
+        setSession({ token: d.token, expiresAt: d.expiresAt }); showHome("ai");
       }).catch(function (e) {
         pin.value = ""; go.disabled = false;
         var wait = e.info && e.info.retryAfter ? " Try again in about " + Math.ceil(e.info.retryAfter / 60) + " min." : "";
