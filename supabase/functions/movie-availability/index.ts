@@ -89,9 +89,16 @@ async function fallbackLookup(
     labels.push("movie");
     const country = region.toLowerCase();
     lookups.push((async () => {
-      let result = await getJson("https://itunes.apple.com/search?term=" + encoded + "&media=movie&entity=movie&limit=10&country=" + country);
-      if ((!Array.isArray((result as Record<string, unknown>).results) ||
-        ((result as Record<string, unknown>).results as unknown[]).length === 0) && country !== "us") {
+      let result: unknown = null;
+      try {
+        result = await getJson("https://itunes.apple.com/search?term=" + encoded + "&media=movie&entity=movie&limit=10&country=" + country);
+      } catch (error) {
+        if (country === "us") throw error;
+      }
+      const results = result && typeof result === "object" && Array.isArray((result as Record<string, unknown>).results)
+        ? (result as Record<string, unknown>).results as unknown[]
+        : [];
+      if (!result || (results.length === 0 && country !== "us")) {
         result = await getJson("https://itunes.apple.com/search?term=" + encoded + "&media=movie&entity=movie&limit=10&country=us");
       }
       return result;
@@ -270,10 +277,14 @@ serve(async (req) => {
         throw new Error("All TMDB title-search endpoints failed.");
       }
       if (!candidates.length) {
-        return json({
-          found: false, query: rawQuery,
-          message: "No matching movie or series was found. Try an official title, an alternate title, or add the release year.",
-        }, 200, origin);
+        try {
+          return json(await fallbackLookup(query, region, year, mediaType), 200, origin);
+        } catch {
+          return json({
+            found: false, query: rawQuery,
+            message: "No matching movie or series was found. Try an official title, an alternate title, or add the release year.",
+          }, 200, origin);
+        }
       }
 
       if (isAmbiguousMovieMatch(candidates)) {
