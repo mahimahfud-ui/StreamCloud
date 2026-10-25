@@ -34,7 +34,7 @@
   function close(){backdrop.classList.remove("open");document.body.style.overflow=""}
   function status(message, loading){content.innerHTML='<p class="sc-mf-status">'+(loading?'<span class="sc-mf-loading"></span>':'')+esc(message)+'</p>'}
   function open(){backdrop.classList.add("open");document.body.style.overflow="hidden";panel.focus()}
-  function normalizeTitle(value){return String(value||"").toLocaleLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim().replace(/\\s+/g," ")}
+  function normalizeTitle(value){return String(value||"").toLocaleLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/&/g," and ").replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ")}
   function render(data, query){
     if(!data.found){status(data.message||"No matching movie was found.");return}
     var m=data.movie||{},opts=Array.isArray(data.options)?data.options:[];
