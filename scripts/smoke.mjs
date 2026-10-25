@@ -41,6 +41,7 @@ try {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: "reduce" });
   const mockToken = "a".repeat(64);
   const mockListingId = "11111111-1111-4111-8111-111111111111";
+  const movieAvailabilityCalls = [];
   const mockState = {
     settings: {
       schemaVersion: 1, site: {}, appearance: {},
@@ -93,6 +94,28 @@ try {
       const body = req.postDataJSON();
       if (body.pin !== "smoke-pin") { await reply({ error: "Wrong PIN." }, 401); return; }
       await reply({ ok: true, token: mockToken, expiresAt: Date.now() + 8 * 60 * 60 * 1000, ttl: 8 * 60 * 60 });
+      return;
+    }
+    if (reqUrl.pathname === "/functions/v1/movie-availability") {
+      const body = req.postDataJSON();
+      movieAvailabilityCalls.push(body);
+      if (body.selectedId) {
+        await reply({
+          found: true, mediaType: body.selectedType || "movie",
+          movie: { id: Number(body.selectedId), title: "Dune", year: "2021", overview: "Test synopsis.", poster: null },
+          region: body.region || "BD", options: [],
+          watchLink: "https://www.justwatch.com/bd/search?q=Dune",
+          message: "No verified streaming provider data was returned for this region.",
+          source: "TMDB/JustWatch", verifiedAvailability: false
+        });
+      } else {
+        await reply({
+          found: false, query: body.title,
+          candidates: [{ id: 438631, mediaType: "movie", title: "Dune", year: "2021", poster: null, overview: "Test synopsis." }],
+          message: "Several titles are close to your search. Select the correct title and year.",
+          region: body.region || "BD", source: "TMDB"
+        });
+      }
       return;
     }
     if (reqUrl.pathname === "/functions/v1/admin-detect") {
@@ -171,6 +194,24 @@ try {
   await page.goto(ORIGIN, { waitUntil: "domcontentloaded" });
   await page.waitForSelector("#sitesView .card", { timeout: 15000 });
   assert.ok(await page.locator("#sitesView .card").count() > 0, "Website catalog should render");
+
+  // Movie search should extract a release year, offer disambiguation, and send the chosen TMDB ID back.
+  await page.locator("#q").fill("Dune (2021)");
+  await page.locator("#q").press("Enter");
+  await page.waitForFunction(() =>
+    document.querySelector(".sc-mf-backdrop")?.classList.contains("open") &&
+    !!document.querySelector(".sc-mf-candidate")
+  );
+  assert.equal(movieAvailabilityCalls[0]?.title, "Dune", "Movie title parser should strip a parenthesized year");
+  assert.equal(movieAvailabilityCalls[0]?.year, 2021, "Movie title parser should pass the release year");
+  await page.locator(".sc-mf-candidate").click();
+  await page.waitForFunction(() =>
+    document.querySelector(".sc-mf-result .sc-mf-movie-title")?.textContent?.includes("Dune")
+  );
+  assert.equal(movieAvailabilityCalls[1]?.selectedId, 438631, "Candidate selection should pass the selected title ID");
+  assert.equal(movieAvailabilityCalls[1]?.selectedType, "movie", "Candidate selection should preserve the media type");
+  await page.locator(".sc-mf-close").click();
+  await page.locator("#q").fill("");
 
   // The admin shortcut should open a PIN gate without changing or blocking the main UI.
   assert.ok(await page.locator("#adminIcon").isVisible(), "Admin icon should render beside the social link");
@@ -318,7 +359,7 @@ try {
   await mobile.close();
 
   if (failures.length) throw new Error(failures.join("\n"));
-  console.log("StreamCloud browser smoke test passed: catalog tabs, search autocomplete, recommendations/modal, watchlist CRUD, AI Studio title lookup, site announcement controls, mobile width, and local requests.");
+  console.log("StreamCloud browser smoke test passed: catalog tabs, autocomplete, movie search year parsing and ambiguity selection, recommendations/modal, watchlist CRUD, AI Studio title lookup, site controls, mobile width, and local requests.");
 } finally {
   if (browser) await browser.close().catch(() => {});
   server.kill("SIGTERM");
