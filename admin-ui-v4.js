@@ -17,16 +17,15 @@
     search: "M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-4.3-4.3", chev: "M9 6l6 6-6 6", back: "M15 6l-6 6 6 6", shield: "M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z", more: "M5 12h.01M12 12h.01M19 12h.01"
   };
   var CATS = [
-    { t: "Dashboard", d: "Overview and recent activity", i: "overview", rx: /overview|dashboard|activity/ },
-    { t: "Catalogue", d: "Add, edit and organise items", i: "layers", rx: /add|catalogue|content|manage|listing/ },
-    { t: "Title Tools", d: "Verified title lookup and autofill", i: "search", rx: /title lookup|studio/ },
-    { t: "Site Design", d: "Layout, colours and site settings", i: "palette", rx: /layout|card|appearance|theme|site|setting/ },
-    { t: "Security & Data", d: "PIN, backup and sign out", i: "shield", rx: /backup|pin|password|security|export|import|log ?out|sign ?out/ },
-    { t: "More", d: "Everything else", i: "more", rx: /./ }
+    { t: "Movies & Series", d: "OMDb / IMDb title lookup", i: "search", rx: /movies\s*&\s*series/ },
+    { t: "All Cards", d: "Edit, hide and delete by category", i: "layers", rx: /all cards/ },
+    { t: "StreamCloud AI", d: "Site, catalogue and backend control", i: "ai", rx: /streamcloud ai/ },
+    { t: "Log out", d: "Lock admin and close the panel", i: "logout", rx: /log out/ }
   ];
-  var SUBD = [[/overview|dashboard/, "Stats and current status"], [/activity/, "Recent admin actions"], [/add/, "Create a new listing"], [/catalogue/, "Health score, bulk actions, metadata review"], [/content/, "Browse, edit and delete items"],
-    [/title lookup|studio/, "Find verified title details"], [/copilot/, "Ask in plain words, bulk add"], [/layout|card/, "Cards, columns and spacing"], [/appearance/, "Colours, fonts and shape"], [/site|setting/, "Site name, links and options"],
-    [/backup/, "Export and import your data"], [/pin/, "Change your admin PIN"], [/log ?out|sign ?out/, "Sign out of admin"]];
+  var SUBD = [[/movies\s*&\s*series/, "Verified title metadata, poster, year and seasons"],
+    [/all cards/, "Browse the whole catalog by category; edit, hide, reorder or delete"],
+    [/streamcloud ai/, "Use natural-language instructions for UI, content and backend changes"],
+    [/log out/, "Revoke the admin session and close the panel"]];
   function $(s, r) { return (r || document).querySelector(s); }
   function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
   function svg(k, sz) {
@@ -42,7 +41,7 @@
   function catOf(t) { t = t.toLowerCase(); for (var i = 0; i < CATS.length; i++) if (CATS[i].rx.test(t)) return i; return CATS.length - 1; }
   function iconOf(t) {
     t = t.toLowerCase();
-    if (/overview|dashboard/.test(t)) return "overview"; if (/add/.test(t)) return "add"; if (/copilot|studio/.test(t)) return "ai"; if (/catalogue/.test(t)) return "layers"; if (/content/.test(t)) return "list";
+    if (/overview|dashboard/.test(t)) return "overview"; if (/add/.test(t)) return "add"; if (/streamcloud ai|copilot|studio/.test(t)) return "ai"; if (/catalogue/.test(t)) return "layers"; if (/content/.test(t)) return "list";
     if (/layout|card/.test(t)) return "layout"; if (/appearance|theme/.test(t)) return "palette"; if (/site|setting/.test(t)) return "globe"; if (/activity|log\b/.test(t)) return "clock";
     if (/backup|export|import/.test(t)) return "download"; if (/pin|password|security/.test(t)) return "lock"; if (/log ?out|sign ?out/.test(t)) return "logout"; return "dot";
   }
@@ -53,7 +52,7 @@
   var G = "linear-gradient(135deg,var(--u-ac),var(--u-ac2))", O = ".scx-ov ", SURF = "background:var(--u-sf);border:1px solid var(--u-ln);border-radius:16px";
   var D = "@media(min-width:1100px){", T = "@media(min-width:700px) and (max-width:1099px){", M = "@media(max-width:699px){";
   var css =
-    O + "{--u-bg:#0e1016;--u-sf:#161922;--u-sf2:#1d212c;--u-ln:rgba(255,255,255,.09);--u-tx:#f3f5f9;--u-dm:#98a1b5;--u-ac:#6366f1;--u-ac2:#8b5cf6;--u-acs:rgba(99,102,241,.18);--u-actx:#a5b4fc;" +
+    O + "{--u-bg:#141414;--u-sf:#181818;--u-sf2:#242424;--u-ln:#343434;--u-tx:#ffffff;--u-dm:#a7a7a7;--u-ac:#e50914;--u-ac2:#b20710;--u-acs:rgba(229,9,20,.14);--u-actx:#ffffff;" +
     "--card:var(--u-sf2);--text:var(--u-tx);--dim:var(--u-dm);--border:var(--u-ln);--panel:var(--u-sf);--red:var(--u-ac);color-scheme:dark}" +
     ".scx-ov[data-ux-theme=light]{--u-bg:#f1f5f9;--u-sf:#fff;--u-sf2:#f8fafc;--u-ln:#e2e8f0;--u-tx:#0f172a;--u-dm:#64748b;--u-ac:#4f46e5;--u-ac2:#7c3aed;--u-acs:#eef2ff;--u-actx:#4f46e5;color-scheme:light}" +
     /* full page shell */
@@ -69,7 +68,7 @@
     O + ".ux-back{display:none;width:38px;height:38px;place-items:center;padding:0;border-radius:50%;background:var(--u-sf2);border:1px solid var(--u-ln);color:var(--u-tx);cursor:pointer}" +
     O + ".ux-ttl{display:none;margin:0;font-size:17px;font-weight:800;color:var(--u-tx)}" +
     O + ".ux-gsearch{position:relative;flex:1 1 200px;max-width:340px;margin-left:auto}.ux-gsearch input{width:100%;padding:9px 14px 9px 36px!important;border-radius:999px!important}.ux-gsearch svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--u-dm);pointer-events:none}" +
-    O + ".ux-themebtn,.scx-x{width:38px;height:38px;display:grid;place-items:center;padding:0;border-radius:50%}.scx-ov .scx-x{background:var(--u-sf2);border:1px solid var(--u-ln);color:var(--u-tx)}" +
+    O + ".ux-themebtn{display:none!important}.ux-themebtn,.scx-x{width:38px;height:38px;display:grid;place-items:center;padding:0;border-radius:50%}.scx-ov .scx-x{background:var(--u-sf2);border:1px solid var(--u-ln);color:var(--u-tx)}" +
     /* nav items */
     O + ".ux-nav button{font:inherit;cursor:pointer;text-align:left;color:var(--u-tx)}" +
     O + ".ux-lh{margin:0;padding:2px 10px 10px;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--u-dm)}" +
@@ -117,7 +116,7 @@
   var st0 = document.createElement("style"); st0.id = "ux-theme-flow"; st0.textContent = css; (document.head || document.documentElement).appendChild(st0);
 
   /* ---------- theme ---------- */
-  function theme() { try { return localStorage.getItem(TK) === "light" ? "light" : "dark"; } catch (e) { return "dark"; } }
+  function theme() { return "dark"; }
   function setIcon(b) { var dark = theme() === "dark", label = dark ? "Switch to light mode" : "Switch to dark mode"; if (b.getAttribute("aria-label") === label && b.firstChild) return; b.textContent = ""; b.appendChild(svg(dark ? "sun" : "moon", 17)); b.title = label; b.setAttribute("aria-label", label); }
   function applyTheme(ov) { if (ov.dataset.uxTheme !== theme()) ov.dataset.uxTheme = theme(); var b = $(".ux-themebtn"); if (b) setIcon(b); }
   function toggle() { try { localStorage.setItem(TK, theme() === "dark" ? "light" : "dark"); } catch (e) { /* ignore */ } var ov = $(".scx-ov"); if (ov) applyTheme(ov); }
@@ -143,7 +142,7 @@
     if (!nav) { nav = h("div", { class: "ux-nav" }, [h("div", { class: "ux-l1" }), h("div", { class: "ux-l2" })]); box.appendChild(nav); st.sig = ""; }
     var back = $(".ux-back"), ttl = $(".ux-ttl");
     if (back) back.classList.toggle("show", has && st.view !== "home");
-    if (ttl) ttl.textContent = st.view === "sub" ? CATS[st.cat].t : "Admin";
+    if (ttl) ttl.textContent = st.view === "sub" ? CATS[st.cat].t : "StreamCloud Studio";
     if (sig === st.sig) return; st.sig = sig;
     var l1 = $(".ux-l1", nav), l2 = $(".ux-l2", nav); l1.textContent = ""; l2.textContent = "";
     l1.appendChild(h("p", { class: "ux-lh", text: "Admin" }));
