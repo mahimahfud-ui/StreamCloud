@@ -17,6 +17,7 @@
     .sc-mf-poster{width:88px;aspect-ratio:2/3;object-fit:cover;border-radius:9px;background:#222}.sc-mf-movie-title{font-size:17px;font-weight:700;margin:0 0 6px}.sc-mf-overview{font-size:13px;color:#b7b8c0;line-height:1.5;margin:0 0 12px}
     .sc-mf-options{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 14px}.sc-mf-provider{display:inline-flex;align-items:center;gap:6px;background:#1d1e24;border:1px solid #363740;border-radius:9px;padding:7px 9px;font-size:12px}
     .sc-mf-provider img{width:20px;height:20px;border-radius:5px}.sc-mf-cta{display:inline-flex;align-items:center;justify-content:center;background:#f4f4f5;color:#111;padding:11px 14px;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px}
+    .sc-mf-sites{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}.sc-mf-site{display:flex;flex-direction:column;gap:9px;padding:12px;border:1px solid #363740;border-radius:12px;background:#191a20;min-width:0}.sc-mf-site-head{display:flex;align-items:center;gap:9px;min-width:0}.sc-mf-site-logo{width:36px;height:36px;object-fit:contain;border-radius:8px;background:#24252c;flex-shrink:0}.sc-mf-site-name{font-size:13px;font-weight:700;overflow-wrap:anywhere}.sc-mf-site-domain{font-size:11px;color:#92939d;overflow-wrap:anywhere}.sc-mf-site-link{display:inline-flex;justify-content:center;align-items:center;text-align:center;background:#f4f4f5;color:#111;padding:9px 10px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none}.sc-mf-site-rank{font-size:10px;color:#b9bac4}
     .sc-mf-note{font-size:11px;line-height:1.5;color:#898a94;margin-top:13px}.sc-mf-loading{display:inline-block;width:15px;height:15px;border:2px solid #666;border-top-color:#fff;border-radius:50%;animation:sc-mf-spin .7s linear infinite;vertical-align:middle;margin-right:8px}@keyframes sc-mf-spin{to{transform:rotate(360deg)}}
     @media(max-width:520px){.sc-mf-panel{padding:18px;border-radius:15px}.sc-mf-result{grid-template-columns:72px 1fr;gap:12px}.sc-mf-poster{width:72px}.sc-mf-title{font-size:20px}}
   `;
@@ -26,20 +27,34 @@
   backdrop.setAttribute("role", "dialog");
   backdrop.setAttribute("aria-modal", "true");
   backdrop.setAttribute("aria-label", "Find legal movie availability");
-  backdrop.innerHTML = '<section class="sc-mf-panel" tabindex="-1"><button class="sc-mf-close" type="button" aria-label="Close">×</button><h2 class="sc-mf-title">Find where to watch</h2><p class="sc-mf-sub">Checking official availability for your region</p><div class="sc-mf-content"><p class="sc-mf-status">Ready to search.</p></div><p class="sc-mf-note">Availability is based on TMDB/JustWatch data and can change. StreamCloud does not verify ad counts or guarantee direct playback; provider links open their official availability page.</p></section>';
+  backdrop.innerHTML = '<section class="sc-mf-panel" tabindex="-1"><button class="sc-mf-close" type="button" aria-label="Close">×</button><h2 class="sc-mf-title">Find where to watch</h2><p class="sc-mf-sub">Checking official availability for your region</p><div class="sc-mf-content"><p class="sc-mf-status">Ready to search.</p></div><p class="sc-mf-note">Availability information can change. StreamCloud does not verify ad counts or guarantee direct playback. Site searches may not confirm availability; links open external websites.</p></section>';
   document.body.appendChild(backdrop);
   var panel = backdrop.querySelector(".sc-mf-panel"), content = backdrop.querySelector(".sc-mf-content"), sub = backdrop.querySelector(".sc-mf-sub");
   function esc(s){return String(s == null ? "" : s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
   function close(){backdrop.classList.remove("open");document.body.style.overflow=""}
   function status(message, loading){content.innerHTML='<p class="sc-mf-status">'+(loading?'<span class="sc-mf-loading"></span>':'')+esc(message)+'</p>'}
   function open(){backdrop.classList.add("open");document.body.style.overflow="hidden";panel.focus()}
-  function render(data){
+  function render(data, query){
     if(!data.found){status(data.message||"No matching movie was found.");return}
     var m=data.movie||{},opts=Array.isArray(data.options)?data.options:[];
     var list=opts.map(function(p){return '<span class="sc-mf-provider">'+(p.logo?'<img alt="" loading="lazy" src="'+esc(p.logo)+'">':'')+esc(p.name)+' · '+esc(({free:"Free",ads:"With ads",flatrate:"Subscription",rent:"Rent",buy:"Buy"})[p.type]||p.type)+'</span>'}).join("");
     var action=data.watchLink?'<a class="sc-mf-cta" href="'+esc(data.watchLink)+'" target="_blank" rel="noopener noreferrer">See official watch options ↗</a>':'';
-    content.innerHTML='<article class="sc-mf-result">'+(m.poster?'<img class="sc-mf-poster" loading="lazy" alt="" src="'+esc(m.poster)+'">':'<div class="sc-mf-poster"></div>')+'<div><h3 class="sc-mf-movie-title">'+esc(m.title)+(m.year?' ('+esc(m.year)+')':'')+'</h3><p class="sc-mf-overview">'+esc(m.overview||"No synopsis available.")+'</p>'+(opts.length?'<div class="sc-mf-options">'+list+'</div>':'<p class="sc-mf-status">No verified streaming providers were returned for '+esc(data.region||"your region")+'.</p>')+action+'</div></article>';
-    sub.textContent="Region: "+(data.region||"BD")+" · Provider data from TMDB/JustWatch";
+    var title=String(query||m.title||"").trim();
+    var catalog=window.MAHIFLIX_CATALOG;
+    var sites=catalog&&Array.isArray(catalog.sites)?catalog.sites.slice():[];
+    sites=sites.filter(function(s){return s&&s.name&&s.url&&/^https?:\/\//i.test(s.url)});
+    sites.sort(function(a,b){
+      function score(s){return Number(s.pop||0)*.45+Number(s.smooth||0)*.35+Number(s.langs||0)*.2}
+      return score(b)-score(a);
+    });
+    var cards=sites.slice(0,8).map(function(s,i){
+      var domain=String(s.domain||"").replace(/^www\./i,"");
+      var searchUrl="https://www.google.com/search?q="+encodeURIComponent('site:'+domain+' "'+title+'"');
+      var logo=Array.isArray(s.logoSources)&&s.logoSources.length?s.logoSources[0]:"";
+      return '<article class="sc-mf-site"><div class="sc-mf-site-head">'+(logo?'<img class="sc-mf-site-logo" loading="lazy" alt="" src="'+esc(logo)+'" onerror="this.style.display=\'none\'">':'')+'<div><div class="sc-mf-site-name">'+esc(s.name)+'</div><div class="sc-mf-site-domain">'+esc(domain)+'</div></div></div><div class="sc-mf-site-rank">Directory rank #'+(i+1)+' · title match not verified</div><a class="sc-mf-site-link" href="'+esc(searchUrl)+'" target="_blank" rel="noopener noreferrer">Find title on site ↗</a></article>';
+    }).join("");
+    content.innerHTML='<article class="sc-mf-result">'+(m.poster?'<img class="sc-mf-poster" loading="lazy" alt="" src="'+esc(m.poster)+'">':'<div class="sc-mf-poster"></div>')+'<div><h3 class="sc-mf-movie-title">'+esc(m.title)+(m.year?' ('+esc(m.year)+')':'')+'</h3><p class="sc-mf-overview">'+esc(m.overview||"No synopsis available.")+'</p>'+(opts.length?'<div class="sc-mf-options">'+list+'</div>':'<p class="sc-mf-status">No verified streaming providers were returned for '+esc(data.region||"your region")+'.</p>')+action+'</div></article>'+'<h3 class="sc-mf-movie-title" style="margin-top:18px">Search StreamCloud sites</h3><p class="sc-mf-overview">Ranked using StreamCloud directory scores. “Find title on site” searches the title on that site’s indexed pages; results are not confirmed availability.</p>'+(cards?'<div class="sc-mf-sites">'+cards+'</div>':'<p class="sc-mf-status">No catalog websites are available.</p>');
+    sub.textContent="Region: "+(data.region||"BD")+" · Provider data from "+(data.source||"official provider search");
   }
   async function findMovie(raw){
     var title=String(raw||"").trim();if(title.length<2)return;
@@ -49,7 +64,7 @@
       var res=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json","apikey":cfg.anonKey},body:JSON.stringify({title:title,region:"BD"})});
       var data=await res.json().catch(function(){return {}});
       if(!res.ok)throw new Error(data.error||"Availability lookup failed.");
-      render(data);
+      render(data,title);
     }catch(e){status(e&&e.message?e.message:"Could not check availability. Please try again.");}
   }
   backdrop.querySelector(".sc-mf-close").addEventListener("click",close);
