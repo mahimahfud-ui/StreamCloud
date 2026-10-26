@@ -466,6 +466,26 @@ try {
     `Mobile app cards are too small: ${JSON.stringify(appCardSizes)}`);
   assert.ok(appCardSizes.maxHeight - appCardSizes.minHeight <= 3,
     `Mobile app cards should have consistent heights: ${JSON.stringify(appCardSizes)}`);
+  const mobileAppDownloads = await mobile.evaluate(() =>
+    [...document.querySelectorAll("#appsView .track > .app-card")].map(card => {
+      const button = card.querySelector(".movie-card-actions .download-link");
+      const style = button ? getComputedStyle(button) : null;
+      const cardRect = card.getBoundingClientRect();
+      const buttonRect = button ? button.getBoundingClientRect() : null;
+      return {
+        name: card.dataset.name,
+        visible: !!button && !!style && style.display !== "none" &&
+          style.visibility !== "hidden" && Number(style.opacity) > 0 &&
+          button.getClientRects().length > 0,
+        insideCard: !!buttonRect && buttonRect.top >= cardRect.top - 1 &&
+          buttonRect.bottom <= cardRect.bottom + 1,
+        width: buttonRect ? buttonRect.width : 0
+      };
+    })
+  );
+  assert.ok(mobileAppDownloads.length > 0 &&
+    mobileAppDownloads.every(item => item.visible && item.insideCard && item.width >= 90),
+    `Every mobile Movie App card should show its Download action inside the card: ${JSON.stringify(mobileAppDownloads)}`);
   await mobile.locator('.mode[data-mode="music"]').click();
   const youtify = mobile.locator('#musicView .app-card[data-name="youtify"] .download-link');
   await youtify.waitFor({ state: "visible" });
