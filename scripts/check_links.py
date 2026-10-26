@@ -16,7 +16,7 @@ HTML_PATH = ROOT / "index.html"
 OUTPUT_PATH = ROOT / "link-status.json"
 USER_AGENT = "StreamCloud-LinkStatusBot/2.0 (+scheduled directory link health check)"
 TIMEOUT_SECONDS = 12
-APK_ZIP_MAGIC = b"PK\\x03\\x04"
+APK_ZIP_MAGIC = b"PK\x03\x04"
 
 
 def slug(value: str) -> str:
@@ -24,16 +24,16 @@ def slug(value: str) -> str:
 
 
 def extract_items(source: str, array_name: str) -> list[dict[str, object]]:
-    match = re.search(rf"const\\s+{re.escape(array_name)}\\s*=\\s*\\[(.*?)\\n\\];", source, re.S)
+    match = re.search(rf"const\s+{re.escape(array_name)}\s*=\s*\[(.*?)\n\];", source, re.S)
     if not match:
         raise RuntimeError(f"Could not find the {array_name} catalog array in index.html")
     rows: list[dict[str, object]] = []
     # A catalog object may start with appType/kind before name; property order is not significant.
-    for object_match in re.finditer(r"\\{([^{}]*)\\}", match.group(1), re.S):
+    for object_match in re.finditer(r"\{([^{}]*)\}", match.group(1), re.S):
         row = object_match.group(1)
-        name_match = re.search(r'\\bname\\s*:\\s*"([^"]+)"', row)
-        url_match = re.search(r'\\burl\\s*:\\s*"([^"]+)"', row)
-        domain_match = re.search(r'\\bdomain\\s*:\\s*"([^"]+)"', row)
+        name_match = re.search(r'\bname\s*:\s*"([^"]+)"', row)
+        url_match = re.search(r'\burl\s*:\s*"([^"]+)"', row)
+        domain_match = re.search(r'\bdomain\s*:\s*"([^"]+)"', row)
         if not (name_match and url_match and domain_match):
             continue
         item: dict[str, object] = {
@@ -41,9 +41,9 @@ def extract_items(source: str, array_name: str) -> list[dict[str, object]]:
             "url": url_match.group(1),
             "domain": domain_match.group(1),
         }
-        download_match = re.search(r'\\bdownloadUrl\\s*:\\s*"([^"]+)"', row)
-        direct_match = re.search(r'\\bdownloadDirect\\s*:\\s*(true|false)', row)
-        format_match = re.search(r'\\bdownloadFormat\\s*:\\s*"([^"]+)"', row)
+        download_match = re.search(r'\bdownloadUrl\s*:\s*"([^"]+)"', row)
+        direct_match = re.search(r'\bdownloadDirect\s*:\s*(true|false)', row)
+        format_match = re.search(r'\bdownloadFormat\s*:\s*"([^"]+)"', row)
         if download_match:
             item["download_url"] = download_match.group(1)
         if direct_match:
@@ -180,7 +180,7 @@ def main() -> None:
         "checked_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "entries": dict(sorted(entries.items())),
     }
-    OUTPUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\\n", encoding="utf-8")
+    OUTPUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"Wrote {len(entries)} page/download checks to {OUTPUT_PATH}")
 
 
