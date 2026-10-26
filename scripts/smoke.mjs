@@ -390,7 +390,7 @@ try {
   smokeCard = page.locator(".scx-order-row").filter({ hasText: "Smoke test listing" });
   page.once("dialog", (dialog) => dialog.accept());
   await smokeCard.getByRole("button", { name: "Delete", exact: true }).click();
-  await page.getByText("Saved to the database. Changes apply to visitors after the page refreshes.").waitFor({ timeout: 8000 });
+  await page.getByText("Card removed from the public catalog.", { exact: true }).waitFor({ timeout: 8000 });
   assert.ok(mockState.settings.content.deleted.includes(siteKey), "All Cards should be able to remove a card from the public catalog");
 
   await clickAdminFeature(page, "StreamCloud AI", "StreamCloud AI");
