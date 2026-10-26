@@ -38,16 +38,22 @@ async function auditCardLogos(page, selector, label, requireRealImage = true) {
   const summary = await page.locator(selector + " .card").evaluateAll(cards => cards.map(card => {
     const image = card.querySelector("img");
     const source = image?.getAttribute("src") || "";
+    let candidates = [];
+    try { candidates = JSON.parse(image?.getAttribute("data-logo-sources") || "[]"); } catch {}
+    const name = card.dataset.name || card.querySelector("h3,.cap")?.textContent?.trim() || "unknown";
     return {
-      name: card.dataset.name || card.querySelector("h3,.cap")?.textContent?.trim() || "unknown",
+      name,
       loaded: !!image && image.complete && image.naturalWidth > 0,
       local: source.startsWith("./assets/logos/") || source.startsWith("./nxsha_icon.png"),
+      hasLocalCandidate: candidates.some(url => url.startsWith("./assets/logos/") || url.startsWith("./nxsha_icon.png")),
+      synthetic: /smoke test listing/i.test(name),
       width: image ? image.naturalWidth : 0,
       source: source || null,
       fallback: !image && !!card.querySelector(".initials")
     };
   }));
-  const missingImages = summary.filter(item => !item.loaded || (requireRealImage && !item.local));
+  const missingImages = summary.filter(item => !item.loaded ||
+    (requireRealImage && !item.synthetic && (!item.hasLocalCandidate || !item.local)));
   assert.ok(summary.length > 0, label + ": expected catalog cards to render");
   if (requireRealImage) {
     assert.deepEqual(missingImages, [], label + ": curated local logo/thumbnail assets should decode instead of falling back to initials or a remote favicon: " + JSON.stringify(missingImages));
