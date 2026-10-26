@@ -1,4 +1,4 @@
-const CACHE_NAME = "streamcloud-shell-v29";
+const CACHE_NAME = "streamcloud-shell-v30";
 
 // Keep the existing offline shell and cache the two category/motion modules as part of it.
 const SHELL_PATHS = [
@@ -50,6 +50,48 @@ const SHELL_PATHS = [
   "./assets/logos/pvrplay.svg",
   "./assets/logos/vega.svg",
   "./assets/logos/watchott.svg"
+  "./assets/logos/movie-apps/cinema-hq.ico",
+  "./assets/logos/movie-apps/cineplus.png",
+  "./assets/logos/movie-apps/flix-vision.png",
+  "./assets/logos/movie-apps/reezn.jpg",
+  "./assets/logos/sites/1tube.png",
+  "./assets/logos/sites/7reel.png",
+  "./assets/logos/sites/anivortex.webp",
+  "./assets/logos/sites/bingr.ico",
+  "./assets/logos/sites/cinegram.png",
+  "./assets/logos/sites/cinehd-app.png",
+  "./assets/logos/sites/cinehd.png",
+  "./assets/logos/sites/cinejoy.ico",
+  "./assets/logos/sites/cinevito.ico",
+  "./assets/logos/sites/cinevito.png",
+  "./assets/logos/sites/demus-hd.png",
+  "./assets/logos/sites/demus.ico",
+  "./assets/logos/sites/demus.jpg",
+  "./assets/logos/sites/echo-music.png",
+  "./assets/logos/sites/echo-nightly.webp",
+  "./assets/logos/sites/filmtv.png",
+  "./assets/logos/sites/freekz.ico",
+  "./assets/logos/sites/freekz.png",
+  "./assets/logos/sites/hdghartv.png",
+  "./assets/logos/sites/histream.svg",
+  "./assets/logos/sites/lastwave.png",
+  "./assets/logos/sites/m4uhd.png",
+  "./assets/logos/sites/meld.png",
+  "./assets/logos/sites/moviboxapk.webp",
+  "./assets/logos/sites/movy.webp",
+  "./assets/logos/sites/netmirror.png",
+  "./assets/logos/sites/nightflix.png",
+  "./assets/logos/sites/nuvix.webp",
+  "./assets/logos/sites/nxsha.png",
+  "./assets/logos/sites/outertune.png",
+  "./assets/logos/sites/pvrplay.png",
+  "./assets/logos/sites/pvrplay.svg",
+  "./assets/logos/sites/spotube.png",
+  "./assets/logos/sites/the-og-pirate-bot.ico",
+  "./assets/logos/sites/vega.png",
+  "./assets/logos/sites/watchott.webp",
+  "./assets/logos/sites/youtify.webp",
+  "./nxsha_icon.png"
 ];
 
 function shellUrls() {
