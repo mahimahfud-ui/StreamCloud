@@ -271,6 +271,12 @@ try {
   await page.waitForSelector("#sitesView .card", { timeout: 15000 });
   assert.ok(await page.locator("#sitesView .card").count() > 0, "Website catalog should render");
 
+  // Scrolling should throttle cinematic effects while the user is moving, then restore them.
+  await page.evaluate(() => window.scrollTo({ top: 260, behavior: "instant" }));
+  await page.waitForFunction(() => document.documentElement.classList.contains("is-scrolling"), null, { timeout: 2000 });
+  await page.waitForFunction(() => !document.documentElement.classList.contains("is-scrolling"), null, { timeout: 3000 });
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+
   // Movie search should extract a release year, offer disambiguation, and send the chosen TMDB ID back.
   await page.locator("#q").fill("Dune (2021)");
   await page.locator("#q").press("Enter");
@@ -419,6 +425,9 @@ try {
   mobile.on("pageerror", (error) => { if (failures.length < 12) failures.push("Mobile uncaught page error: " + (error.stack || error.message)); });
   await mobile.goto(ORIGIN, { waitUntil: "domcontentloaded" });
   await mobile.waitForSelector("#sitesView .card", { timeout: 15000 });
+  await mobile.evaluate(() => window.scrollTo({ top: 260, behavior: "instant" }));
+  await mobile.waitForFunction(() => document.documentElement.classList.contains("is-scrolling"), null, { timeout: 2000 });
+  await mobile.waitForFunction(() => !document.documentElement.classList.contains("is-scrolling"), null, { timeout: 3000 });
   const dimensions = await mobile.evaluate(() => ({
     viewport: document.documentElement.clientWidth,
     content: document.documentElement.scrollWidth,

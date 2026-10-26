@@ -179,6 +179,20 @@ body{min-height:100vh;min-height:100dvh}
 }
 
 
+/* Scroll performance: stop animating the hidden fallback layer once WebGL is running. */
+.gl-ready .cinema-fallback:after { animation-play-state: paused; }
+
+/* During active scrolling, keep the browser focused on native scroll/compositing instead of
+   animating card shadows, tilt and sticky glass effects frame-by-frame. */
+.is-scrolling nav,
+.is-scrolling .mode-wrap,
+.is-scrolling .card.live,
+.is-scrolling .card.live:after,
+.is-scrolling .row-head,
+.is-scrolling .finale-in > * {
+  transition-duration: 0s !important;
+}
+
 /* StreamCloud mobile catalogue repair:
    equalize card rows and keep homepage-preview images in normal document flow on phones. */
 main .track {
