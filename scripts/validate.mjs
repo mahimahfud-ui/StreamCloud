@@ -106,6 +106,24 @@ if (!fs.existsSync(indexPath)) {
   }
 }
 
+// Catalog image paths are assembled by JavaScript, so they are not visible to the HTML-tag
+// scanner above. Check those literal local image paths as well (including logoSources arrays).
+function checkDynamicImageReferences(source, fromFile) {
+  const imagePathPattern = /(["'])((?:\.{0,2}\/|\/|assets\/)?[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*\.(?:svg|png|jpe?g|webp|avif|ico|gif))\1/gi;
+  for (const match of source.matchAll(imagePathPattern)) {
+    const reference = match[2];
+    if (reference.startsWith("http://") || reference.startsWith("https://") || reference.startsWith("//") ||
+        reference.startsWith("data:") || reference.startsWith("blob:") ||
+        /^\/favicon\.(?:svg|png|ico)$/i.test(reference)) continue;
+    resolveRef(fromFile, reference, fromFile + " dynamic image reference");
+  }
+}
+if (fs.existsSync(indexPath)) checkDynamicImageReferences(fs.readFileSync(indexPath, "utf8"), "index.html");
+const logoManifestPath = abs("logo-manifest.js");
+if (fs.existsSync(logoManifestPath)) {
+  checkDynamicImageReferences(fs.readFileSync(logoManifestPath, "utf8"), "logo-manifest.js");
+}
+
 // Check explicit local imports and asset URLs in JavaScript modules.
 for (const file of files.filter((p) => /\.(?:js|mjs|cjs)$/i.test(p) && !p.startsWith("vendor/"))) {
   const source = fs.readFileSync(abs(file), "utf8");

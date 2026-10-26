@@ -24,6 +24,43 @@ async function clickAdminFeature(page, category, feature) {
   await featureButton.click();
 }
 
+async function auditCardLogos(page, selector, label, requireRealImage = true) {
+  await page.locator(selector + " .card img").evaluateAll(images => {
+    images.forEach(image => { image.loading = "eager"; });
+  });
+  await page.waitForFunction(sel => {
+    const cards = [...document.querySelectorAll(sel + " .card")];
+    return cards.length > 0 && cards.every(card => {
+      const image = card.querySelector("img");
+      return image ? image.complete && image.naturalWidth > 0 : !!card.querySelector(".initials");
+    });
+  }, selector, { timeout: 20000 });
+  const summary = await page.locator(selector + " .card").evaluateAll(cards => cards.map(card => {
+    const image = card.querySelector("img");
+    const source = image?.getAttribute("src") || "";
+    let candidates = [];
+    try { candidates = JSON.parse(image?.getAttribute("data-logo-sources") || "[]"); } catch {}
+    const name = card.dataset.name || card.querySelector("h3,.cap")?.textContent?.trim() || "unknown";
+    return {
+      name,
+      loaded: !!image && image.complete && image.naturalWidth > 0,
+      local: source.startsWith("./assets/logos/") || source.startsWith("./nxsha_icon.png"),
+      hasLocalCandidate: candidates.some(url => url.startsWith("./assets/logos/") || url.startsWith("./nxsha_icon.png")),
+      synthetic: /smoke test listing/i.test(name),
+      width: image ? image.naturalWidth : 0,
+      source: source || null,
+      fallback: !image && !!card.querySelector(".initials")
+    };
+  }));
+  const missingImages = summary.filter(item => !item.loaded ||
+    (requireRealImage && !item.synthetic && (!item.hasLocalCandidate || !item.local)));
+  assert.ok(summary.length > 0, label + ": expected catalog cards to render");
+  if (requireRealImage) {
+    assert.deepEqual(missingImages, [], label + ": curated local logo/thumbnail assets should decode instead of falling back to initials or a remote favicon: " + JSON.stringify(missingImages));
+  }
+  return { count: summary.length, loaded: summary.filter(x => x.loaded).length, fallbacks: summary.filter(x => !x.loaded).map(x => x.name) };
+}
+
 async function waitForServer() {
   for (let attempt = 0; attempt < 50; attempt++) {
     try {
@@ -271,6 +308,20 @@ try {
   await page.waitForSelector("#sitesView .card", { timeout: 15000 });
   assert.ok(await page.locator("#sitesView .card").count() > 0, "Website catalog should render");
 
+  const imageAudit = {};
+  imageAudit.desktopWebsites = await auditCardLogos(page, "#sitesView", "Desktop Movie Websites");
+  await page.locator('.mode[data-mode="apps"]').click();
+  imageAudit.desktopMovieApps = await auditCardLogos(page, "#appsView", "Desktop Movie Apps");
+  await page.locator('.mode[data-mode="music"]').click();
+  imageAudit.desktopMusicApps = await auditCardLogos(page, "#musicView", "Desktop Music Apps");
+  await page.locator('.mode[data-mode="gaming"]').click();
+  imageAudit.desktopGaming = await auditCardLogos(page, "#gamingView", "Desktop Gaming Websites", false);
+  await page.locator('.mode[data-mode="sites"]').click();
+  assert.ok(imageAudit.desktopWebsites.loaded > 0 && imageAudit.desktopMovieApps.loaded > 0 &&
+    imageAudit.desktopMusicApps.loaded > 0,
+    "Catalog logo assets should load across all core categories: " + JSON.stringify(imageAudit));
+
+
   // Scrolling should throttle cinematic effects while the user is moving, then restore them.
   await page.evaluate(() => window.scrollTo({ top: 260, behavior: "instant" }));
   await page.waitForFunction(() => document.documentElement.classList.contains("is-scrolling"), null, { timeout: 2000 });
@@ -425,6 +476,7 @@ try {
   mobile.on("pageerror", (error) => { if (failures.length < 12) failures.push("Mobile uncaught page error: " + (error.stack || error.message)); });
   await mobile.goto(ORIGIN, { waitUntil: "domcontentloaded" });
   await mobile.waitForSelector("#sitesView .card", { timeout: 15000 });
+  await auditCardLogos(mobile, "#sitesView", "Mobile Movie Websites");
   await mobile.evaluate(() => window.scrollTo({ top: 260, behavior: "instant" }));
   await mobile.waitForFunction(() => document.documentElement.classList.contains("is-scrolling"), null, { timeout: 2000 });
   await mobile.waitForFunction(() => !document.documentElement.classList.contains("is-scrolling"), null, { timeout: 3000 });
@@ -466,6 +518,7 @@ try {
     `Mobile app cards are too small: ${JSON.stringify(appCardSizes)}`);
   assert.ok(appCardSizes.maxHeight - appCardSizes.minHeight <= 3,
     `Mobile app cards should have consistent heights: ${JSON.stringify(appCardSizes)}`);
+  await auditCardLogos(mobile, "#appsView", "Mobile Movie Apps");
   const mobileAppDownloads = await mobile.evaluate(() =>
     [...document.querySelectorAll("#appsView .track > .app-card")].map(card => {
       const button = card.querySelector(".movie-card-actions .download-link");
@@ -487,6 +540,7 @@ try {
     mobileAppDownloads.every(item => item.visible && item.insideCard && item.width >= 90),
     `Every mobile Movie App card should show its Download action inside the card: ${JSON.stringify(mobileAppDownloads)}`);
   await mobile.locator('.mode[data-mode="music"]').click();
+  await auditCardLogos(mobile, "#musicView", "Mobile Music Apps");
   const youtify = mobile.locator('#musicView .app-card[data-name="youtify"] .download-link');
   await youtify.waitFor({ state: "visible" });
   assert.match(await youtify.innerText(), /Download XAPK/i, "Youtify should identify its package as XAPK instead of APK");

@@ -694,7 +694,18 @@ const clean=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt
 const initials=n=>n.replace(/[^a-z0-9 ]/gi,"").split(/\s+/).map(x=>x[0]||"").join("").slice(0,2).toUpperCase();
 const hue=n=>{let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h};
 
-function logoHTML(it,preferLocal){
+function localLogoSource(src){
+  const value=String(src||"").trim();
+  const lower=value.toLowerCase();
+  if(!value||lower.startsWith("http://")||lower.startsWith("https://")||lower.startsWith("data:")||lower.startsWith("blob:")||value.startsWith("//"))return "";
+  let relative=value.split(/[?#]/,1)[0];
+  if(!relative||relative.split("/").some(function(part){return part===".."}))return "";
+  while(relative.startsWith("./"))relative=relative.slice(2);
+  while(relative.startsWith("/"))relative=relative.slice(1);
+  if(!relative||!/\.(?:svg|png|jpe?g|webp|avif|ico|gif)$/i.test(relative))return "";
+  return "./"+relative;
+}
+function logoHTML(it){
   const slug=String(it.name||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   const logoMap=window.STREAMCLOUD_ITEM_LOGOS||{};
   const type=it.appType||"site";
@@ -702,15 +713,20 @@ function logoHTML(it,preferLocal){
   const domainKey=type+":"+domain;
   const nameKey=type+":"+slug;
   const localItem=logoMap[domainKey]||logoMap[nameKey]||(window.MAHIFLIX_LOGOS||{})[domain];
-  const preview=String(it.thumbnail||it.thumbnailUrl||"").trim();
+  const previewValue=String(it.thumbnail||it.thumbnailUrl||"").trim();
+  const previewLower=previewValue.toLowerCase();
+  const preview=previewValue?((previewLower.startsWith("https://")||previewLower.startsWith("http://"))?previewValue:(localLogoSource(previewValue)||previewValue)):"";
   let host=domain;
   try{host=new URL(it.url||("https://"+domain)).hostname}catch(e){host=domain.split("/")[0]}
-  const officialSources=(it.logoSources||[]).filter(function(src){return /^https?:\/\//i.test(String(src))});
+  const localSources=(it.logoSources||[]).map(localLogoSource).filter(Boolean);
+  const mappedLocal=localLogoSource(localItem);
+  const officialSources=(it.logoSources||[]).filter(function(src){const value=String(src).toLowerCase();return value.startsWith("https://")||value.startsWith("http://")});
   const sources=[
     ...(preview?[preview]:[]),
+    ...localSources,
+    ...(mappedLocal?[mappedLocal]:[]),
     ...officialSources,
     ...(host?["https://"+host+"/favicon.svg","https://"+host+"/favicon.png","https://"+host+"/favicon.ico"]:[]),
-    ...(localItem?[localItem]:[]),
     ...(host?["https://www.google.com/s2/favicons?sz=256&domain="+encodeURIComponent(host),"https://icons.duckduckgo.com/ip3/"+encodeURIComponent(host)+".ico"]:[])
   ];
   const unique=Array.from(new Set(sources.filter(Boolean)));
@@ -766,7 +782,7 @@ function appCard(it,i){
   const directUrl=hasDownloadUrl&&it.downloadDirect===true;
   const downloadFormat=String(it.downloadFormat||"APK").toUpperCase();
   const downloadLabel=directUrl?"Download "+clean(downloadFormat):"Open download page";
-  const logo=logoHTML(it,!music);
+  const logo=logoHTML(it);
   const favourite="<button class='fav movie-fav' type='button' data-on='' aria-pressed='false' aria-label='Add "+clean(it.name)+" to My List' title='Add to My List'>"+svgPlus()+"</button>";
   const downloadButton=hasDownloadUrl
     ?"<a class='open-link download-link' "+(directUrl?"data-direct-download='true'":"data-download-page='true'")+" href='"+clean(it.downloadUrl)+"' rel='nofollow noopener noreferrer' aria-label='"+clean(directUrl?"Download "+it.name+" "+downloadFormat:"Open download page for "+it.name)+"'>"+downloadLabel+" <span aria-hidden='true'>↧</span></a>"
