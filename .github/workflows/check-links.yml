@@ -1,6 +1,13 @@
 name: Check MahiFlix external links
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "scripts/check_links.py"
+      - "scripts/test_check_links.py"
+      - ".github/workflows/check-links.yml"
   schedule:
     - cron: "17 4 * * 1"
   workflow_dispatch:
