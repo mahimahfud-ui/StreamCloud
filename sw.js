@@ -49,7 +49,7 @@ const SHELL_PATHS = [
   "./assets/logos/nxsha.svg",
   "./assets/logos/pvrplay.svg",
   "./assets/logos/vega.svg",
-  "./assets/logos/watchott.svg"
+  "./assets/logos/watchott.svg",
   "./assets/logos/movie-apps/cinema-hq.ico",
   "./assets/logos/movie-apps/cineplus.png",
   "./assets/logos/movie-apps/flix-vision.png",
