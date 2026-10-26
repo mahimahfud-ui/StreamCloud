@@ -5,7 +5,7 @@ export function initChoreography({ invalidate }) {
   const root = document.documentElement;
   const hero = document.getElementById('top');
   const finale = document.getElementById('finale');
-  let vh = innerHeight, queued = false;
+  let vh = innerHeight, queued = false, scrolling = false, scrollIdleTimer = 0, lastDepthAt = 0;
 
   // ---- reveals: add `.in` once when something first enters the viewport ----
   // The catalog re-renders (mode switch, filters, search), so new nodes are picked up by a MutationObserver.
@@ -77,11 +77,25 @@ export function initChoreography({ invalidate }) {
     state.pageP = clamp(y / Math.max(1, docH - vh));
     hero.style.setProperty('--hp', state.hero.toFixed(3));
     root.classList.toggle('at-finale', state.finale > .2);
-    depth();
+    // Visible-card geometry reads are the most expensive part of scroll choreography.
+    // Keep subtle desktop depth motion, but cap those reads/writes during active scrolling.
+    const now = performance.now();
+    if (!scrolling || now - lastDepthAt >= 48) { depth(); lastDepthAt = now; }
     if (state.reduced) invalidate();
   }
   const queue = () => { if (!queued) { queued = true; requestAnimationFrame(step); } };
-  addEventListener('scroll', queue, { passive: true });
+  const onScroll = () => {
+    scrolling = true;
+    root.classList.add('is-scrolling');
+    clearTimeout(scrollIdleTimer);
+    scrollIdleTimer = setTimeout(() => {
+      scrolling = false;
+      root.classList.remove('is-scrolling');
+      queue(); // final depth pass after scrolling stops
+    }, 120);
+    queue();
+  };
+  addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', () => { vh = innerHeight; queue(); });
   step();
   return { refresh: queue };

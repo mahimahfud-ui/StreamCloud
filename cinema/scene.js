@@ -224,6 +224,9 @@ export function startScene({ canvas, state, onReady, onFail }) {
 
   // ---- loop + quality governor ----
   let raf = 0, last = performance.now(), ready = false, warm = 2, acc = 0, cnt = 0, bad = 0, dead = false;
+  let lastRenderedAt = 0, lastScrollAt = -Infinity;
+  const onScroll = () => { lastScrollAt = performance.now(); };
+  addEventListener('scroll', onScroll, { passive: true });
   let base = 1;                                                         // fastest frame seen ≈ the display's refresh interval
   function govern(dt) {
     if (dt > .004) base = Math.min(base, dt);
@@ -241,7 +244,14 @@ export function startScene({ canvas, state, onReady, onFail }) {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(.05, (now - last) / 1000); last = now;
     update(dt, now, false);
-    renderer.render(scene, camera);
+    // Keep the cinematic canvas animated, but lower GPU draw frequency during active page
+    // scrolling so the browser can prioritize content movement and touch/wheel input.
+    const activelyScrolling = now - lastScrollAt < 180;
+    const renderInterval = activelyScrolling ? (mqPhone.matches ? 45 : 33.333) : (1000 / 60);
+    if (!lastRenderedAt || now - lastRenderedAt >= renderInterval) {
+      renderer.render(scene, camera);
+      lastRenderedAt = now;
+    }
     if (!ready) { ready = true; onReady(); }
     govern(dt);
   }
@@ -265,7 +275,7 @@ export function startScene({ canvas, state, onReady, onFail }) {
 
   function dispose() {
     dead = true; stop();
-    document.removeEventListener('visibilitychange', onVis); removeEventListener('resize', onResize);
+    document.removeEventListener('visibilitychange', onVis); removeEventListener('resize', onResize); removeEventListener('scroll', onScroll);
     canvas.removeEventListener('webglcontextlost', onLost); canvas.removeEventListener('webglcontextrestored', onRestored);
     disposables.forEach(d => d.dispose()); renderer.dispose();
     try { renderer.forceContextLoss(); } catch (e) {}
