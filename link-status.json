@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-19T09:56:53+00:00",
+  "checked_at": "2026-10-26T10:10:54+00:00",
   "entries": {
     "site:freekz": {
       "name": "Freekz",
@@ -8,7 +8,7 @@
       "http_status": 200,
       "reason": "HTTP 200",
       "checked_url": "https://freekz.to/",
-      "checked_at": "2026-10-19T09:56:44+00:00"
+      "checked_at": "2026-10-26T10:10:27+00:00"
     },
     "site:7reel": {
       "name": "7reel",
@@ -17,16 +17,16 @@
       "http_status": 200,
       "reason": "HTTP 200",
       "checked_url": "https://7reels.cc/",
-      "checked_at": "2026-10-19T09:56:44+00:00"
+      "checked_at": "2026-10-26T10:10:28+00:00"
     },
     "site:m4uhd": {
       "name": "M4UHD",
       "kind": "site",
-      "status": "up",
-      "http_status": 200,
-      "reason": "HTTP 200",
+      "status": "unknown",
+      "http_status": null,
+      "reason": "Network check could not verify link: TimeoutError",
       "checked_url": "https://m4uhd.gold/",
-      "checked_at": "2026-10-19T09:56:45+00:00"
+      "checked_at": "2026-10-26T10:10:28+00:00"
     },
     "site:cinehd": {
       "name": "CineHD",
@@ -35,7 +35,7 @@
       "http_status": 200,
       "reason": "HTTP 200",
       "checked_url": "https://cinehd.vc/",
-      "checked_at": "2026-10-19T09:56:48+00:00"
+      "checked_at": "2026-10-26T10:10:41+00:00"
     },
     "site:nightflix": {
       "name": "NightFlix",
@@ -44,7 +44,7 @@
       "http_status": 200,
       "reason": "HTTP 200",
       "checked_url": "https://nightflix.vg/",
-      "checked_at": "2026-10-19T09:56:48+00:00"
+      "checked_at": "2026-10-26T10:10:41+00:00"
     },
     "site:the-og-pirate-bot": {
       "name": "The OG Pirate Bot",
@@ -53,7 +53,7 @@
       "http_status": 200,
       "reason": "HTTP 200",
       "checked_url": "https://theogpiratebot.online/",
-      "checked_at": "2026-10-19T09:56:49+00:00"
+      "checked_at": "2026-10-26T10:10:41+00:00"
     },
     "site:cinevito": {
       "name": "Cinevito",
@@ -62,7 +62,7 @@
       "http_status": 200,
       "reason": "HTTP 200",
       "checked_url": "https://cinevito.net/",
-      "checked_at": "2026-10-19T09:56:49+00:00"
+      "checked_at": "2026-10-26T10:10:42+00:00"
     },
     "site:bingr": {
       "name": "Bingr",
@@ -71,7 +71,7 @@
       "http_status": 200,
       "reason": "HTTP 200",
       "checked_url": "https://bingr.one/",
-      "checked_at": "2026-10-19T09:56:50+00:00"
+      "checked_at": "2026-10-26T10:10:42+00:00"
     },
     "site:cinejoy": {
       "name": "Cinejoy",
@@ -80,7 +80,7 @@
       "http_status": 200,
       "reason": "HTTP 200",
       "checked_url": "https://cinejoy.to/",
-      "checked_at": "2026-10-19T09:56:51+00:00"
+      "checked_at": "2026-10-26T10:10:43+00:00"
     },
     "site:cinegram": {
       "name": "Cinegram",
@@ -89,7 +89,16 @@
       "http_status": 403,
       "reason": "HTTP 403",
       "checked_url": "https://cinegram.tv/",
-      "checked_at": "2026-10-19T09:56:52+00:00"
+      "checked_at": "2026-10-26T10:10:44+00:00"
+    },
+    "site:histream": {
+      "name": "HiStream",
+      "kind": "site",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://histream.app/",
+      "checked_at": "2026-10-26T10:10:44+00:00"
     },
     "site:watchott": {
       "name": "Watchott",
@@ -98,7 +107,7 @@
       "http_status": 200,
       "reason": "HTTP 200",
       "checked_url": "https://watchott.org/",
-      "checked_at": "2026-10-19T09:56:52+00:00"
+      "checked_at": "2026-10-26T10:10:45+00:00"
     },
     "site:1tube": {
       "name": "1tube",
@@ -107,7 +116,187 @@
       "http_status": 200,
       "reason": "HTTP 200",
       "checked_url": "https://www.1tube.org/",
-      "checked_at": "2026-10-19T09:56:53+00:00"
+      "checked_at": "2026-10-26T10:10:45+00:00"
+    },
+    "site:movy": {
+      "name": "Movy",
+      "kind": "site",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://www.movy.sx/",
+      "checked_at": "2026-10-26T10:10:46+00:00"
+    },
+    "site:pvrplay": {
+      "name": "PvrPlay",
+      "kind": "site",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://dbhnmkjasgbvsdkjbskkvnskjbfckldsnckjbckjnxkjcsknxjvkjxnvcxknvku.pvrplay.fun/",
+      "checked_at": "2026-10-26T10:10:46+00:00"
+    },
+    "app:vega": {
+      "name": "Vega",
+      "kind": "app",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://vega.zendax.me/",
+      "checked_at": "2026-10-26T10:10:46+00:00"
+    },
+    "app:cinehd": {
+      "name": "CineHD",
+      "kind": "app",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://cinehd.dev/",
+      "checked_at": "2026-10-26T10:10:46+00:00"
+    },
+    "app:moviboxapk": {
+      "name": "Moviboxapk",
+      "kind": "app",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://moviboxapk.com/",
+      "checked_at": "2026-10-26T10:10:47+00:00"
+    },
+    "app:anivortex": {
+      "name": "Anivortex",
+      "kind": "app",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://anivortex.in/",
+      "checked_at": "2026-10-26T10:10:47+00:00"
+    },
+    "app:nxsha": {
+      "name": "Nxsha",
+      "kind": "app",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://nxsha.app/",
+      "checked_at": "2026-10-26T10:10:48+00:00"
+    },
+    "app:freekz": {
+      "name": "Freekz",
+      "kind": "app",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://freekz.to/",
+      "checked_at": "2026-10-26T10:10:48+00:00"
+    },
+    "app:cinema-hq": {
+      "name": "Cinema HQ",
+      "kind": "app",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://cinemahq.app/",
+      "checked_at": "2026-10-26T10:10:48+00:00"
+    },
+    "app:flix-vision": {
+      "name": "Flix Vision",
+      "kind": "app",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://linktr.ee/flixvision",
+      "checked_at": "2026-10-26T10:10:49+00:00"
+    },
+    "app:cineplus": {
+      "name": "CinePlus",
+      "kind": "app",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://cineplus.app/",
+      "checked_at": "2026-10-26T10:10:50+00:00"
+    },
+    "app:reezn": {
+      "name": "Reezn",
+      "kind": "app",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://github.com/bedevlab/rdownload",
+      "checked_at": "2026-10-26T10:10:50+00:00"
+    },
+    "music:demus": {
+      "name": "Demus",
+      "kind": "music",
+      "status": "unknown",
+      "http_status": 412,
+      "reason": "HTTP 412",
+      "checked_url": "https://en.softonic.com/download/demus/android/post-download?dt=internalDownload",
+      "checked_at": "2026-10-26T10:10:51+00:00"
+    },
+    "music:youtify": {
+      "name": "Youtify",
+      "kind": "music",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://d.apkpure.net/b/XAPK/com.youtify.music?version=latest",
+      "checked_at": "2026-10-26T10:10:51+00:00"
+    },
+    "music:echo-music": {
+      "name": "Echo Music",
+      "kind": "music",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://github.com/EchoMusicApp/Echo-Music/releases/latest/download/EchoMusic.apk",
+      "checked_at": "2026-10-26T10:10:52+00:00"
+    },
+    "music:echo-nightly": {
+      "name": "Echo Nightly",
+      "kind": "music",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://github.com/itsmechinmoy/echo-nightly/releases/latest/download/app-release.apk",
+      "checked_at": "2026-10-26T10:10:52+00:00"
+    },
+    "music:spotube": {
+      "name": "Spotube",
+      "kind": "music",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://spotube.cc/downloads/redirect/?platform=Android&filetype=apk&p=latest%2Fdownload%2FSpotube-android-all-arch.apk",
+      "checked_at": "2026-10-26T10:10:53+00:00"
+    },
+    "music:outertune": {
+      "name": "OuterTune",
+      "kind": "music",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://github.com/OuterTune/OuterTune/releases/latest",
+      "checked_at": "2026-10-26T10:10:53+00:00"
+    },
+    "music:lastwave": {
+      "name": "LastWave",
+      "kind": "music",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://github.com/Clash-Projects/LastWave-Native/releases/latest",
+      "checked_at": "2026-10-26T10:10:54+00:00"
+    },
+    "music:meld": {
+      "name": "Meld",
+      "kind": "music",
+      "status": "up",
+      "http_status": 200,
+      "reason": "HTTP 200",
+      "checked_url": "https://github.com/FrancescoGrazioso/Meld/releases/download/v0.7.2/Meld-izzy.apk",
+      "checked_at": "2026-10-26T10:10:54+00:00"
     }
   }
 }
