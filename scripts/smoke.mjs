@@ -424,6 +424,44 @@ try {
     content: document.documentElement.scrollWidth,
   }));
   assert.ok(dimensions.content <= dimensions.viewport + 1, `Mobile layout overflows horizontally: ${JSON.stringify(dimensions)}`);
+  const websiteCardSizes = await mobile.evaluate(() => {
+    const cards = [...document.querySelectorAll("#sitesView .track > .card")];
+    const heights = cards.map(card => card.getBoundingClientRect().height);
+    const widths = cards.map(card => card.getBoundingClientRect().width);
+    return {
+      count: cards.length,
+      minHeight: Math.min(...heights),
+      maxHeight: Math.max(...heights),
+      minWidth: Math.min(...widths),
+      imageCards: cards.filter(card => {
+        const image = card.querySelector("img");
+        return image && image.getBoundingClientRect().height > 60;
+      }).length,
+    };
+  });
+  assert.ok(websiteCardSizes.count > 0 && websiteCardSizes.minWidth >= 120,
+    `Mobile website cards are too small: ${JSON.stringify(websiteCardSizes)}`);
+  assert.ok(websiteCardSizes.minHeight >= 160,
+    `Mobile website cards collapsed instead of showing their full image and details: ${JSON.stringify(websiteCardSizes)}`);
+  assert.ok(websiteCardSizes.maxHeight - websiteCardSizes.minHeight <= 3,
+    `Mobile website cards should have consistent heights: ${JSON.stringify(websiteCardSizes)}`);
+  await mobile.locator('.mode[data-mode="apps"]').click();
+  await mobile.waitForSelector("#appsView .app-card", { timeout: 15000 });
+  const appCardSizes = await mobile.evaluate(() => {
+    const cards = [...document.querySelectorAll("#appsView .track > .app-card")];
+    const heights = cards.map(card => card.getBoundingClientRect().height);
+    const widths = cards.map(card => card.getBoundingClientRect().width);
+    return { count: cards.length, minHeight: Math.min(...heights), maxHeight: Math.max(...heights), minWidth: Math.min(...widths) };
+  });
+  assert.ok(appCardSizes.count > 0 && appCardSizes.minWidth >= 120,
+    `Mobile app cards are too small: ${JSON.stringify(appCardSizes)}`);
+  assert.ok(appCardSizes.maxHeight - appCardSizes.minHeight <= 3,
+    `Mobile app cards should have consistent heights: ${JSON.stringify(appCardSizes)}`);
+  await mobile.locator('.mode[data-mode="music"]').click();
+  const youtify = mobile.locator('#musicView .app-card[data-name="youtify"] .download-link');
+  await youtify.waitFor({ state: "visible" });
+  assert.match(await youtify.innerText(), /Download XAPK/i, "Youtify should identify its package as XAPK instead of APK");
+  assert.equal(await youtify.getAttribute("data-direct-download"), "true", "Youtify's direct file link should be marked explicitly");
   await mobile.close();
 
   if (failures.length) throw new Error(failures.join("\n"));

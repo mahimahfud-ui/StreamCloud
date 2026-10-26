@@ -177,3 +177,80 @@ body{min-height:100vh;min-height:100dvh}
   main .track{width:100%}
   .mode-switch{max-width:100%}
 }
+
+
+/* StreamCloud mobile catalogue repair:
+   equalize card rows and keep homepage-preview images in normal document flow on phones. */
+main .track {
+  align-items: stretch;
+  grid-auto-rows: 1fr;
+}
+main .track > .card {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+@media (max-width: 760px) {
+  main .track {
+    grid-auto-rows: 1fr !important;
+    align-items: stretch !important;
+  }
+  main .track > .card {
+    height: 100% !important;
+    min-height: 0;
+  }
+  main .card.logo-card img.homepage-preview,
+  main .card.logo-card img.source-thumbnail {
+    position: static !important;
+    inset: auto !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    aspect-ratio: 16 / 10 !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  main .card.logo-card .cap {
+    flex: 0 0 auto;
+    min-height: 46px;
+    display: flex !important;
+    align-items: center;
+    line-height: 1.35;
+  }
+  main .card.logo-card .site-meta {
+    margin-top: auto;
+    min-height: 42px;
+  }
+  main .app-card {
+    height: 100% !important;
+    min-height: 280px;
+  }
+  main .app-card .card-top {
+    min-height: 64px;
+  }
+  main .app-card h3 {
+    min-height: 42px;
+    align-items: flex-start;
+  }
+  main .app-card p {
+    flex: 1 0 auto;
+    min-height: 54px;
+  }
+  main .app-card .movie-app-tags {
+    min-height: 32px;
+    align-content: start;
+  }
+  main .app-card .card-footer {
+    margin-top: auto;
+  }
+}

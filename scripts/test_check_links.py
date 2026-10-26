@@ -42,6 +42,33 @@ const A=[
             [{"name": "Movie App", "url": "https://movie.example/", "domain": "movie.example"}],
         )
 
+    def test_download_urls_and_formats_are_extracted(self):
+        source = '''
+const M=[
+{appType:"music",name:"Player",url:"https://player.example/",downloadUrl:"https://cdn.example/app.xapk",downloadDirect:true,downloadFormat:"XAPK",domain:"player.example"},
+];
+'''
+        self.assertEqual(
+            extract_items(source, "M"),
+            [{
+                "name": "Player",
+                "url": "https://player.example/",
+                "domain": "player.example",
+                "download_url": "https://cdn.example/app.xapk",
+                "download_direct": True,
+                "download_format": "XAPK",
+            }],
+        )
+
+    def test_every_seeded_app_has_an_explicit_direct_download(self):
+        source = HTML_PATH.read_text(encoding="utf-8")
+        for array_name in ("A", "M"):
+            for item in extract_items(source, array_name):
+                with self.subTest(array_name=array_name, name=item["name"]):
+                    self.assertTrue(item.get("download_url"), f"{item['name']} needs a download URL")
+                    self.assertIs(item.get("download_direct"), True, f"{item['name']} must be explicitly marked direct")
+                    self.assertIn(item.get("download_format", "APK"), ("APK", "XAPK"))
+
     def test_missing_category_raises_a_clear_error(self):
         with self.assertRaisesRegex(RuntimeError, "Could not find the M catalog array"):
             extract_items("const S=[\n];", "M")
