@@ -113,7 +113,8 @@ function checkDynamicImageReferences(source, fromFile) {
   for (const match of source.matchAll(imagePathPattern)) {
     const reference = match[2];
     if (reference.startsWith("http://") || reference.startsWith("https://") || reference.startsWith("//") ||
-        reference.startsWith("data:") || reference.startsWith("blob:")) continue;
+        reference.startsWith("data:") || reference.startsWith("blob:") ||
+        /^\/favicon\.(?:svg|png|ico)$/i.test(reference)) continue;
     resolveRef(fromFile, reference, fromFile + " dynamic image reference");
   }
 }
