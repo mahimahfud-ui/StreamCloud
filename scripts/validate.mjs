@@ -117,7 +117,7 @@ function checkDynamicImageReferences(source, fromFile) {
     resolveRef(fromFile, reference, fromFile + " dynamic image reference");
   }
 }
-checkDynamicImageReferences(html, "index.html");
+if (fs.existsSync(indexPath)) checkDynamicImageReferences(fs.readFileSync(indexPath, "utf8"), "index.html");
 const logoManifestPath = abs("logo-manifest.js");
 if (fs.existsSync(logoManifestPath)) {
   checkDynamicImageReferences(fs.readFileSync(logoManifestPath, "utf8"), "logo-manifest.js");
