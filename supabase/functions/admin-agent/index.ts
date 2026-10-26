@@ -76,34 +76,60 @@ function pEnabled(p:Prov){return !!pkey(p)&&(p.free||paidFallback);}
 function pStatuses(){return PROVS.map(p=>({name:p.name,configured:!!pkey(p),enabled:pEnabled(p)&&(p.kind!=="cloudflare"||!!cloudflareId())}));}
 function cloudflareId():string{const direct=env("CLOUDFLARE_ACCOUNT_ID")||env("Cloudflare Account ID");if(direct)return direct;try{const o=JSON.parse(env("Cloudflare"));const x=Object.entries(o).find(([k,v])=>/^(?:account.?id|cloudflare.?account.?id)$/i.test(k)&&typeof v==="string");if(x)return String(x[1]).trim();}catch{}return"";}
 function outputText(d:any):string{const c=d?.choices?.[0]?.message?.content;if(typeof c==="string")return c;if(Array.isArray(c))return c.map((p:any)=>p?.text||"").join("");return"";}
+function providerFailure(status:number,data:any,key:string):string{
+ const raw=String(data?.error?.message||data?.message||data?.error?.status||"").trim();
+ const detail=raw.replaceAll(key,"[redacted]").replace(/Bearer\s+\S+/gi,"Bearer [redacted]").replace(/(?:AIza[0-9A-Za-z_-]{20,}|gsk_[0-9A-Za-z_-]{12,}|sk-or-v1-[0-9A-Za-z_-]{12,})/g,"[redacted]").replace(/\s+/g," ").slice(0,200);
+ const hints:Record<number,string>={400:"request rejected; check model/JSON mode",401:"API key was rejected",403:"provider account or model access is denied",404:"model ID or endpoint was not found",413:"request payload too large; source context is capped",429:"provider quota or rate limit reached",500:"provider server error",502:"provider gateway error",503:"provider temporarily unavailable",504:"provider timed out"};
+ return "HTTP "+status+(detail?": "+detail:"")+(hints[status]?" ("+hints[status]+")":"");
+}
 async function callAI(p:Prov,system:string,prompt:string,jsonMode:boolean):Promise<string>{
- const key=pkey(p);if(!key)throw new Error("Key missing");const defaults:Record<string,string>={gemini:"gemini-2.5-flash",groq:"openai/gpt-oss-120b",openrouter:"openrouter/free",cloudflare:"@cf/zai-org/glm-4.7-flash",openai:"gpt-4.1-mini",deepseek:"deepseek-chat",anthropic:"claude-3-5-haiku-latest",venice:"venice-uncensored",shannon:"shannon-3"};
+ const key=pkey(p);if(!key)throw new Error("Key missing");const defaults:Record<string,string>={gemini:"gemini-3.1-flash-lite",groq:"openai/gpt-oss-120b",openrouter:"openrouter/free",cloudflare:"@cf/zai-org/glm-4.7-flash",openai:"gpt-4.1-mini",deepseek:"deepseek-chat",anthropic:"claude-3-5-haiku-latest",venice:"venice-uncensored",shannon:"shannon-3"};
  let model=env(p.modelEnv)||defaults[p.kind];
  if(p.kind==="openrouter"&&!paidFallback&&model!=="openrouter/free"&&!/:free$/i.test(model))model="openrouter/free";
  if(p.kind==="gemini"){
-  const url="https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(model.replace(/^models\//,""))+":generateContent";
-  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify({systemInstruction:{parts:[{text:system}]},contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:0.15,maxOutputTokens:8192,...(jsonMode?{responseMimeType:"application/json"}:{})}}),signal:AbortSignal.timeout(55000)});
-  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error("HTTP "+r.status);const t=(d?.candidates?.[0]?.content?.parts||[]).map((x:any)=>x.text||"").join("");if(!t)throw new Error("empty response");return t;
+  const candidates=[...new Set([model,"gemini-3.1-flash-lite","gemini-3-flash-preview"].map(x=>String(x||"").replace(/^models\//,"")).filter(Boolean))];
+  let lastError:Error=new Error("Gemini model unavailable");
+  for(const candidate of candidates){
+   const url="https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(candidate)+":generateContent";
+   const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify({systemInstruction:{parts:[{text:system}]},contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:0.15,maxOutputTokens:8192,...(jsonMode?{responseMimeType:"application/json"}:{})}}),signal:AbortSignal.timeout(55000)});
+   const d=await r.json().catch(()=>({}));
+   if(!r.ok){
+    lastError=new Error(providerFailure(r.status,d,key)+" [model "+candidate+"]");
+    if(r.status===404)continue;
+    throw lastError;
+   }
+   const t=(d?.candidates?.[0]?.content?.parts||[]).map((x:any)=>x.text||"").join("");
+   if(!t)throw new Error("Gemini returned an empty response.");
+   return t;
+  }
+  throw lastError;
  }
  if(p.kind==="cloudflare"){
   const id=cloudflareId();if(!id)throw new Error("Cloudflare account ID missing");const modelPath=model.split("/").map((x:string)=>encodeURIComponent(x).replace(/%40/gi,"@")).join("/");
   const r=await fetch("https://api.cloudflare.com/client/v4/accounts/"+encodeURIComponent(id)+"/ai/run/"+modelPath,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+key},body:JSON.stringify({messages:[{role:"system",content:system},{role:"user",content:prompt}],max_tokens:8192,temperature:0.15}),signal:AbortSignal.timeout(55000)});
-  const d=await r.json().catch(()=>({}));if(!r.ok||d.success===false)throw new Error("HTTP "+r.status);const t=d.result?.response||d.result?.text||"";if(!t)throw new Error("empty response");return String(t);
+  const d=await r.json().catch(()=>({}));if(!r.ok||d.success===false)throw new Error(providerFailure(r.status,d,key));const t=d.result?.response||d.result?.text||"";if(!t)throw new Error("empty response");return String(t);
  }
  if(p.kind==="anthropic"){
   const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01"},body:JSON.stringify({model,max_tokens:8192,temperature:0.15,system,messages:[{role:"user",content:prompt}]}),signal:AbortSignal.timeout(55000)});
-  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error("HTTP "+r.status);const t=(d?.content||[]).map((x:any)=>x.type==="text"?x.text:"").join("");if(!t)throw new Error("empty response");return t;
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(providerFailure(r.status,d,key));const t=(d?.content||[]).map((x:any)=>x.type==="text"?x.text:"").join("");if(!t)throw new Error("empty response");return t;
  }
  const url=p.kind==="groq"?"https://api.groq.com/openai/v1/chat/completions":p.kind==="openrouter"?"https://openrouter.ai/api/v1/chat/completions":p.kind==="deepseek"?"https://api.deepseek.com/v1/chat/completions":p.kind==="venice"?"https://api.venice.ai/api/v1/chat/completions":p.kind==="shannon"?"https://api.shannon-ai.com/v1/chat/completions":"https://api.openai.com/v1/chat/completions";
  const b:Record<string,unknown>={model,messages:[{role:"system",content:system},{role:"user",content:prompt}],max_tokens:8192,temperature:0.15};if(jsonMode)b.response_format={type:"json_object"};
  const h:Record<string,string>={"Content-Type":"application/json",Authorization:"Bearer "+key};if(p.kind==="openrouter"){h["HTTP-Referer"]="https://mahimahfud-ui.github.io/StreamCloud/";h["X-Title"]="StreamCloud Admin Agent";}
- const r=await fetch(url,{method:"POST",headers:h,body:JSON.stringify(b),signal:AbortSignal.timeout(55000)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error("HTTP "+r.status);const t=outputText(d);if(!t)throw new Error("empty response");return t;
+ const r=await fetch(url,{method:"POST",headers:h,body:JSON.stringify(b),signal:AbortSignal.timeout(55000)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(providerFailure(r.status,d,key));const t=outputText(d);if(!t)throw new Error("empty response");return t;
 }
 async function ai(system:string,prompt:string,jsonMode=false):Promise<{text:string;provider:string}>{
  const order=PROVS.filter(p=>pEnabled(p));const errors:string[]=[];
- for(const p of order){try{return{text:await callAI(p,system,prompt,jsonMode),provider:p.name};}catch(e){const m=String((e as Error).message||"");errors.push(p.name+" "+(m.match(/HTTP \d+/)?.[0]||"failed"));console.warn("[admin-agent]",errors[errors.length-1]);}}
- if(!order.length)throw new Error("No AI provider is enabled. Configure Gemini, Groq or OpenRouter in Supabase secrets. Paid providers are used only if ENABLE_PAID_FALLBACK=true.");
- throw new Error("All enabled AI providers failed: "+errors.join(", ")+". Check provider model/quota settings in Supabase.");
+ for(const p of order){
+  try{return{text:await callAI(p,system,prompt,jsonMode),provider:p.name};}
+  catch(e){
+   const m=String((e as Error).message||"Provider request failed").replace(/\s+/g," ").slice(0,260);
+   errors.push(p.name+" "+m);
+   console.warn("[admin-agent]",p.name,m);
+  }
+ }
+ if(!order.length)throw new Error("No AI provider is enabled. Configure a supported provider key in Supabase secrets. Paid providers are used only if ENABLE_PAID_FALLBACK=true.");
+ throw new Error("All enabled AI providers failed: "+errors.join("; ")+". Provider details are shown above; model, key access, quota and request size may need attention.");
 }
 function parseJSON(text:string):any{const tick=String.fromCharCode(96);const s=String(text||"").trim().replace(new RegExp("^"+tick.repeat(3)+"(?:json)?\\s*","i"),"").replace(new RegExp("\\s*"+tick.repeat(3)+"$"),"");try{return JSON.parse(s);}catch{}const a=s.indexOf("{"),b=s.lastIndexOf("}");if(a>=0&&b>a)return JSON.parse(s.slice(a,b+1));throw new Error("AI returned invalid structured data. Try a more specific task.");}
 
