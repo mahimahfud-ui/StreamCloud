@@ -765,10 +765,15 @@ function card(it,i,isTop){
   const c2="#0d0d0d";
   const nw=it.new?"<span class='badge'>NEW</span>":"";
   const ad=it.ads<2?"<span class='ad "+adClass[it.ads]+"'>"+(it.ads===0?"NO AD":"LESS AD")+"</span>":"";
-  return "<a class='card logo-card live' href='"+clean(it.url)+"' target='_blank' rel='noopener noreferrer' aria-label='Open "+clean(it.name)+" website in a new tab' title='Open "+clean(it.name)+"' style='--c1:"+c1+";--c2:"+c2+"' data-name='"+clean(it.name.toLowerCase())+"'>"+
+  const isGaming=it.appType==="gaming";
+  const cardTag=isGaming?"div":"a";
+  const cardOpen=isGaming
+    ? "<div class='card logo-card live' tabindex='0' role='button' aria-label='View "+clean(it.name)+" details' "
+    : "<a class='card logo-card live' href='"+clean(it.url)+"' target='_blank' rel='noopener noreferrer' aria-label='Open "+clean(it.name)+" website in a new tab' title='Open "+clean(it.name)+"' ";
+  return cardOpen+"style='--c1:"+c1+";--c2:"+c2+"' data-name='"+clean(it.name.toLowerCase())+"'>"+
     logoHTML(it)+nw+ad+
     "<div class='cap'>"+clean(it.name)+"</div>"+
-    "<div class='site-meta'><span>"+clean(it.domain||it.url||"Website")+"</span><span class='site-open'>Visit ↗</span></div></a>";
+    "<div class='site-meta'><span>"+clean(it.domain||it.url||"Website")+"</span><span class='site-open'>"+(isGaming?"Details ↗":"Visit ↗")+"</span></div></"+cardTag+">";
 }
 
 function appCard(it,i){
