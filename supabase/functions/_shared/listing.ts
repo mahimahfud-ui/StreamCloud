@@ -1,6 +1,6 @@
 import { baseDomain, normalizeUrlKey, parsePublicUrl } from "./urls.ts";
 
-export const SECTIONS = ["movie", "series", "sites", "apps", "music"] as const;
+export const SECTIONS = ["movie", "series", "sites", "apps", "music", "gaming", "tv"] as const;
 export type Section = typeof SECTIONS[number];
 export type ListingRow = Record<string, unknown>;
 
