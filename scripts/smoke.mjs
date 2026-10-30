@@ -307,6 +307,10 @@ try {
   await page.goto(ORIGIN, { waitUntil: "domcontentloaded" });
   await page.waitForSelector("#sitesView .card", { timeout: 15000 });
   assert.ok(await page.locator("#sitesView .card").count() > 0, "Website catalog should render");
+  const firstWebsiteCard = page.locator("#sitesView .card").first();
+  assert.equal(await firstWebsiteCard.evaluate(el => el.tagName), "A", "Movie Website cards should be native links");
+  assert.equal(await firstWebsiteCard.getAttribute("target"), "_blank", "Movie Website cards should open in a new tab");
+  assert.match(await firstWebsiteCard.getAttribute("href") || "", /^https:\/\//, "Movie Website cards should have a valid HTTPS destination");
 
   const imageAudit = {};
   imageAudit.desktopWebsites = await auditCardLogos(page, "#sitesView", "Desktop Movie Websites");
@@ -372,6 +376,7 @@ try {
   await page.locator('.mode[data-mode="gaming"]').click();
   await page.waitForFunction(() => document.querySelector('.mode[data-mode="gaming"]')?.classList.contains("active"));
   assert.equal(await page.locator("#gamingView .card").count(), 1, "Gaming Websites should show the GTA browser-game listing");
+  assert.equal(await page.locator("#gamingView .card").first().evaluate(el => el.tagName), "DIV", "Gaming cards should remain detail-modal cards, not external site links");
   await page.locator("#gamingView .card").click();
   await page.waitForFunction(() => document.getElementById("detailModal")?.classList.contains("open"));
   assert.equal(await page.locator("#detailTitle").textContent(), "GTA V Browser Game", "Gaming listing should open its details");
