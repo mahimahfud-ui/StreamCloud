@@ -10,16 +10,17 @@
       apps: { visible: true, title: "Movie Apps" },
       music: { visible: true, title: "Music Apps" },
       gaming: { visible: true, title: "Gaming Websites" },
+      tv: { visible: true, title: "TV Apps" },
       recs: { visible: true, title: "Recommendations" },
-      order: ["sites", "apps", "music", "gaming", "recs"]
+      order: ["sites", "apps", "music", "gaming", "tv", "recs"]
     },
     content: { overrides: {}, hidden: [], deleted: [], order: {} }
   };
-  var original = { sites: [], apps: [], music: [], gaming: [] };
-  var dynamic = { sites: new Map(), apps: new Map(), music: new Map(), gaming: new Map() };
+  var original = { sites: [], apps: [], music: [], gaming: [], tv: [] };
+  var dynamic = { sites: new Map(), apps: new Map(), music: new Map(), gaming: new Map(), tv: new Map() };
   var settings = DEFAULTS;
-  var registry = { sites: [], apps: [], music: [], gaming: [], movie: [], series: [] };
-  var manual = { sites: false, apps: false, music: false, gaming: false };
+  var registry = { sites: [], apps: [], music: [], gaming: [], tv: [], movie: [], series: [] };
+  var manual = { sites: false, apps: false, music: false, gaming: false, tv: false };
   var styleNode = null;
   var siteSettingsStyle = null;
 
@@ -124,7 +125,7 @@
     }
     styleNode.textContent =
       ".track{grid-template-columns:repeat(var(--sc-cols-d,3),minmax(0,1fr))!important;gap:var(--sc-gap,22px)!important}" +
-      "#sitesView .card,#appsView .card,#musicView .card,#gamingView .card{aspect-ratio:var(--sc-aspect,1/1)!important}" +
+      "#sitesView .card,#appsView .card,#musicView .card,#gamingView .card,#tvView .card{aspect-ratio:var(--sc-aspect,1/1)!important}" +
       ".logo-card img{object-fit:var(--sc-image-fit,contain)!important}" +
       ".card{border-radius:var(--sc-radius,4px)!important}" +
       ".sc-hidden-section{display:none!important}" +
@@ -225,6 +226,7 @@
     var apps = document.getElementById("appsView");
     var music = document.getElementById("musicView");
     var gaming = document.getElementById("gamingView");
+    var tv = document.getElementById("tvView");
     var recs = document.getElementById("recs");
     var empty = document.getElementById("empty");
     [
@@ -232,6 +234,7 @@
       [apps, sections.apps, "apps"],
       [music, sections.music, "music"],
       [gaming, sections.gaming, "gaming"],
+      [tv, sections.tv, "tv"],
       [recs, sections.recs, "recs"]
     ].forEach(function (p) {
       if (!p[0]) return;
@@ -247,11 +250,11 @@
         }
       }
     });
-    var order = Array.isArray(sections.order) ? sections.order.slice() : ["sites", "apps", "music", "gaming", "recs"];
-    ["sites", "apps", "music", "gaming", "recs"].forEach(function (key) { if (order.indexOf(key) < 0) { var recIndex = order.indexOf("recs"); order.splice(recIndex < 0 ? order.length : recIndex, 0, key); } });
+    var order = Array.isArray(sections.order) ? sections.order.slice() : ["sites", "apps", "music", "gaming", "tv", "recs"];
+    ["sites", "apps", "music", "gaming", "tv", "recs"].forEach(function (key) { if (order.indexOf(key) < 0) { var recIndex = order.indexOf("recs"); order.splice(recIndex < 0 ? order.length : recIndex, 0, key); } });
     var modeWrap = document.querySelector(".mode-switch");
-    var modeMap = { sites: sites, apps: apps, music: music, gaming: gaming };
-    var modes = ["sites", "apps", "music", "gaming"].slice();
+    var modeMap = { sites: sites, apps: apps, music: music, gaming: gaming, tv: tv };
+    var modes = ["sites", "apps", "music", "gaming", "tv"].slice();
     if (modeWrap) {
       modes.sort(function (a, b) { return order.indexOf(a) - order.indexOf(b); });
       modes.forEach(function (key) {
@@ -260,7 +263,7 @@
       });
     }
     if (main) {
-      order.filter(function (key) { return key === "sites" || key === "apps" || key === "music" || key === "gaming" || key === "recs"; }).forEach(function (key) {
+      order.filter(function (key) { return key === "sites" || key === "apps" || key === "music" || key === "gaming" || key === "tv" || key === "recs"; }).forEach(function (key) {
         var node = key === "recs" ? recs : modeMap[key];
         if (node) main.appendChild(node);
       });
@@ -277,7 +280,8 @@
       if (typeof A !== "undefined") controlCatalog("apps", A);
       if (typeof M !== "undefined") controlCatalog("music", M);
       if (typeof G !== "undefined") controlCatalog("gaming", G);
-      if (typeof renderView === "function") { renderView("sites"); renderView("apps"); renderView("music"); renderView("gaming"); }
+      if (typeof TV !== "undefined") controlCatalog("tv", TV);
+      if (typeof renderView === "function") { renderView("sites"); renderView("apps"); renderView("music"); renderView("gaming"); renderView("tv"); }
     } catch (e) { console.warn("StreamCloud catalog controls could not be applied.", e); }
     applyAppearance();
     applySiteSettings();
@@ -307,7 +311,9 @@
       if (typeof S !== "undefined") controlCatalog("sites", S);
       if (typeof A !== "undefined") controlCatalog("apps", A);
       if (typeof M !== "undefined") controlCatalog("music", M);
-      if (typeof renderView === "function") { renderView("sites"); renderView("apps"); renderView("music"); }
+      if (typeof G !== "undefined") controlCatalog("gaming", G);
+      if (typeof TV !== "undefined") controlCatalog("tv", TV);
+      if (typeof renderView === "function") { renderView("sites"); renderView("apps"); renderView("music"); renderView("gaming"); renderView("tv"); }
       applySections();
     } catch (e) { console.warn("StreamCloud public catalogue refresh failed.", e); }
   };
@@ -315,6 +321,7 @@
   original.apps = typeof A !== "undefined" ? A.slice() : [];
   original.music = typeof M !== "undefined" ? M.slice() : [];
   original.gaming = typeof G !== "undefined" ? G.slice() : [];
+  original.tv = typeof TV !== "undefined" ? TV.slice() : [];
 
   window.STREAMCLOUD_SETTINGS_READY = (function () {
     if (!BASE || !CFG.anonKey) { applySettings(DEFAULTS); return Promise.resolve(DEFAULTS); }
