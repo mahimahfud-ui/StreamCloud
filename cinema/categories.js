@@ -1,62 +1,98 @@
-// Three separate categories backed by the existing catalog and render functions.
-// The data itself remains in index.html so search, filtering, sorting, favourites and details
-// continue to use the same records and event handlers.
-
+// StreamCloud category tabs share the original catalog renderer but keep each
+// category in its own view. This prevents cards and active states crossing sections.
 export function initCategories() {
   const modeSwitch = document.querySelector('.mode-switch');
   const sitesView = document.getElementById('sitesView');
   const appsView = document.getElementById('appsView');
   const musicView = document.getElementById('musicView');
+  const gamingView = document.getElementById('gamingView');
+  const tvView = document.getElementById('tvView');
   const sharedCatalog = window.MAHIFLIX_CATALOG;
-  if (!modeSwitch || !sitesView || !appsView || !musicView || !sharedCatalog) return;
+  if (!modeSwitch || !sitesView || !appsView || !musicView || !gamingView || !tvView || !sharedCatalog) return;
 
   const sitesButton = modeSwitch.querySelector('.mode[data-mode="sites"]');
   const movieButton = modeSwitch.querySelector('.mode[data-mode="apps"]');
-  if (!sitesButton || !movieButton) return;
+  const gamingButton = modeSwitch.querySelector('.mode[data-mode="gaming"]');
+  const tvButton = modeSwitch.querySelector('.mode[data-mode="tv"]');
+  if (!sitesButton || !movieButton || !gamingButton || !tvButton) return;
 
   const siteItems = Array.from(sharedCatalog.sites || []);
   const allApps = Array.from(sharedCatalog.apps || []);
-  const movieApps = allApps.filter(item => item && item.appType === 'movie');
-  const musicApps = allApps.filter(item => item && item.appType === 'music');
-  if (!movieApps.length && !musicApps.length) return;
-
-  const labels = { sites: 'Websites', movie: 'Movie Apps', music: 'Music Apps' };
-  const slug = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
-  let initialHash = (location.hash || '').slice(1);
-  try { initialHash = decodeURIComponent(initialHash); } catch (_) { /* ignore malformed hashes */ }
-  const hashSlug = slug(initialHash);
-  const initialItem = [...siteItems, ...allApps].find(item => slug(item.name) === hashSlug);
-  let selectedCategory = initialItem
-    ? (initialItem.appType === 'music' ? 'music' : initialItem.appType === 'movie' ? 'movie' : 'sites')
-    : (movieButton.classList.contains('active') ? 'movie' : 'sites');
-  let switchingInternally = false;
-
-  const existingMusicButtons = modeSwitch.querySelectorAll('.mode[data-mode="music"]');
-  let musicButton;
-  if (existingMusicButtons.length > 0) {
-    musicButton = existingMusicButtons[0];
-    for (let i = 1; i < existingMusicButtons.length; i++) {
-      existingMusicButtons[i].remove();
-    }
-  } else {
+  const gamingItems = Array.from(sharedCatalog.gaming || []);
+  const tvItems = Array.from(sharedCatalog.tv || []);
+  const labels = {
+    sites: 'Websites',
+    movie: 'Movie Apps',
+    music: 'Music Apps',
+    gaming: 'Gaming Websites',
+    tv: 'TV Apps'
+  };
+  const buttons = {
+    sites: sitesButton,
+    movie: movieButton,
+    music: modeSwitch.querySelector('.mode[data-mode="music"]'),
+    gaming: gamingButton,
+    tv: tvButton
+  };
+  let musicButton = buttons.music;
+  if (!musicButton) {
     musicButton = document.createElement('button');
     musicButton.className = 'mode';
     musicButton.type = 'button';
     musicButton.dataset.mode = 'music';
     musicButton.setAttribute('role', 'tab');
-    musicButton.setAttribute('aria-controls', 'musicView');
-    musicButton.setAttribute('aria-selected', 'false');
-    musicButton.tabIndex = -1;
     musicButton.textContent = 'MUSIC APPS';
-    modeSwitch.appendChild(musicButton);
+    modeSwitch.insertBefore(musicButton, gamingButton);
+    buttons.music = musicButton;
   }
 
+  const views = {
+    sites: sitesView,
+    movie: appsView,
+    music: musicView,
+    gaming: gamingView,
+    tv: tvView
+  };
+  const modeForCategory = {
+    sites: 'sites',
+    movie: 'apps',
+    music: 'music',
+    gaming: 'gaming',
+    tv: 'tv'
+  };
+  const categoryForMode = {
+    sites: 'sites',
+    apps: 'movie',
+    music: 'music',
+    gaming: 'gaming',
+    tv: 'tv'
+  };
+  const slug = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  let initialHash = (location.hash || '').slice(1);
+  try { initialHash = decodeURIComponent(initialHash); } catch (_) { /* ignore malformed hashes */ }
+  const hashSlug = slug(initialHash);
+  const initialItem = [...siteItems, ...allApps, ...gamingItems, ...tvItems]
+    .find(item => slug(item.name) === hashSlug);
+  const initialCategory = initialItem
+    ? initialItem.appType === 'music' ? 'music'
+      : initialItem.appType === 'movie' ? 'movie'
+        : initialItem.appType === 'gaming' ? 'gaming'
+          : initialItem.appType === 'tv' ? 'tv' : 'sites'
+    : categoryForMode[Object.keys(buttons).map(key => [key, buttons[key]])
+      .find(([, button]) => button.classList.contains('active'))?.[1]?.dataset.mode || 'sites'] || 'sites';
+  let selectedCategory = initialCategory;
+
+  Object.entries(buttons).forEach(([category, button]) => {
+    button.setAttribute('role', 'tab');
+    button.setAttribute('aria-controls', views[category].id);
+    if (!button.hasAttribute('aria-selected')) button.setAttribute('aria-selected', 'false');
+  });
   sitesButton.textContent = 'WEBSITES';
   movieButton.textContent = 'MOVIE APPS';
-  sitesButton.setAttribute('aria-controls', 'sitesView');
-  movieButton.setAttribute('aria-controls', 'appsView');
-  musicButton.setAttribute('aria-controls', 'musicView');
+  musicButton.textContent = 'MUSIC APPS';
+  gamingButton.textContent = 'GAMING WEBSITES';
+  tvButton.textContent = 'TV APPS';
 
   let thumb = modeSwitch.querySelector('.mode-thumb');
   if (!thumb) {
@@ -71,7 +107,7 @@ export function initCategories() {
   window.STREAMCLOUD_ACTIVE_CATEGORY = selectedCategory;
 
   function activeButton() {
-    return selectedCategory === 'sites' ? sitesButton : selectedCategory === 'movie' ? movieButton : musicButton;
+    return buttons[selectedCategory] || sitesButton;
   }
 
   function positionThumb() {
@@ -82,43 +118,42 @@ export function initCategories() {
     thumb.style.transform = 'translateX(' + Math.max(0, active.offsetLeft - 5) + 'px)';
   }
 
-
   function updateEmptyState() {
     const empty = document.getElementById('empty');
     if (!empty) return;
-    const view = selectedCategory === 'sites'
-      ? sitesView
-      : selectedCategory === 'movie'
-        ? appsView
-        : musicView;
-    const rowSelector = selectedCategory === 'sites'
-      ? '.row-section[data-row="movie websites"]'
-      : selectedCategory === 'movie'
-        ? '.row-section[data-row="movie apps"]'
-        : '.row-section[data-row="music apps"]';
-    const row = view.querySelector(rowSelector);
+    const view = views[selectedCategory];
+    const rowNames = {
+      sites: 'movie websites',
+      movie: 'movie apps',
+      music: 'music apps',
+      gaming: 'gaming websites',
+      tv: 'tv apps'
+    };
+    const row = view.querySelector('.row-section[data-row="' + rowNames[selectedCategory] + '"]');
     const visibleCount = row
       ? Array.from(row.querySelectorAll('.card')).filter(card => card.style.display !== 'none').length
       : 0;
     empty.style.display = visibleCount ? 'none' : 'block';
     if (!visibleCount) {
       const query = document.getElementById('q');
-      empty.textContent = selectedCategory === 'sites' && siteItems.length === 0 && !(query && query.value.trim())
-        ? 'No websites added yet. Send ChatGPT a message like Website - https://example.com to add one.'
-        : 'No listings found in ' + labels[selectedCategory] + ' with the current search or filters.';
+      if (selectedCategory === 'tv' && !(query && query.value.trim())) {
+        empty.textContent = 'TV Apps are ready. Listings will appear here when real TV apps are added.';
+      } else if (selectedCategory === 'sites' && siteItems.length === 0 && !(query && query.value.trim())) {
+        empty.textContent = 'No websites added yet. Send ChatGPT a message like Website - https://example.com to add one.';
+      } else {
+        empty.textContent = 'No listings found in ' + labels[selectedCategory] + ' with the current search or filters.';
+      }
     }
   }
 
   function updateCategoryView() {
     window.STREAMCLOUD_ACTIVE_CATEGORY = selectedCategory;
-    sitesView.dataset.category = 'sites';
-    appsView.dataset.category = 'movie';
-    musicView.dataset.category = 'music';
-    sitesView.classList.toggle('active', selectedCategory === 'sites');
-    appsView.classList.toggle('active', selectedCategory === 'movie');
-    musicView.classList.toggle('active', selectedCategory === 'music');
-    [sitesButton, movieButton, musicButton].forEach(button => {
-      const active = button === activeButton();
+    Object.entries(views).forEach(([category, view]) => {
+      view.dataset.category = category === 'movie' ? 'movie' : category;
+      view.classList.toggle('active', category === selectedCategory);
+    });
+    Object.entries(buttons).forEach(([category, button]) => {
+      const active = category === selectedCategory;
       button.classList.toggle('active', active);
       button.setAttribute('aria-selected', String(active));
       button.tabIndex = active ? 0 : -1;
@@ -133,57 +168,41 @@ export function initCategories() {
     updateCategoryView();
   }
 
-  // Capture the new Music Apps tab and route it through the original Apps renderer.
-  // That keeps the existing app render, modal, search, sorting and favourite systems in sync.
+  // Route all tabs through the existing renderer; the captured event prevents
+  // legacy click listeners from activating a second, unrelated view.
   modeSwitch.addEventListener('click', event => {
     const button = event.target.closest('.mode');
     if (!button || !modeSwitch.contains(button)) return;
-    if (switchingInternally) return;
-
-    if (button === musicButton) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-
-      // Use the original catalogue renderer's explicit music mode. Previously this
-      // clicked the Movie Apps tab as a workaround, which rendered movie entries
-      // into appsView while the UI label showed Music Apps.
-      if (typeof window.STREAMCLOUD_SET_MODE === 'function') {
-        window.STREAMCLOUD_SET_MODE('music');
-      } else {
-        // Compatibility fallback for older cached index.html versions.
-        switchingInternally = true;
-        try { movieButton.click(); } finally { switchingInternally = false; }
-      }
-      selectCategory('music');
-      return;
+    const entry = Object.entries(buttons).find(([, candidate]) => candidate === button);
+    if (!entry) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const [category] = entry;
+    if (typeof window.STREAMCLOUD_SET_MODE === 'function') {
+      window.STREAMCLOUD_SET_MODE(modeForCategory[category]);
     }
-    if (button === sitesButton) selectCategory('sites');
-    else if (button === movieButton) selectCategory('movie');
+    selectCategory(category);
   }, true);
 
   modeSwitch.addEventListener('keydown', event => {
     const current = event.target.closest('.mode');
-    if (!current || !modeSwitch.contains(current)) return;
-    const buttons = [sitesButton, movieButton, musicButton];
-    const index = buttons.indexOf(current);
+    const ordered = Object.values(buttons);
+    const index = ordered.indexOf(current);
     if (index < 0) return;
     let next = index;
-    if (event.key === 'ArrowRight') next = (index + 1) % buttons.length;
-    else if (event.key === 'ArrowLeft') next = (index + buttons.length - 1) % buttons.length;
+    if (event.key === 'ArrowRight') next = (index + 1) % ordered.length;
+    else if (event.key === 'ArrowLeft') next = (index + ordered.length - 1) % ordered.length;
     else if (event.key === 'Home') next = 0;
-    else if (event.key === 'End') next = buttons.length - 1;
+    else if (event.key === 'End') next = ordered.length - 1;
     else return;
     event.preventDefault();
-    buttons[next].focus();
-    buttons[next].click();
+    ordered[next].focus();
+    ordered[next].click();
   });
 
-
-  // Rebuilds triggered by the existing search/filter/sort code only need visibility/empty-state sync.
+  // Keep category state correct after search, filters, sorting or admin catalogue updates.
   const viewObserver = new MutationObserver(updateCategoryView);
-  viewObserver.observe(sitesView, { childList: true, subtree: true });
-  viewObserver.observe(appsView, { childList: true, subtree: true });
-  viewObserver.observe(musicView, { childList: true, subtree: true });
+  Object.values(views).forEach(view => viewObserver.observe(view, { childList: true, subtree: true }));
 
   const search = document.getElementById('q');
   if (search) search.addEventListener('input', updateEmptyState);
