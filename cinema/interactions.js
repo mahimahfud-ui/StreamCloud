@@ -20,13 +20,16 @@ export function initInteractions({ invalidate, refresh }) {
     if (!hoveredRect) hoveredRect = card.getBoundingClientRect();
     const r = hoveredRect;
     const nx = (pe.clientX - r.left) / r.width, ny = (pe.clientY - r.top) / r.height;
+    // Keep the moving light, but avoid per-frame 3D card rotation: it causes
+    // extra compositing work and can feel laggy on integrated GPUs.
     card.style.setProperty('--mx', (nx * 100).toFixed(1) + '%');
     card.style.setProperty('--my', (ny * 100).toFixed(1) + '%');
-    // tiny tilt as a single axis-angle `rotate` so it can transition independently of lift/parallax
-    const ax = -(ny - .5) * 2, ay = (nx - .5) * 2, ang = Math.hypot(ax, ay) * 3;
-    card.style.rotate = ang > .05 ? `${ax.toFixed(3)} ${ay.toFixed(3)} 0 ${ang.toFixed(2)}deg` : '';
   }
-  function release(c) { c.style.rotate = ''; }
+  function release(c) {
+    c.style.removeProperty('rotate');
+    c.style.removeProperty('--mx');
+    c.style.removeProperty('--my');
+  }
   if (fine.matches) {
     addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; pe = e; if (!raf) raf = requestAnimationFrame(apply); }, { passive: true });
     document.addEventListener('pointerleave', () => { if (hovered) release(hovered); hovered = null; hoveredRect = null; state.px = state.py = 0; });
@@ -36,7 +39,7 @@ export function initInteractions({ invalidate, refresh }) {
 
   // ---- mode switch: shift the scene's mood and fire a light pulse ----
   document.querySelectorAll('.mode').forEach(btn => btn.addEventListener('click', () => {
-    state.mood = btn.dataset.mode === 'apps' ? 1 : 0;
+    state.mood = btn.dataset.mode === 'sites' ? 0 : 1;
     state.pulseAt = performance.now();
     invalidate(); refresh();
   }));
@@ -57,12 +60,6 @@ export function initInteractions({ invalidate, refresh }) {
       q.value = ''; q.dispatchEvent(new Event('input')); sb.classList.remove('open'); q.blur();
     }
   });
-  // results arrive progressively: restart the card entrance, staggered, for whatever survived the filter
-  q.addEventListener('input', () => {
-    if (state.reduced) return;
-    const cards = [...document.querySelectorAll('.view.active .card')].filter(c => c.style.display !== 'none');
-    cards.forEach((c, i) => { c.style.animation = 'none'; c.style.animationDelay = Math.min(i, 8) * 45 + 'ms'; });
-    void document.body.offsetWidth;                                           // single reflow for the batch
-    cards.forEach(c => { c.style.animation = ''; });
-  });
+  // Search results are re-rendered by the original catalog logic. Avoid forcing
+  // a synchronous layout/reflow on every keystroke; new cards animate on insertion.
 }
