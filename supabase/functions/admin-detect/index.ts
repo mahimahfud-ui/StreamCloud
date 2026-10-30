@@ -188,43 +188,50 @@ Deno.serve(async (req) => {
     } catch (e) { notes.push(`IMDb lookup failed: ${(e as Error).message}`); }
   }
 
-  // 4. Apps: logo, official site, verified direct APK link only.
+  // 4. Websites and app categories: verify official logo candidates; app packages are checked separately.
   if (isApp || isWebsite) {
-    out.logo_url = await pickLogo(page, target);
+    out.logo_url = page ? await pickLogo(page, target) : null;
     verified.logo = !!out.logo_url;
     if (!out.description) out.description = page?.structured?.description || page?.description || null;
   }
   if (isApp) {
     let apkCandidate: string | null = downloadTarget?.href ?? (looksPackage ? target.href : null);
+    if (page) {
+      out.official_url = page.canonical && parsePublicUrl(page.canonical)?.hostname.endsWith(baseDomain(target.hostname)) ? page.canonical : target.origin + "/";
+      const same = page.apkLinks.filter((l) => {
+        const h = new URL(l);
+        return baseDomain(h.hostname) === baseDomain(target.hostname) || (h.hostname === "github.com" && /\\/releases\\/download\\//.test(h.pathname));
+      });
+      const other = page.apkLinks.filter((l) => !same.includes(l));
+      apkCandidate = apkCandidate ?? same[0] ?? null;
+      if (!apkCandidate && other.length) notes.push("An APK link was found on another domain (" + new URL(other[0]).hostname + "); it was not treated as official.");
+    }
     const githubSource = downloadTarget?.hostname === "github.com" ? downloadTarget : target;
     if (githubSource.hostname === "github.com") {
       const gh = await githubApk(githubSource, notes);
       if (gh) {
         out.name = out.name && out.name !== "GitHub" ? out.name : gh.name ?? out.name;
         out.description = out.description || gh.description || null;
-        if (gh.apk) apkCandidate = apkCandidate ?? gh.apk;
-        if (gh.version) { out.version = out.version || gh.version; }
-        const repoPath = githubSource.pathname.match(/^\/([\w.-]+)\/([\w.-]+)/);
-        out.official_url = repoPath ? "https://github.com/" + repoPath[1] + "/" + repoPath[2] : "https://github.com/";
+        apkCandidate = apkCandidate ?? gh.apk ?? null;
+        if (gh.version) out.version = out.version || gh.version;
+        if (!out.official_url) {
+          const repoPath = githubSource.pathname.match(/^\\/([\\w.-]+)\\/([\\w.-]+)/);
+          out.official_url = repoPath ? "https://github.com/" + repoPath[1] + "/" + repoPath[2] : "https://github.com/";
+        }
       }
-    } else if (page) {
-      out.official_url = page.canonical && parsePublicUrl(page.canonical)?.hostname.endsWith(baseDomain(target.hostname)) ? page.canonical : target.origin + "/";
-      const same = page.apkLinks.filter((l) => {
-        const h = new URL(l);
-        return baseDomain(h.hostname) === baseDomain(target.hostname) || (h.hostname === "github.com" && /\/releases\/download\//.test(h.pathname));
-      });
-      const other = page.apkLinks.filter((l) => !same.includes(l));
-      apkCandidate = apkCandidate ?? same[0] ?? null;
-      if (!apkCandidate && other.length) notes.push(`An APK link was found on another domain (${new URL(other[0]).hostname}); it was not treated as official.`);
     }
     if (apkCandidate) {
       const v = await verifyApk(apkCandidate);
       if (v.ok) { out.download_url = apkCandidate; verified.download = true; out.platform = out.platform ?? "Android"; }
-      else notes.push(`APK link found but not verified (${v.reason}). Left empty.`);
+      else notes.push("Direct app package could not be verified (" + v.reason + "). It will not be saved as a verified download.");
     } else notes.push("No verified direct APK/package link was found. Paste a direct APK/XAPK URL; app pages alone are not accepted as direct downloads.");
-    if (!verified.logo) notes.push("No official app logo could be verified from this source. Add the official website/store URL or an official logo URL in the review step.");
+    if (!out.name && (downloadTarget || looksPackage)) {
+      const rawName = new URL(downloadTarget?.href ?? target.href).pathname.split("/").pop() || "";
+      const fileName = decodeURIComponent(rawName).replace(/\\.(?:apk|xapk|apks|zip|aab)$/i, "").replace(/[._-]+/g, " ").trim();
+      if (fileName) { out.name = fileName.slice(0, 160); notes.push("The card name was derived from the package filename. Review and correct it before publishing."); }
+    }
+    if (!verified.logo) notes.push("No official app logo could be verified from this source. Add an official website/store URL or paste an official logo image URL in the review step.");
   }
-
   // 5. Sanity: never keep a name that is just a generic site label.
   if (typeof out.name === "string") out.name = out.name.slice(0, 160);
   if (typeof out.description === "string") out.description = norm(out.description) ? out.description.slice(0, 600) : null;
