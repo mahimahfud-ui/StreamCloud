@@ -306,12 +306,25 @@ export const CatalogCard: React.FC<CatalogCardProps> = ({
   // GRID VIEW: WEBSITE LOGO CARD
   // -------------------------------------------------------------
   const bgGradient = `linear-gradient(140deg, hsl(${hue} 50% 18%), #0d0d0e)`;
+  const openWebsite = () => {
+    onVisit(item);
+    window.open(item.url, '_blank', 'noopener,noreferrer');
+  };
+  const handleWebsiteKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    openWebsite();
+  };
 
   return (
     <div
+      role="link"
+      tabIndex={0}
+      aria-label={`Open ${item.name} website in a new tab`}
       className="group relative aspect-square rounded-2xl p-4 flex flex-col items-center justify-center border border-white/10 hover:border-red-500/60 shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/80 overflow-hidden cursor-pointer"
       style={{ background: bgGradient }}
-      onClick={() => onOpenDetail(item)}
+      onClick={openWebsite}
+      onKeyDown={handleWebsiteKeyDown}
     >
       {/* Top 10 Stylized Number */}
       {rank && (
