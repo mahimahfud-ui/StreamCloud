@@ -545,6 +545,7 @@ button, a, select { touch-action: manipulation; }
     <button class="mode" data-mode="apps" role="tab" aria-selected="false">MOVIE APPS</button>
     <button class="mode" data-mode="music" role="tab" aria-selected="false">MUSIC APPS</button>
     <button class="mode" data-mode="gaming" role="tab" aria-selected="false">GAMING WEBSITES</button>
+    <button class="mode" data-mode="tv" role="tab" aria-selected="false" aria-controls="tvView">TV APPS</button>
   </div>
 </div>
 
@@ -571,6 +572,7 @@ button, a, select { touch-action: manipulation; }
   <div id="appsView" class="view"></div>
   <div id="musicView" class="view"></div>
   <div id="gamingView" class="view"></div>
+  <div id="tvView" class="view" data-category="tv"></div>
   <p id="empty" class="empty">Nothing matched your search.</p>
 </main>
 
@@ -683,10 +685,13 @@ const M=[
 ];
 
 const G=[
- {appType:"gaming",kind:"site",name:"GTA V Browser Game",url:"https://gta.deloskiyt.pl/",domain:"gta.deloskiyt.pl",thumbnail:"https://gta.deloskiyt.pl/b/8b0b5899ed/title/logo.png",ads:2,pop:70,smooth:62,langs:70,new:true,desc:"Unofficial browser-based GTA V-style gaming page. It may be experimental, slow to load, or redirect; it is not an official Rockstar Games service. Avoid entering personal details or downloading unexpected files.",logoSources:["https://gta.deloskiyt.pl/b/8b0b5899ed/title/logo.png","https://gta.deloskiyt.pl/favicon.ico"]}
+ {appType:"gaming",kind:"site",name:"GTA V Browser Game",url:"https://gta.deloskiyt.pl/",domain:"gta.deloskiyt.pl",thumbnail:"https://gta.deloskiyt.pl/b/8b0b5899ed/title/logo.png",ads:2,pop:70,smooth:62,langs:70,new:true,desc:"Unofficial browser-based GTA V-style gaming page. It may be experimental, slow to load, or redirect; it is not an official Rockstar Games service.",logoSources:["https://gta.deloskiyt.pl/b/8b0b5899ed/title/logo.png","https://gta.deloskiyt.pl/favicon.ico"]}
 ];
 
-window.MAHIFLIX_CATALOG={get sites(){return S},get gaming(){return G},get apps(){return A.concat(M)}};
+// TV Apps has its own catalogue and view. It stays empty until real TV app listings are added.
+const TV=[];
+
+window.MAHIFLIX_CATALOG={get sites(){return S},get gaming(){return G},get tv(){return TV},get apps(){return A.concat(M)}};
 const adLabel=["No / minimal ads","Some ads","More / heavier ads"];
 const adClass=["a0","a1","a2"];
 
@@ -800,8 +805,8 @@ function appCard(it,i){
 }
 
 function renderView(type){
-  const el=document.getElementById(type==="sites"?"sitesView":type==="music"?"musicView":type==="gaming"?"gamingView":"appsView");
-  const data=type==="sites"?S:type==="music"?M:type==="gaming"?G:A;
+  const el=document.getElementById(type==="sites"?"sitesView":type==="music"?"musicView":type==="gaming"?"gamingView":type==="tv"?"tvView":"appsView");
+  const data=type==="sites"?S:type==="music"?M:type==="gaming"?G:type==="tv"?TV:A;
   const manualOrder=window.STREAMCLOUD_ORDER_MANUAL||{};
   const sorted=manualOrder[type]?data.slice():data.slice().sort((a,b)=>qualityScore(b)-qualityScore(a));
   if(type==="sites"){
@@ -810,6 +815,8 @@ function renderView(type){
     el.innerHTML=rowHTML("Music Apps",sorted,{kind:"app",note:"Music apps and direct app links"});
   }else if(type==="gaming"){
     el.innerHTML=rowHTML("Gaming Websites",sorted,{kind:"site",note:"Browser games and gaming websites"});
+  }else if(type==="tv"){
+    el.innerHTML=sorted.length?rowHTML("TV Apps",sorted,{kind:"app",note:"TV and Android TV apps"}):"";
   }else{
     el.innerHTML=rowHTML("Movie Apps",sorted,{kind:"app",note:"Direct APK links and app information"});
   }
@@ -819,6 +826,7 @@ renderView("sites");
 renderView("apps");
 renderView("music");
 renderView("gaming");
+renderView("tv");
 document.querySelectorAll('.track').forEach(function(t){t.querySelectorAll('.card').forEach(function(card,i){card.style.animationDelay=(Math.min(i,8)*55)+'ms'})});
 function svgPlay(){return "<svg viewBox='0 0 24 24' fill='currentColor'><path d='M6 4l14 8-14 8z'/></svg>"}
 function svgPlus(){return "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='3' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>"}
@@ -840,6 +848,7 @@ document.querySelectorAll(".mode").forEach(function(btn){
     document.getElementById("appsView").classList.toggle("active",mode==="apps");
     document.getElementById("musicView").classList.toggle("active",mode==="music");
     document.getElementById("gamingView").classList.toggle("active",mode==="gaming");
+    document.getElementById("tvView").classList.toggle("active",mode==="tv");
     renderView(mode);
     document.getElementById("q").value="";
     document.getElementById("empty").style.display="none";
@@ -919,7 +928,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   const adFilter=document.getElementById("adFilter");
   const sortSelect=document.getElementById("sortSelect");
   let mode="sites",filter="all",sort="score",current=null,currentList="sites",lastFocus=null,statusEntries={};
-  const allData=()=>mode==="sites"?S:mode==="gaming"?G:A.concat(M);
+  const allData=()=>mode==="sites"?S:mode==="gaming"?G:mode==="tv"?TV:A.concat(M);
   const slug=name=>name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   const ratingKey=item=>"mahiflix-rating:"+slug(item.name);
   const favKey=item=>"mahiflix-favorite:"+slug(item.name);
@@ -944,13 +953,13 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     updateDetailStatus();
     document.getElementById("detailTags").innerHTML=[
       item.new?"New entry":"",
-      currentList==="apps"||currentList==="music"?"Android app":currentList==="gaming"?"Gaming website":"Website",
+      currentList==="apps"||currentList==="music"||currentList==="tv"?"Android app":currentList==="gaming"?"Gaming website":"Website",
       /anime/i.test(item.name+" "+item.desc)?"Anime":""
     ].filter(Boolean).map(t=>"<span class='detail-tag'>"+clean(t)+"</span>").join("");
     document.getElementById("detailLogo").innerHTML=logoHTML(item);
     const visit=document.getElementById("detailVisit");visit.href=item.url;
     visit.target="_blank";visit.rel="noopener noreferrer";
-    visit.textContent=currentList==="apps"||currentList==="music"?"Open App Page":"Visit Site";
+    visit.textContent=currentList==="apps"||currentList==="music"||currentList==="tv"?"Open App Page":"Visit Site";
     setRating(savedRating(item));updateFav();
     modal.classList.add("open");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
     document.querySelector(".detail-panel").focus();
@@ -975,13 +984,13 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   function render(){
     const tools=document.querySelector(".catalog-tools");
     if(tools) tools.hidden = mode==="sites" && S.length===0;
-    const data=allData().filter(matches).filter(item=>mode==="sites"?!item.appType:mode==="gaming"?item.appType==="gaming":mode==="apps"?item.appType==="movie":item.appType==="music");
+    const data=allData().filter(matches).filter(item=>mode==="sites"?!item.appType:mode==="gaming"?item.appType==="gaming":mode==="tv"?item.appType==="tv":mode==="apps"?item.appType==="movie":item.appType==="music");
     if(sort==="popular")data.sort((a,b)=>b.pop-a.pop);
     else if(sort==="newest")data.sort((a,b)=>Number(b.new)-Number(a.new)||qualityScore(b)-qualityScore(a));
     else if(sort==="name")data.sort((a,b)=>a.name.localeCompare(b.name));
     else data.sort((a,b)=>qualityScore(b)-qualityScore(a));
     const typed=data.map(item=>Object.assign({},item,{kind:mode==="sites"||mode==="gaming"?"site":"app"}));
-    const target=document.getElementById(mode==="sites"?"sitesView":mode==="gaming"?"gamingView":mode==="music"?"musicView":"appsView");
+    const target=document.getElementById(mode==="sites"?"sitesView":mode==="gaming"?"gamingView":mode==="tv"?"tvView":mode==="music"?"musicView":"appsView");
     if(mode==="sites"){
       target.innerHTML=typed.length?rowHTML("Movie Websites",typed,{kind:"site",note:"Hand-picked by Mahi · Scores are estimates"}):"";
     }else if(mode==="gaming"){
@@ -990,13 +999,16 @@ document.getElementById("yr").textContent=new Date().getFullYear();
       target.innerHTML=typed.length?rowHTML("Movie Apps",typed,{kind:"app",note:"Official pages & verified downloads · Scores are estimates"}):"";
     }else if(mode==="music"){
       target.innerHTML=typed.length?rowHTML("Music Apps",typed,{kind:"app",note:"Direct app downloads"}):"";
+    }else if(mode==="tv"){
+      target.innerHTML=typed.length?rowHTML("TV Apps",typed,{kind:"app",note:"TV and Android TV apps"}):"";
     }
     document.getElementById("empty").style.display=typed.length?"none":"block";
-    document.getElementById("empty").textContent=search.value?"No listings matched your search. Try another name or filter.":mode==="sites"&&!S.length?"No websites are listed yet. Please check back soon.":"No listings match these filters.";
+    document.getElementById("empty").textContent=search.value?"No listings matched your search. Try another name or filter.":mode==="sites"&&!S.length?"No websites are listed yet. Please check back soon.":mode==="tv"?"TV Apps are ready. Listings will appear here when real TV apps are added.":"No listings match these filters.";
     document.getElementById("sitesView").classList.toggle("active",mode==="sites");
     document.getElementById("appsView").classList.toggle("active",mode==="apps");
     document.getElementById("musicView").classList.toggle("active",mode==="music");
     document.getElementById("gamingView").classList.toggle("active",mode==="gaming");
+    document.getElementById("tvView").classList.toggle("active",mode==="tv");
     document.querySelectorAll(".mode").forEach(b=>{const on=b.dataset.mode===mode;b.classList.toggle("active",on);b.setAttribute("aria-selected",String(on))});
     document.querySelectorAll(".filter-chip").forEach(b=>{const on=b.dataset.filter===filter;b.classList.toggle("active",on);b.setAttribute("aria-pressed",String(on))});
     target.querySelectorAll(".card").forEach((c,i)=>{
@@ -1025,11 +1037,11 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     document.getElementById("detailUpdated").textContent="Last checked "+when+" · "+state.reason+". 403, rate limits and temporary network failures are treated as unverified rather than down.";
   }
   function paintStatusBadges(){
-    const target=document.getElementById(mode==="sites"?"sitesView":mode==="gaming"?"gamingView":mode==="music"?"musicView":"appsView");
+    const target=document.getElementById(mode==="sites"?"sitesView":mode==="gaming"?"gamingView":mode==="tv"?"tvView":mode==="music"?"musicView":"appsView");
     target.querySelectorAll(".card").forEach(card=>{
       const item=allData().find(x=>x.name.toLowerCase()===card.dataset.name);
       const state=item?statusFor(item,mode):null;
-      const downloadState=item&&(mode==="apps"||mode==="music")?statusEntries["download:"+slug(item.name)]:null;
+      const downloadState=item&&(mode==="apps"||mode==="music"||mode==="tv")?statusEntries["download:"+slug(item.name)]:null;
       const downloadIssue=!!downloadState&&["down","not_direct"].includes(downloadState.status);
       const linkIssue=!!state&&state.status==="down";
       let badge=card.querySelector(".status-flag");
@@ -1112,7 +1124,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   // Shared mode setter for the dynamically-created Music Apps tab in cinema/categories.js.
   // Keep mode, filters, active tabs and rendered data in sync through the original renderer.
   window.STREAMCLOUD_SET_MODE = function(nextMode){
-    if(!["sites","apps","music"].includes(nextMode)) return;
+    if(!["sites","apps","music","gaming","tv"].includes(nextMode)) return;
     mode=nextMode;
     filter="all";
     adFilter.value="all";
@@ -1126,8 +1138,8 @@ document.getElementById("yr").textContent=new Date().getFullYear();
   }).catch(()=>{});
   const initial=(location.hash||"").slice(1).toLowerCase();
   if(initial){
-    const item=S.concat(A,M).find(x=>slug(x.name)===initial);
-    if(item){mode=M.includes(item)?"music":(A.includes(item)?"apps":"sites");render();openDetail(item,mode)}
+    const item=S.concat(A,M,G,TV).find(x=>slug(x.name)===initial);
+    if(item){mode=TV.includes(item)?"tv":G.includes(item)?"gaming":M.includes(item)?"music":(A.includes(item)?"apps":"sites");render();openDetail(item,mode)}
   }
 
 })();
