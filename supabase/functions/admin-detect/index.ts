@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
   }
   const downloadTarget = body.downloadUrl ? parsePublicUrl(body.downloadUrl) : null;
   if (body.downloadUrl && !downloadTarget) return json(req, { error: "Direct download URL must be a public HTTPS link." }, 400);
-  if (downloadTarget && !/\\.(?:apk|xapk|apks)$/i.test(downloadTarget.pathname)) {
+  if (downloadTarget && !/\.(?:apk|xapk|apks)$/i.test(downloadTarget.pathname)) {
     return json(req, { error: "Paste a direct .apk, .xapk or .apks file URL, not a web page or generic ZIP." }, 422);
   }
   const sourceRaw = typeof body.url === "string" && body.url.trim() ? body.url : String(body.downloadUrl ?? "");
@@ -132,7 +132,7 @@ Deno.serve(async (req) => {
 
   // Fetch an official/source page when available. Package URLs are verified as files, never parsed as HTML.
   let page: PageInfo | null = null;
-  const isPackageUrl = (u: URL) => /\.(?:apk|xapk|apks|zip|aab)$/i.test(u.pathname);
+  const isPackageUrl = (u: URL) => /\.(?:apk|xapk|apks)$/i.test(u.pathname);
   const looksPackage = isPackageUrl(target);
   if (!looksPackage) {
     try {
@@ -230,7 +230,9 @@ Deno.serve(async (req) => {
     } else notes.push("No verified direct APK/package link was found. Paste a direct APK/XAPK URL; app pages alone are not accepted as direct downloads.");
     if (!out.name && (downloadTarget || looksPackage)) {
       const rawName = new URL(downloadTarget?.href ?? target.href).pathname.split("/").pop() || "";
-      const fileName = decodeURIComponent(rawName).replace(/\.(?:apk|xapk|apks|zip|aab)$/i, "").replace(/[._-]+/g, " ").trim();
+      let decodedName = rawName;
+      try { decodedName = decodeURIComponent(rawName); } catch { /* keep the encoded filename */ }
+      const fileName = decodedName.replace(/\.(?:apk|xapk|apks)$/i, "").replace(/[._-]+/g, " ").trim();
       if (fileName) { out.name = fileName.slice(0, 160); notes.push("The card name was derived from the package filename. Review and correct it before publishing."); }
     }
     if (!verified.logo) notes.push("No official app logo could be verified from this source. Add an official website/store URL or paste an official logo image URL in the review step.");
