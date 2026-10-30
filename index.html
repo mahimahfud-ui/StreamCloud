@@ -774,7 +774,7 @@ function card(it,i,isTop){
   const cardTag=isGaming?"div":"a";
   const cardOpen=isGaming
     ? "<div class='card logo-card live' tabindex='0' role='button' aria-label='View "+clean(it.name)+" details' "
-    : "<a class='card logo-card live' href='"+clean(it.url)+"' target='_blank' rel='noopener noreferrer' aria-label='Open "+clean(it.name)+" website in a new tab' title='Open "+clean(it.name)+"' ";
+    : "<a class='card logo-card live' href='"+clean(it.url)+"' target='_blank' rel='noopener noreferrer' aria-label='Open "+clean(it.name)+" website in a new tab' ";
   return cardOpen+"style='--c1:"+c1+";--c2:"+c2+"' data-name='"+clean(it.name.toLowerCase())+"'>"+
     logoHTML(it)+nw+ad+
     "<div class='cap'>"+clean(it.name)+"</div>"+
