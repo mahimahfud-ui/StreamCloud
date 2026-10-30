@@ -100,7 +100,7 @@ main .card:active{transform:scale(.985)}
 
 
 /* StreamCloud category switcher — cleaner glass surface with compact category symbols. */
-.mode-wrap{gap:10px;margin-top:-27px}
+.mode-wrap{gap:6px;margin-top:-76px;margin-bottom:8px}
 .mode-wrap::before{content:"EXPLORE BY CATEGORY";display:block;color:#777783;font-size:9px;font-weight:800;letter-spacing:.24em;text-align:center;line-height:1.4}
 .mode-switch{position:relative;width:min(100%,700px);padding:6px;gap:5px;border:1px solid rgba(255,255,255,.14);border-radius:19px;background:linear-gradient(155deg,rgba(35,35,43,.96),rgba(13,13,17,.96));box-shadow:0 18px 42px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.07);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 .mode-switch .mode{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:9px;flex:1 1 0;min-width:0;min-height:49px;padding:11px 12px;border:1px solid transparent;border-radius:13px;background:transparent;color:#a3a3ad;font-size:clamp(10px,1vw,12px);font-weight:850;letter-spacing:.045em;line-height:1.15;white-space:nowrap;transition:color .25s ease,transform .25s ease,border-color .25s ease}
@@ -124,7 +124,7 @@ main .app-card .kind{display:inline-flex;align-items:center;border:1px solid rgb
 main .app-card h3{margin-top:2px;letter-spacing:-.015em}
 main .app-card p{min-height:40px}
 @media(max-width:760px){
- .mode-wrap{margin:5px 4% 18px;gap:9px}
+ .mode-wrap{margin:-60px 4% 8px;gap:6px}
  .mode-switch{padding:5px;gap:3px;border-radius:15px}
  .mode-switch .mode{flex-direction:column;gap:5px;min-height:62px;padding:7px 3px;border-radius:11px;font-size:9px;letter-spacing:.015em;white-space:normal}
  .mode-switch .mode::before{width:24px;height:24px;font-size:14px}
