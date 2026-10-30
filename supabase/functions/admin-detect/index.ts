@@ -12,6 +12,15 @@ import { checkProviderHealth } from "./provider-health.ts";
 type Detected = Record<string, unknown>;
 const norm = (s: string) => s.toLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 
+/** Estimate ad load only when the source itself explicitly describes it. */
+function detectAdsLevel(value: string): number | null {
+  const text = value.toLowerCase().replace(/[-_]+/g, " ");
+  if (/\b(ad free|no ads|without ads|no advertisements)\b/.test(text)) return 0;
+  if (/\b(frequent ads|aggressive ads|heavy ads|many ads|full screen ads|intrusive ads)\b/.test(text)) return 2;
+  if (/\b(contains ads|contains advertising|ads included|with ads)\b/.test(text)) return 1;
+  return null;
+}
+
 async function pickLogo(page: PageInfo | null, origin: URL): Promise<string | null> {
   // Prefer brand icons and touch icons; generic page artwork is a last resort.
   const candidates = [
@@ -242,6 +251,8 @@ Deno.serve(async (req) => {
   const structured = page?.structured;
   out.name = ai?.name || structured?.name || (isTitle ? page?.title : page?.siteName || page?.title) || null;
   out.description = ai?.description || structured?.description || page?.description || null;
+  const pageAds = page ? detectAdsLevel([page.description || "", page.text || ""].join(" ")) : null;
+  if (pageAds !== null) out.ads = pageAds;
   out.year = ai?.year ?? structured?.year ?? null;
   out.genres = ai?.genres?.length ? ai.genres : structured?.genres ?? [];
   out.platform = (isApp ? ai?.platform : null) || (isApp ? structured?.platform : null) || null;
@@ -328,6 +339,7 @@ Deno.serve(async (req) => {
         out.name = fileName.slice(0, 160);
         notes.push("The app name was derived from the package filename. Review and correct it before publishing.");
       }
+      if (!out.description) out.description = "Verified Android app package available for direct download. Confirm the app details before publishing.";
     }
     if (!verified.logo) notes.push("No official app logo could be verified from this source. Add an official website/store URL or paste an official logo image URL in the review step.");
   }
