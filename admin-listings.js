@@ -9,13 +9,13 @@
   var BASE = String(CFG.url || "").replace(/\/+$/, "");
   var configured = /^https:\/\//.test(BASE) && !!CFG.anonKey && String(CFG.anonKey).trim() !== "এপিয়াই";
   var SESSION_KEY = "streamcloud-admin-session";
-  var SECTION_LABEL = { movie: "Movies", series: "Web Series", sites: "Websites", apps: "Movie Apps", music: "Music Apps" };
+  var SECTION_LABEL = { movie: "Movies", series: "Web Series", sites: "Websites", apps: "Movie Apps", music: "Music Apps", gaming: "Gaming Websites", tv: "TV Apps" };
   var CATEGORIES = [
     { label: "Movie", section: "movie" }, { label: "Web Series", section: "series" },
     { label: "Movie App", section: "apps" }, { label: "Music App", section: "music" },
     { label: "Movie Website", section: "sites" }, { label: "Music Website", section: "music" },
     { label: "Anime App/Website", section: "sites" }, { label: "Streaming/Live TV", section: "sites" },
-    { label: "Other App", section: "apps" }, { label: "Other Website", section: "sites" },
+    { label: "Other App", section: "apps" }, { label: "TV App", section: "tv" },\n    { label: "Gaming Website", section: "gaming" }, { label: "Other Website", section: "sites" },
     { label: "Custom Category", section: "sites", custom: true }
   ];
 
@@ -82,7 +82,7 @@
     list.forEach(function (r) {
       if (r.section === "movie" || r.section === "series") return;
       var item = toCatalog(r);
-      (r.section === "sites" ? S : r.section === "music" ? M : A).push(item);
+      (r.section === "sites" ? S : r.section === "music" ? M : r.section === "gaming" ? G : r.section === "tv" ? TV : A).push(item);
     });
     if (typeof window.STREAMCLOUD_REFRESH_PUBLIC_CONTROLS === "function") window.STREAMCLOUD_REFRESH_PUBLIC_CONTROLS();
     var q = document.getElementById("q");
