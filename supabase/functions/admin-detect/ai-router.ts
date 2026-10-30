@@ -102,7 +102,7 @@ function orderFor(section: string, task: Task): Provider[] {
   if (section === "movie" || section === "series") {
     return ["groq", "gemini", "openrouter", "cloudflare", "venice", "shannon", "anthropic", "deepseek", "openai"];
   }
-  if (section === "music" || section === "apps" || section === "sites") {
+  if (section === "music" || section === "apps" || section === "sites" || section === "gaming" || section === "tv") {
     return ["groq", "openrouter", "gemini", "cloudflare", "venice", "shannon", "anthropic", "deepseek", "openai"];
   }
   return ["groq", "gemini", "openrouter", "cloudflare", "venice", "shannon", "anthropic", "deepseek", "openai"];
