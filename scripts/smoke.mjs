@@ -522,7 +522,7 @@ try {
   // explicitly confirm, persist to the DB mock and route the item into that category.
   await page.getByRole("button", { name: "Add Cards", exact: true }).click();
   await page.locator('select[aria-label="Add card category"]').selectOption("tv");
-  await page.getByLabel("Official website / store page (recommended)").fill("https://example.com/tv-player");
+  await page.getByLabel("Official website / app-store page (needed for automatic logo detection)").fill("https://example.com/tv-player");
   await page.getByLabel("Direct APK / XAPK download URL").fill("https://example.com/tv-player.apk");
   await page.getByRole("button", { name: "AI Detect & Preview" }).click();
   await page.getByText("Official logo verified").waitFor({ timeout: 8000 });
