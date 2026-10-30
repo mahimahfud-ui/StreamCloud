@@ -314,3 +314,162 @@ main .track > .card {
     position: static !important;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Motion/UX polish v2
+   Keep the existing StreamCloud look; reduce blur/paint work and shorten
+   interaction timing so navigation feels immediate on desktop and phones.
+   -------------------------------------------------------------------------- */
+:root{
+  --sc-motion-fast:150ms;
+  --sc-motion-base:210ms;
+  --sc-motion-enter:280ms;
+  --sc-motion-ease:cubic-bezier(.2,.75,.25,1);
+}
+@media (prefers-reduced-motion:no-preference){
+  .view.active{
+    animation:sc-view-enter-v2 240ms var(--sc-motion-ease) both!important;
+    transform-origin:center top;
+  }
+  @keyframes sc-view-enter-v2{
+    from{opacity:0;transform:translate3d(0,6px,0)}
+    to{opacity:1;transform:translate3d(0,0,0)}
+  }
+
+  .card.live{
+    animation:sc-card-enter-v2 var(--sc-motion-enter) var(--sc-motion-ease) both!important;
+    filter:none!important;
+  }
+  @keyframes sc-card-enter-v2{
+    from{opacity:0;transform:translate3d(0,9px,0) scale(.99)}
+    to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+  }
+
+  main .card{
+    transition:
+      transform 220ms var(--sc-motion-ease),
+      border-color 180ms ease,
+      box-shadow 220ms var(--sc-motion-ease),
+      background-color 180ms ease!important;
+  }
+  main .card.live:hover,
+  main .card.live:focus-within,
+  main .card:focus-visible{
+    transform:translate3d(0,-3px,0)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 14px 30px rgba(0,0,0,.46),0 0 0 1px rgba(255,59,69,.16)!important;
+  }
+  .card:after{transition:opacity 160ms ease!important}
+  .card.logo-card img,
+  .app-card .app-icon img,
+  .app-card .movie-logo img{
+    transition:transform 240ms var(--sc-motion-ease),opacity 180ms ease!important;
+  }
+
+  .mode-switch .mode,
+  .mode-switch .mode::before{
+    transition:color 160ms ease,background-color 160ms ease,border-color 160ms ease,transform 180ms var(--sc-motion-ease)!important;
+  }
+  .mode-switch .mode-thumb,
+  .mode-thumb{
+    transition:transform 360ms var(--sc-motion-ease),width 360ms var(--sc-motion-ease)!important;
+    will-change:transform,width;
+  }
+  .mode-switch .mode:active,
+  .filter-chip:active,
+  .sc-chip:active,
+  .sc-reset:active,
+  .open-link:active,
+  .modal-action:active{
+    transform:scale(.975);
+    transition-duration:90ms!important;
+  }
+
+  .search,
+  .search input,
+  .search button{
+    transition:
+      width 260ms var(--sc-motion-ease),
+      opacity 160ms ease,
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms var(--sc-motion-ease)!important;
+  }
+  .search.open{transform:none!important}
+  #acList{
+    transition:opacity 150ms ease,transform 180ms var(--sc-motion-ease),visibility 0s linear 150ms!important;
+  }
+  #acList.open{
+    transition:opacity 150ms ease,transform 180ms var(--sc-motion-ease),visibility 0s!important;
+  }
+
+  .detail-modal,.wl-modal{
+    transition:opacity 180ms ease,visibility 0s linear 180ms!important;
+  }
+  .detail-modal.open,.wl-modal.open{
+    transition:opacity 180ms ease,visibility 0s!important;
+  }
+  .detail-panel,.wl-panel{
+    transition:transform 240ms var(--sc-motion-ease),opacity 180ms ease!important;
+    transform:translate3d(0,8px,0) scale(.99)!important;
+    filter:none!important;
+  }
+  .detail-modal.open .detail-panel,
+  .wl-modal.open .wl-panel{transform:translate3d(0,0,0) scale(1)!important}
+  .detail-modal .modal-scrim,.wl-scrim{
+    transition:opacity 180ms ease!important;
+  }
+
+  .t-poster{transition:transform 220ms var(--sc-motion-ease),box-shadow 220ms ease!important}
+  .t-poster img{transition:opacity 220ms ease!important}
+  .t-tab{transition:background-color 160ms ease,color 160ms ease,border-color 160ms ease!important}
+
+  :where(button,a,[role="button"],[role="link"],input,select,textarea){
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+  }
+  :where(button,a,[role="button"],[role="link"]):focus-visible{
+    outline:2px solid rgba(255,255,255,.9);
+    outline-offset:3px;
+  }
+
+  /* Let native scrolling/compositing take priority over cinematic blur and card depth. */
+  .is-scrolling nav,
+  .is-scrolling .mode-wrap,
+  .is-scrolling .card.live,
+  .is-scrolling .card.live:after,
+  .is-scrolling .row-head,
+  .is-scrolling .finale-in>*{
+    transition-duration:0s!important;
+  }
+  .is-scrolling nav.solid,
+  .is-scrolling .mode-switch{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+}
+@media(hover:none){
+  main .card.live:hover:not(:focus-within){
+    transform:none!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 12px 28px rgba(0,0,0,.4)!important;
+  }
+  main .card.live:active{transform:scale(.985)!important;transition-duration:90ms!important}
+  .mode-switch .mode:hover::before{transform:none}
+}
+@media(max-width:760px){
+  .view.active{animation-duration:200ms!important}
+  .card.live{animation-duration:240ms!important}
+  .mode-switch .mode-thumb,.mode-thumb{transition-duration:260ms!important}
+  .detail-panel,.wl-panel{max-height:calc(100dvh - 20px)}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  .view.active,.card.live,.detail-modal .detail-panel,.wl-modal .wl-panel,
+  .t-card,.t-poster,.t-poster img{animation:none!important;transition:none!important;filter:none!important}
+  .card.live:hover,.card.live:focus-within,.card.live:active,
+  .mode-switch .mode:active,.search.open{transform:none!important}
+  nav.solid,.mode-switch,.modal-scrim,.wl-scrim{
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  }
+  .mode-switch .mode-thumb,.mode-thumb{will-change:auto}
+}
