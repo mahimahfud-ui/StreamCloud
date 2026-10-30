@@ -783,8 +783,9 @@ function card(it,i,isTop){
 
 function appCard(it,i){
   const music=it.appType==="music";
-  const accent=music?"#73e6ef":"#ff7166";
-  const accent2=music?"#7253bd":"#8e202d";
+  const tv=it.appType==="tv";
+  const accent=music?"#73e6ef":tv?"#78b7ff":"#ff7166";
+  const accent2=music?"#7253bd":tv?"#365d9b":"#8e202d";
   const adTag=it.ads===0?"<span class='ad-low'>No / minimal ads</span>":it.ads===1?"<span class='ad-mid'>Some ads</span>":"<span class='ad-high'>More / heavier ads</span>";
   const freshness=it.new?"<span class='fresh'>NEW</span>":"";
   const domain="<span>"+clean(it.domain||"app")+"</span>";
@@ -797,9 +798,9 @@ function appCard(it,i){
   const downloadButton=hasDownloadUrl
     ?"<a class='open-link download-link' "+(directUrl?"data-direct-download='true'":"data-download-page='true'")+" href='"+clean(it.downloadUrl)+"' rel='nofollow noopener noreferrer' aria-label='"+clean(directUrl?"Download "+it.name+" "+downloadFormat:"Open download page for "+it.name)+"'>"+downloadLabel+" <span aria-hidden='true'>↧</span></a>"
     :"<button class='open-link download-link download-unavailable' type='button' disabled aria-disabled='true' title='A verified download link is not available yet'>Download</button>";
-  const tags="<div class='movie-app-tags'>"+freshness+(music?(directUrl?"<span class='download-tag'>DIRECT "+clean(downloadFormat)+" DOWNLOAD</span>":hasDownloadUrl?"<span class='download-tag'>DOWNLOAD PAGE</span>":"<span class='download-tag unavailable-tag'>DIRECT LINK UNAVAILABLE</span>"):adTag)+domain+"</div>";
-  return "<article class='card app-card movie-app-card live' tabindex='0' role='button' data-name='"+clean(it.name.toLowerCase())+"' data-category='"+(music?"music":"movie")+"' style='--accent:"+accent+";--accent2:"+accent2+";--accent-glow:"+accent+"30;animation-delay:"+Math.min(i,8)*42+"ms'>"+
-    "<div class='card-top'><div class='app-icon movie-logo'>"+logo+"</div><span class='kind'>"+(music?"MUSIC APP":"MOVIE APP")+"</span></div>"+
+  const tags="<div class='movie-app-tags'>"+freshness+(music||tv?(directUrl?"<span class='download-tag'>DIRECT "+clean(downloadFormat)+" DOWNLOAD</span>":hasDownloadUrl?"<span class='download-tag'>DOWNLOAD PAGE</span>":"<span class='download-tag unavailable-tag'>DIRECT LINK UNAVAILABLE</span>"):adTag)+domain+"</div>";
+  return "<article class='card app-card movie-app-card live' tabindex='0' role='button' data-name='"+clean(it.name.toLowerCase())+"' data-category='"+(music?"music":tv?"tv":"movie")+"' style='--accent:"+accent+";--accent2:"+accent2+";--accent-glow:"+accent+"30;animation-delay:"+Math.min(i,8)*42+"ms'>"+
+    "<div class='card-top'><div class='app-icon movie-logo'>"+logo+"</div><span class='kind'>"+(music?"MUSIC APP":tv?"TV APP":"MOVIE APP")+"</span></div>"+
     "<h3><span>"+clean(it.name)+"</span>"+favourite+"</h3><p>"+clean(it.desc||"")+"</p>"+tags+
     "<div class='card-footer'><small>"+(directUrl?"Direct file download · stays on this page":hasDownloadUrl?"Download section · same tab":"Direct download link not verified")+"</small><div class='movie-card-actions'>"+downloadButton+"</div></div></article>";
 }
@@ -953,7 +954,7 @@ document.getElementById("yr").textContent=new Date().getFullYear();
     updateDetailStatus();
     document.getElementById("detailTags").innerHTML=[
       item.new?"New entry":"",
-      currentList==="apps"||currentList==="music"||currentList==="tv"?"Android app":currentList==="gaming"?"Gaming website":"Website",
+      currentList==="tv"?"TV app":currentList==="apps"||currentList==="music"?"Android app":currentList==="gaming"?"Gaming website":"Website",
       /anime/i.test(item.name+" "+item.desc)?"Anime":""
     ].filter(Boolean).map(t=>"<span class='detail-tag'>"+clean(t)+"</span>").join("");
     document.getElementById("detailLogo").innerHTML=logoHTML(item);
