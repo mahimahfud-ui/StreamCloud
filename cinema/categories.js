@@ -6,8 +6,9 @@ export function initCategories() {
   const modeSwitch = document.querySelector('.mode-switch');
   const sitesView = document.getElementById('sitesView');
   const appsView = document.getElementById('appsView');
+  const musicView = document.getElementById('musicView');
   const sharedCatalog = window.MAHIFLIX_CATALOG;
-  if (!modeSwitch || !sitesView || !appsView || !sharedCatalog) return;
+  if (!modeSwitch || !sitesView || !appsView || !musicView || !sharedCatalog) return;
 
   const sitesButton = modeSwitch.querySelector('.mode[data-mode="sites"]');
   const movieButton = modeSwitch.querySelector('.mode[data-mode="apps"]');
@@ -44,7 +45,7 @@ export function initCategories() {
     musicButton.type = 'button';
     musicButton.dataset.mode = 'music';
     musicButton.setAttribute('role', 'tab');
-    musicButton.setAttribute('aria-controls', 'appsView');
+    musicButton.setAttribute('aria-controls', 'musicView');
     musicButton.setAttribute('aria-selected', 'false');
     musicButton.tabIndex = -1;
     musicButton.textContent = 'MUSIC APPS';
@@ -55,6 +56,7 @@ export function initCategories() {
   movieButton.textContent = 'MOVIE APPS';
   sitesButton.setAttribute('aria-controls', 'sitesView');
   movieButton.setAttribute('aria-controls', 'appsView');
+  musicButton.setAttribute('aria-controls', 'musicView');
 
   let thumb = modeSwitch.querySelector('.mode-thumb');
   if (!thumb) {
@@ -84,7 +86,11 @@ export function initCategories() {
   function updateEmptyState() {
     const empty = document.getElementById('empty');
     if (!empty) return;
-    const view = selectedCategory === 'sites' ? sitesView : appsView;
+    const view = selectedCategory === 'sites'
+      ? sitesView
+      : selectedCategory === 'movie'
+        ? appsView
+        : musicView;
     const rowSelector = selectedCategory === 'sites'
       ? '.row-section[data-row="movie websites"]'
       : selectedCategory === 'movie'
@@ -106,9 +112,11 @@ export function initCategories() {
   function updateCategoryView() {
     window.STREAMCLOUD_ACTIVE_CATEGORY = selectedCategory;
     sitesView.dataset.category = 'sites';
-    appsView.dataset.category = selectedCategory;
+    appsView.dataset.category = 'movie';
+    musicView.dataset.category = 'music';
     sitesView.classList.toggle('active', selectedCategory === 'sites');
-    appsView.classList.toggle('active', selectedCategory !== 'sites');
+    appsView.classList.toggle('active', selectedCategory === 'movie');
+    musicView.classList.toggle('active', selectedCategory === 'music');
     [sitesButton, movieButton, musicButton].forEach(button => {
       const active = button === activeButton();
       button.classList.toggle('active', active);
@@ -175,6 +183,7 @@ export function initCategories() {
   const viewObserver = new MutationObserver(updateCategoryView);
   viewObserver.observe(sitesView, { childList: true, subtree: true });
   viewObserver.observe(appsView, { childList: true, subtree: true });
+  viewObserver.observe(musicView, { childList: true, subtree: true });
 
   const search = document.getElementById('q');
   if (search) search.addEventListener('input', updateEmptyState);
