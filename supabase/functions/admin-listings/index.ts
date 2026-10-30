@@ -3,6 +3,7 @@ import { getSessionToken, requireAdmin, sha256Hex } from "../_shared/auth.ts";
 import { serviceClient } from "../_shared/db.ts";
 import { validateListing, SECTIONS } from "../_shared/listing.ts";
 import { verifyApk } from "../_shared/apk.ts";
+import { verifyImageUrl } from "../_shared/images.ts";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SETTINGS_MAX = 100_000;
@@ -15,8 +16,9 @@ const SETTINGS_DEFAULT = {
     apps: { visible: true, title: "Movie Apps" },
     music: { visible: true, title: "Music Apps" },
     gaming: { visible: true, title: "Gaming Websites" },
+    tv: { visible: true, title: "TV Apps" },
     recs: { visible: true, title: "Recommendations" },
-    order: ["sites", "apps", "music", "gaming", "recs"],
+    order: ["sites", "apps", "music", "gaming", "tv", "recs"],
   },
   content: { overrides: {}, hidden: [], order: {} },
 };
@@ -238,14 +240,23 @@ Deno.serve(async (req) => {
     const { row, errors } = validateListing((body.listing ?? {}) as Record<string, unknown>);
     if (errors) return json(req, { error: "Please fix the highlighted fields.", fields: errors }, 422);
 
-    if (row!.download_url) {
-      const v = await verifyApk(String(row!.download_url));
-      if (v.ok) row!.download_verified = true;
-      else if (body.keepUnverifiedDownload !== true) {
-        return json(req, { error: `Download link not verified: ${v.reason}`, fields: { download_url: "Not a verified APK link. Clear it, fix it, or keep it as unverified." } }, 422);
+    if (body.requireVerifiedLogo === true) {
+      if (!row!.logo_url) return json(req, { error: "An official logo URL is required.", fields: { logo_url: "Add an official image URL." } }, 422);
+      if (!(await verifyImageUrl(String(row!.logo_url)))) {
+        return json(req, { error: "The logo URL did not return a verifiable image.", fields: { logo_url: "Use a public HTTPS image URL with a valid image signature." } }, 422);
       }
     }
 
+    if (body.requireVerifiedDownload === true && !row!.download_url) {
+      return json(req, { error: "A direct app package URL is required.", fields: { download_url: "Paste a direct APK/XAPK package URL." } }, 422);
+    }
+    if (row!.download_url) {
+      const v = await verifyApk(String(row!.download_url));
+      if (v.ok) row!.download_verified = true;
+      else if (body.requireVerifiedDownload === true || body.keepUnverifiedDownload !== true) {
+        return json(req, { error: "Download link not verified: " + v.reason, fields: { download_url: "Not a verified APK/package file. Paste a direct package URL and run detection again." } }, 422);
+      }
+    }
     const q = action === "create"
       ? db.from("listings").insert(row!).select().single()
       : db.from("listings").update({ ...row, updated_at: new Date().toISOString() }).eq("id", id).select().single();
