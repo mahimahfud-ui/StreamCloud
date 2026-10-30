@@ -327,10 +327,18 @@ try {
 
 
   // Scrolling should throttle cinematic effects while the user is moving, then restore them.
-  await page.evaluate(() => window.scrollTo({ top: 260, behavior: "instant" }));
-  await page.waitForFunction(() => document.documentElement.classList.contains("is-scrolling"), null, { timeout: 2000 });
+  const scrollMove = await page.evaluate(() => {
+    const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    const current = window.scrollY;
+    const next = current < max ? Math.min(max, current + 260) : Math.max(0, current - 260);
+    window.scrollTo(0, next);
+    return { max, current, next };
+  });
+  assert.ok(scrollMove.max > 0 && scrollMove.next !== scrollMove.current,
+    "The page should move to a different scroll position during the scroll smoke test");
+  await page.waitForFunction(() => document.documentElement.classList.contains("is-scrolling"), null, { timeout: 5000 });
   await page.waitForFunction(() => !document.documentElement.classList.contains("is-scrolling"), null, { timeout: 3000 });
-  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await page.evaluate(() => window.scrollTo(0, 0));
 
   // Movie search should extract a release year, offer disambiguation, and send the chosen TMDB ID back.
   await page.locator("#q").fill("Dune (2021)");
