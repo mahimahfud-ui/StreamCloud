@@ -206,6 +206,18 @@ try {
         });
         return;
       }
+      if (["sites", "apps", "music", "gaming", "tv"].includes(body.section)) {
+        await reply({
+          detected: {
+            url: body.url, official_url: body.url, name: "TV Smoke App",
+            description: "Verified smoke-test TV application.", logo_url: "https://example.com/tv-logo.png",
+            download_url: body.downloadUrl, platform: "Android", version: "1.0"
+          },
+          verified: { imdb: false, logo: true, download: true },
+          notes: ["Mock official-source image and package verification."]
+        });
+        return;
+      }
       if (body.url) {
         await reply({ detected: { url: body.url, name: "Detected by OpenAI", description: "Mock OpenAI extraction." }, verified: { imdb: false, logo: false, download: false }, notes: [] });
         return;
@@ -240,6 +252,20 @@ try {
         return;
       }
       if (body.action === "delete") { mockState.listings = mockState.listings.filter((x) => x.id !== body.id); await reply({ ok: true }); return; }
+      if (body.action === "create" || body.action === "update") {
+        const row = {
+          id: body.id || "33333333-3333-4333-8333-333333333333",
+          ...body.listing,
+          download_verified: body.requireVerifiedDownload === true,
+          published: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        mockState.listings = mockState.listings.filter(x => x.id !== row.id);
+        mockState.listings.unshift(row);
+        await reply({ listing: row });
+        return;
+      }
       if (body.action === "pin-change") { await reply({ ok: true, reLoginRequired: true }); return; }
       if (body.action === "logout") { await reply({ ok: true }); return; }
       if (body.action === "import") { await reply({ ok: true, added: 0, skipped: 0, errors: [] }); return; }
@@ -491,6 +517,28 @@ try {
   
   await clickAdminFeature(page, "All Cards", "All Cards");
   await page.getByText("Edit and arrange cards").waitFor({ timeout: 8000 });
+
+  // Verify Add Cards: choose a category, inspect AI metadata and verified assets,
+  // explicitly confirm, persist to the DB mock and route the item into that category.
+  await page.getByRole("button", { name: "Add Cards", exact: true }).click();
+  await page.locator('select[aria-label="Add card category"]').selectOption("tv");
+  await page.getByLabel("Official website / store page (recommended)").fill("https://example.com/tv-player");
+  await page.getByLabel("Direct APK / XAPK download URL").fill("https://example.com/tv-player.apk");
+  await page.getByRole("button", { name: "AI Detect & Preview" }).click();
+  await page.getByText("Official logo verified").waitFor({ timeout: 8000 });
+  await page.getByText("Direct package verified").waitFor({ timeout: 8000 });
+  assert.ok(mockState.calls.some((x) => x.section === "tv" && x.downloadUrl === "https://example.com/tv-player.apk"),
+    "AI detection should send the selected TV Apps category and direct package URL");
+  await page.getByLabel("Card name").fill("TV Smoke App");
+  await page.getByRole("button", { name: "Confirm & Publish Card" }).click();
+  await page.getByText("Card published in TV Apps.", { exact: false }).waitFor({ timeout: 8000 });
+  const addCardCall = mockState.calls.find((x) => x.action === "create" && x.listing?.name === "TV Smoke App");
+  assert.ok(addCardCall && addCardCall.requireVerifiedLogo === true && addCardCall.requireVerifiedDownload === true,
+    "Publishing an app should require server-side logo and package verification");
+  assert.ok(mockState.listings.some((x) => x.name === "TV Smoke App" && x.section === "tv" && x.download_verified),
+    "Confirmed Add Cards should persist a verified TV App row");
+  await page.locator('#tvView .app-card[data-name="tv smoke app"]').waitFor({ timeout: 8000 });
+
   await page.locator('select[aria-label="Card category"]').selectOption("sites");
   await page.locator('select[aria-label="Select card"] option').filter({ hasText: "Smoke test listing" }).waitFor({ state: "attached", timeout: 8000 });
   await page.locator('select[aria-label="Select card"]').selectOption({ label: "Smoke test listing" });
