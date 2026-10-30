@@ -73,7 +73,7 @@
     return item;
   }
   function catalogArrays() {
-    try { return [S, A, M]; } catch (e) { return []; }
+    try { return [S, A, M, G, TV]; } catch (e) { return []; }
   }
   function syncCatalog(list) {
     var arrays = catalogArrays();
@@ -788,7 +788,7 @@
     var group = h("select", { class: "scx-in", "aria-label": "Card category" });
     options(group, [
       { value: "sites", label: "Websites" }, { value: "apps", label: "Movie Apps" },
-      { value: "music", label: "Music Apps" }, { value: "gaming", label: "Gaming Websites" }, { value: "movie", label: "Movies" }, { value: "series", label: "Web Series" }
+      { value: "music", label: "Music Apps" }, { value: "gaming", label: "Gaming Websites" },\n      { value: "tv", label: "TV Apps" }, { value: "movie", label: "Movies" }, { value: "series", label: "Web Series" }
     ], ui.controlSection || "sites");
     var itemSelect = h("select", { class: "scx-in", "aria-label": "Select card" });
     var selectRow = h("div", { class: "scx-row" }, [
@@ -816,7 +816,7 @@
       add("url", rec ? "Title detail / external link" : "Homepage URL", "url", vals.url || "", { placeholder: "https://…" });
       add(rec ? "poster" : "logoUrl", rec ? "Poster image URL" : "Logo image URL", "url", rec ? vals.poster : vals.logoUrl, { placeholder: "https://…" });
       add(rec ? "overview" : "description", "Description", "textarea", rec ? vals.overview : vals.description, { rows: "3", maxlength: "1500" });
-      if (!rec && (section === "apps" || section === "music")) {
+      if (!rec && (section === "apps" || section === "music" || section === "tv")) {
         add("downloadUrl", "Download URL", "url", vals.downloadUrl || "", { placeholder: "https://…" });
         var direct = checkbox("Direct APK/package URL verified", vals.downloadDirect === true);
         form.appendChild(direct.wrap); fields.downloadDirect = direct.input;
@@ -860,7 +860,7 @@
           values.name = String(values.name || "").slice(0, 160);
           values.description = String(values.description || "").slice(0, 1500);
           values.domain = values.url ? (function () { try { return new URL(values.url).hostname.replace(/^www\./, ""); } catch (e) { return ""; } })() : "";
-          if (section === "apps" || section === "music") values.downloadDirect = fields.downloadDirect ? fields.downloadDirect.checked : false;
+          if (section === "apps" || section === "music" || section === "tv") values.downloadDirect = fields.downloadDirect ? fields.downloadDirect.checked : false;
           delete values.hidden;
         }
         delete values.hidden; delete values.section; delete values.key; delete values.isRec;
