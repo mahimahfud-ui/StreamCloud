@@ -319,8 +319,15 @@ Deno.serve(async (req) => {
       const rawName = new URL(downloadTarget?.href ?? target.href).pathname.split("/").pop() || "";
       let decodedName = rawName;
       try { decodedName = decodeURIComponent(rawName); } catch { /* keep the encoded filename */ }
-      const fileName = decodedName.replace(/\.(?:apk|xapk|apks)$/i, "").replace(/[._-]+/g, " ").trim();
-      if (fileName) { out.name = fileName.slice(0, 160); notes.push("The card name was derived from the package filename. Review and correct it before publishing."); }
+      const rawBase = decodedName.replace(/\.(?:apk|xapk|apks)$/i, "").trim();
+      const versionMatch = rawBase.match(/(?:^|[\s._-])v?(\d+\.\d+(?:\.\d+){0,2})(?=$|[\s._-])/i);
+      if (!out.version && versionMatch) out.version = versionMatch[1];
+      const fileName = rawBase.replace(/(?:^|[\s._-])v?\d+\.\d+(?:\.\d+){0,2}(?=$|[\s._-])/i, " ")
+        .replace(/[._-]+/g, " ").replace(/\s+/g, " ").trim();
+      if (!out.name && fileName) {
+        out.name = fileName.slice(0, 160);
+        notes.push("The app name was derived from the package filename. Review and correct it before publishing.");
+      }
     }
     if (!verified.logo) notes.push("No official app logo could be verified from this source. Add an official website/store URL or paste an official logo image URL in the review step.");
   }
