@@ -1018,11 +1018,11 @@
         { value: "tv", label: "TV Apps" }
       ], "sites");
       var categoryWrap = h("label", { class: "scx-f" }, ["Publish in", category]);
-      var source = field("Official website / store page (recommended)", "", "url", { placeholder: "https://official-site.example/" });
+      var source = field("Official website / app-store page", "", "url", { placeholder: "https://official-site.example/" });
       var download = field("Direct APK / XAPK download URL", "", "url", { placeholder: "https://…/app.apk" });
       var fieldsTop = h("div", { class: "scx-grid" }, [source.wrap, download.wrap]);
       var detect = h("button", { class: "scx-btn pri", type: "button", text: "AI Detect & Preview" });
-      var detectMsg = h("p", { class: "scx-help", role: "status", text: "The AI reads the official page, checks icon candidates, and verifies direct app packages. It does not publish automatically." });
+      var detectMsg = h("p", { class: "scx-help", role: "status", text: "For automatic official-logo detection, paste the official website or app-store page. App categories also require a direct APK/XAPK URL. The package file alone can be verified, but cannot prove which logo belongs to the app." });
       var preview = h("div", { class: "scx-add-preview", hidden: true });
       addPanel.appendChild(categoryWrap);
       addPanel.appendChild(fieldsTop);
@@ -1037,9 +1037,11 @@
       function packageUrl(raw) { try { return /\.(?:apk|xapk|apks|zip|aab)$/i.test(new URL(raw).pathname); } catch (e) { return false; } }
       function updateCategory() {
         download.wrap.hidden = !isAppCategory();
-        source.wrap.querySelector("span") && (source.wrap.querySelector("span").textContent = isAppCategory()
-          ? "Official website / store page (optional when you only have a direct package link)"
-          : "Official website URL");
+        if (source.wrap.firstChild && source.wrap.firstChild.nodeType === 3) {
+          source.wrap.firstChild.textContent = isAppCategory()
+            ? "Official website / app-store page (needed for automatic logo detection)"
+            : "Official website URL";
+        }
       }
       category.addEventListener("change", function () { updateCategory(); preview.textContent = ""; preview.hidden = true; });
       updateCategory();
