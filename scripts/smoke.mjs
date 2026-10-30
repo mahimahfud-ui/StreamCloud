@@ -312,6 +312,13 @@ try {
   assert.equal(await firstWebsiteCard.getAttribute("target"), "_blank", "Movie Website cards should open in a new tab");
   assert.match(await firstWebsiteCard.getAttribute("href") || "", /^https:\/\//, "Movie Website cards should have a valid HTTPS destination");
   assert.equal(await page.locator("#sitesView .card[title]").count(), 0, "Website cards must not show native hover tooltips with website names");
+  const desktopCategorySpacing = await page.locator(".mode-wrap").evaluate(el => ({
+    topMargin: parseFloat(getComputedStyle(el).marginTop),
+    bottomMargin: parseFloat(getComputedStyle(el).marginBottom),
+    gap: parseFloat(getComputedStyle(el).rowGap),
+  }));
+  assert.ok(desktopCategorySpacing.topMargin <= -70 && desktopCategorySpacing.bottomMargin <= 8 && desktopCategorySpacing.gap <= 6,
+    `Desktop category switcher has excess vertical spacing: ${JSON.stringify(desktopCategorySpacing)}`);
 
   const imageAudit = {};
   imageAudit.desktopWebsites = await auditCardLogos(page, "#sitesView", "Desktop Movie Websites");
@@ -529,6 +536,13 @@ try {
   mobile.on("pageerror", (error) => { if (failures.length < 12) failures.push("Mobile uncaught page error: " + (error.stack || error.message)); });
   await mobile.goto(ORIGIN, { waitUntil: "domcontentloaded" });
   await mobile.waitForSelector("#sitesView .card", { timeout: 15000 });
+  const mobileCategorySpacing = await mobile.locator(".mode-wrap").evaluate(el => ({
+    topMargin: parseFloat(getComputedStyle(el).marginTop),
+    bottomMargin: parseFloat(getComputedStyle(el).marginBottom),
+    gap: parseFloat(getComputedStyle(el).rowGap),
+  }));
+  assert.ok(mobileCategorySpacing.topMargin <= -55 && mobileCategorySpacing.bottomMargin <= 8 && mobileCategorySpacing.gap <= 6,
+    `Mobile category switcher has excess vertical spacing: ${JSON.stringify(mobileCategorySpacing)}`);
   await auditCardLogos(mobile, "#sitesView", "Mobile Movie Websites");
   await mobile.evaluate(() => window.scrollTo({ top: 260, behavior: "instant" }));
   await mobile.waitForFunction(() => document.documentElement.classList.contains("is-scrolling"), null, { timeout: 2000 });
