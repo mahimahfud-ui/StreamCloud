@@ -13,11 +13,48 @@ type Detected = Record<string, unknown>;
 const norm = (s: string) => s.toLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 
 async function pickLogo(page: PageInfo | null, origin: URL): Promise<string | null> {
-  // Prefer a real site icon; Open Graph/JSON-LD images are useful fallbacks for sites
-  // whose favicon is missing or unreadable.
-  const candidates = [...(page?.icons ?? []).slice(0, 4), ...(page?.images ?? []).slice(0, 8), new URL("/favicon.ico", origin).href];
-  for (const c of [...new Set(candidates)].slice(0, 10)) if (parsePublicUrl(c) && await verifyImageUrl(c)) return c;
+  // Prefer brand icons and touch icons; generic page artwork is a last resort.
+  const candidates = [
+    ...(page?.icons ?? []).slice(0, 8),
+    ...(page?.images ?? []).slice(0, 10),
+    new URL("/apple-touch-icon.png", origin).href,
+    new URL("/apple-touch-icon-precomposed.png", origin).href,
+    new URL("/android-chrome-192x192.png", origin).href,
+    new URL("/favicon-32x32.png", origin).href,
+    new URL("/favicon.ico", origin).href,
+  ];
+  for (const c of [...new Set(candidates)].slice(0, 18)) {
+    if (parsePublicUrl(c) && await verifyImageUrl(c)) return c;
+  }
   return null;
+}
+
+/** Convert alternate-reader Markdown into the same bounded metadata shape used by the HTML parser. */
+function pageFromReader(markdown: string, base: URL, favicon: string | null, titleHeader: string | null, descriptionHeader: string | null): PageInfo {
+  const titleMatch = markdown.match(/^Title:\s*(.+)$/im) || markdown.match(/^#\s+(.+)$/m);
+  const title = (titleHeader || titleMatch?.[1] || base.hostname.replace(/^www\./, "")).trim().slice(0, 180);
+  const imageUrls = [...markdown.matchAll(/!\[[^\]]*\]\((https?:\/\/[^)\s]+)(?:\s+[^)]*)?\)/g)]
+    .map((m) => m[1].replace(/&amp;/g, "&"));
+  const iconUrls = favicon && parsePublicUrl(favicon) ? [favicon] : [];
+  const firstParagraph = markdown.split(/\n{2,}/).map((x) => x.replace(/^#\s*/, "").trim())
+    .find((x) => x && !/^(URL Source|Markdown Content|Title):/i.test(x));
+  const description = (descriptionHeader || firstParagraph || "").trim().slice(0, 600) || null;
+  const ids = markdown.match(/\btt\d{5,10}\b/gi) ?? [];
+  const apkLinks = [...markdown.matchAll(/https?:\/\/[^\s)\]]+\.(?:apk|xapk|apks)(?:\?[^\s)\]]*)?/gi)].map((m) => m[0]);
+  return {
+    html: markdown.slice(0, 60000),
+    title,
+    siteName: title,
+    description,
+    canonical: base.href,
+    icons: iconUrls,
+    images: [...new Set(imageUrls)].slice(0, 30),
+    imdbIds: [...new Set(ids)],
+    apkLinks: [...new Set(apkLinks)].slice(0, 30),
+    text: markdown.replace(/\s+/g, " ").slice(0, 12000),
+    jsonLd: [],
+    structured: { name: title, description, image: imageUrls[0] ?? null, year: null, genres: [], platform: null, version: null },
+  };
 }
 
 async function pickPageImage(page: PageInfo | null): Promise<string | null> {
@@ -134,14 +171,64 @@ Deno.serve(async (req) => {
   let page: PageInfo | null = null;
   const isPackageUrl = (u: URL) => /\.(?:apk|xapk|apks)$/i.test(u.pathname);
   const looksPackage = isPackageUrl(target);
+  let readerFallbackAllowed = false;
+  let primaryReadNote = "";
   if (!looksPackage) {
     try {
       const { res, url } = await safeFetch(target, { headers: { Accept: "text/html,application/xhtml+xml" } });
       const type = (res.headers.get("content-type") ?? "").toLowerCase();
       if (res.ok && (type.includes("html") || type === "")) {
         page = extractPage(new TextDecoder().decode(await readLimited(res, 600_000)), url);
-      } else { await res.body?.cancel(); notes.push("The source page could not be read (status " + res.status + "). Review the details manually."); }
-    } catch (e) { notes.push("The source page could not be read: " + ((e as Error).message || "network error") + ". Review the details manually."); }
+      } else {
+        primaryReadNote = "The source page returned HTTP " + res.status + ".";
+        readerFallbackAllowed = [401, 403, 404, 406, 429, 500, 502, 503, 504].includes(res.status);
+        await res.body?.cancel();
+      }
+    } catch (e) {
+      primaryReadNote = "The source page could not be reached: " + ((e as Error).message || "network error") + ".";
+    }
+
+    // Retry pages that actively block server-side reads through an alternate reader.
+    // We only use this after an actual public-host HTTP response, not after a DNS/SSRF rejection.
+    if (!page && readerFallbackAllowed) {
+      try {
+        const readerUrl = new URL("https://r.jina.ai/");
+        readerUrl.searchParams.set("url", target.href);
+        const { res: readerRes } = await safeFetch(readerUrl, {
+          headers: {
+            Accept: "text/plain",
+            "X-Respond-With": "markdown",
+            "X-With-Images-Summary": "true",
+            "X-Retain-Images": "all",
+            "X-User-Agent": "browser",
+            "X-Timeout": "20",
+          },
+          timeoutMs: 25000,
+        });
+        if (readerRes.ok) {
+          const markdown = new TextDecoder().decode(await readLimited(readerRes, 300_000));
+          if (markdown.trim().length > 80) {
+            page = pageFromReader(
+              markdown, target,
+              readerRes.headers.get("x-favicon"),
+              readerRes.headers.get("x-title"),
+              readerRes.headers.get("x-description"),
+            );
+            notes.push("The original site blocked direct reading; details were recovered through an alternate page reader. Review the detected values.");
+          } else {
+            await readerRes.body?.cancel();
+            notes.push(primaryReadNote + " The alternate reader returned too little content. Check the URL or fill the missing details manually.");
+          }
+        } else {
+          await readerRes.body?.cancel();
+          notes.push(primaryReadNote + " The alternate page reader returned HTTP " + readerRes.status + ". Some fields may need review.");
+        }
+      } catch (e) {
+        notes.push(primaryReadNote + " Alternate page reader failed: " + ((e as Error).message || "network error") + ".");
+      }
+    } else if (!page) {
+      notes.push(primaryReadNote + " Review the URL or fill any unavailable fields manually.");
+    }
   }
   // 2. Automatically select an AI provider for this task and fail over on errors.
   let ai: Awaited<ReturnType<typeof askGemini>> = null;
@@ -193,7 +280,7 @@ Deno.serve(async (req) => {
 
   // 4. Websites and app categories: verify official logo candidates; app packages are checked separately.
   if (isApp || isWebsite) {
-    out.logo_url = page ? await pickLogo(page, target) : null;
+    out.logo_url = await pickLogo(page, target);
     verified.logo = !!out.logo_url;
     if (!out.description) out.description = page?.structured?.description || page?.description || null;
   }
