@@ -5,7 +5,7 @@ export function initChoreography({ invalidate }) {
   const root = document.documentElement;
   const hero = document.getElementById('top');
   const finale = document.getElementById('finale');
-  let vh = innerHeight, queued = false, scrolling = false, scrollIdleTimer = 0, lastDepthAt = 0;
+  let vh = innerHeight, queued = false, scrolling = false, scrollIdleTimer = 0;
 
   // ---- reveals: add `.in` once when something first enters the viewport ----
   // The catalog re-renders (mode switch, filters, search), so new nodes are picked up by a MutationObserver.
@@ -38,7 +38,17 @@ export function initChoreography({ invalidate }) {
   const main = document.querySelector('main');
   if (main && 'MutationObserver' in window) {
     new MutationObserver(muts => {
-      muts.forEach(m => m.removedNodes.forEach(n => { if (n.nodeType === 1) n.querySelectorAll?.('.card').forEach(c => { onScreen.delete(c); depthIO && depthIO.unobserve(c); }); }));
+      muts.forEach(m => m.removedNodes.forEach(n => {
+        if (n.nodeType !== 1) return;
+        const removedCards = [];
+        if (n.matches?.('.card')) removedCards.push(n);
+        removedCards.push(...(n.querySelectorAll?.('.card') || []));
+        removedCards.forEach(c => {
+          onScreen.delete(c);
+          if (depthIO) depthIO.unobserve(c);
+          c.style.translate = '';
+        });
+      }));
       watch(main);
     }).observe(main, { childList: true, subtree: true });
   }
@@ -79,8 +89,9 @@ export function initChoreography({ invalidate }) {
     root.classList.toggle('at-finale', state.finale > .2);
     // Visible-card geometry reads are the most expensive part of scroll choreography.
     // Keep subtle desktop depth motion, but cap those reads/writes during active scrolling.
-    const now = performance.now();
-    if (!scrolling || now - lastDepthAt >= 48) { depth(); lastDepthAt = now; }
+    // Skip card geometry reads/writes while the user is actively scrolling.
+    // The final position is recalculated once the scroll settles.
+    if (!scrolling) depth();
     if (state.reduced) invalidate();
   }
   const queue = () => { if (!queued) { queued = true; requestAnimationFrame(step); } };
