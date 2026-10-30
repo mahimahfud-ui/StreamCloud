@@ -1034,7 +1034,7 @@
       var detectedVerification = {};
       var detectedNotes = [];
       function isAppCategory() { return category.value === "apps" || category.value === "music" || category.value === "tv"; }
-      function packageUrl(raw) { try { return /\.(?:apk|xapk|apks|zip|aab)$/i.test(new URL(raw).pathname); } catch (e) { return false; } }
+      function packageUrl(raw) { try { return /\.(?:apk|xapk|apks)$/i.test(new URL(raw).pathname); } catch (e) { return false; } }
       function updateCategory() {
         download.wrap.hidden = !isAppCategory();
         if (source.wrap.firstChild && source.wrap.firstChild.nodeType === 3) {
