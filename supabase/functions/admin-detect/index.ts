@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
 
   // Fetch an official/source page when available. Package URLs are verified as files, never parsed as HTML.
   let page: PageInfo | null = null;
-  const isPackageUrl = (u: URL) => /\\.(?:apk|xapk|apks|zip|aab)$/i.test(u.pathname);
+  const isPackageUrl = (u: URL) => /\.(?:apk|xapk|apks|zip|aab)$/i.test(u.pathname);
   const looksPackage = isPackageUrl(target);
   if (!looksPackage) {
     try {
@@ -200,7 +200,7 @@ Deno.serve(async (req) => {
       out.official_url = page.canonical && parsePublicUrl(page.canonical)?.hostname.endsWith(baseDomain(target.hostname)) ? page.canonical : target.origin + "/";
       const same = page.apkLinks.filter((l) => {
         const h = new URL(l);
-        return baseDomain(h.hostname) === baseDomain(target.hostname) || (h.hostname === "github.com" && /\\/releases\\/download\\//.test(h.pathname));
+        return baseDomain(h.hostname) === baseDomain(target.hostname) || (h.hostname === "github.com" && /\/releases\/download\//.test(h.pathname));
       });
       const other = page.apkLinks.filter((l) => !same.includes(l));
       apkCandidate = apkCandidate ?? same[0] ?? null;
@@ -215,7 +215,7 @@ Deno.serve(async (req) => {
         apkCandidate = apkCandidate ?? gh.apk ?? null;
         if (gh.version) out.version = out.version || gh.version;
         if (!out.official_url) {
-          const repoPath = githubSource.pathname.match(/^\\/([\\w.-]+)\\/([\\w.-]+)/);
+          const repoPath = githubSource.pathname.match(/^\/([\w.-]+)\/([\w.-]+)/);
           out.official_url = repoPath ? "https://github.com/" + repoPath[1] + "/" + repoPath[2] : "https://github.com/";
         }
       }
@@ -227,7 +227,7 @@ Deno.serve(async (req) => {
     } else notes.push("No verified direct APK/package link was found. Paste a direct APK/XAPK URL; app pages alone are not accepted as direct downloads.");
     if (!out.name && (downloadTarget || looksPackage)) {
       const rawName = new URL(downloadTarget?.href ?? target.href).pathname.split("/").pop() || "";
-      const fileName = decodeURIComponent(rawName).replace(/\\.(?:apk|xapk|apks|zip|aab)$/i, "").replace(/[._-]+/g, " ").trim();
+      const fileName = decodeURIComponent(rawName).replace(/\.(?:apk|xapk|apks|zip|aab)$/i, "").replace(/[._-]+/g, " ").trim();
       if (fileName) { out.name = fileName.slice(0, 160); notes.push("The card name was derived from the package filename. Review and correct it before publishing."); }
     }
     if (!verified.logo) notes.push("No official app logo could be verified from this source. Add an official website/store URL or paste an official logo image URL in the review step.");
