@@ -375,10 +375,33 @@ try {
     return !!el && el.classList.contains("active");
   });
   assert.ok(await page.locator("#appsView .card").count() > 0, "Movie apps should render");
+  assert.equal(await page.locator("#appsView").evaluate(el => el.classList.contains("active")), true,
+    "Movie Apps view should be the only active app category");
+  assert.equal(await page.locator("#musicView").evaluate(el => el.classList.contains("active")), false,
+    "Music Apps view must stay hidden while Movie Apps is selected");
+  assert.equal(await page.locator(".view.active").count(), 1,
+    "Only one catalogue view should be active at a time");
+  assert.ok(await page.locator("#appsView .app-card[data-category='movie']").count() > 0,
+    "Movie Apps view should contain movie-category cards only");
+  assert.equal(await page.locator("#appsView .app-card[data-category='music']").count(), 0,
+    "Music cards must never render in Movie Apps");
 
   await page.locator('.mode[data-mode="music"]').click();
-  await page.waitForFunction(() => window.STREAMCLOUD_ACTIVE_CATEGORY === "music");
-  assert.ok(await page.locator("#appsView .card").count() > 0, "Music apps should render");
+  await page.waitForFunction(() =>
+    window.STREAMCLOUD_ACTIVE_CATEGORY === "music" &&
+    document.getElementById("musicView")?.classList.contains("active") &&
+    !document.getElementById("appsView")?.classList.contains("active")
+  );
+  assert.equal(await page.locator("#appsView").evaluate(el => el.classList.contains("active")), false,
+    "Movie Apps view must be hidden while Music Apps is selected");
+  assert.equal(await page.locator("#musicView").evaluate(el => el.classList.contains("active")), true,
+    "Music Apps must have its own active view");
+  assert.equal(await page.locator(".view.active").count(), 1,
+    "Only the selected Music Apps view should be active");
+  assert.ok(await page.locator("#musicView .app-card[data-category='music']").count() > 0,
+    "Music Apps view should contain music-category cards");
+  assert.equal(await page.locator("#musicView .app-card[data-category='movie']").count(), 0,
+    "Movie cards must never render in Music Apps");
 
   await page.locator('.mode[data-mode="gaming"]').waitFor({ timeout: 8000 });
   await page.locator('.mode[data-mode="gaming"]').click();
@@ -521,6 +544,14 @@ try {
     `Mobile website cards should have consistent heights: ${JSON.stringify(websiteCardSizes)}`);
   await mobile.locator('.mode[data-mode="apps"]').click();
   await mobile.waitForSelector("#appsView .app-card", { timeout: 15000 });
+  await mobile.waitForFunction(() =>
+    document.getElementById("appsView")?.classList.contains("active") &&
+    !document.getElementById("musicView")?.classList.contains("active")
+  );
+  assert.equal(await mobile.locator(".view.active").count(), 1,
+    "Mobile Movie Apps selection should display exactly one category view");
+  assert.equal(await mobile.locator("#appsView .app-card[data-category='music']").count(), 0,
+    "Mobile Movie Apps must not contain Music Apps cards");
   const appCardSizes = await mobile.evaluate(() => {
     const cards = [...document.querySelectorAll("#appsView .track > .app-card")];
     const heights = cards.map(card => card.getBoundingClientRect().height);
@@ -553,6 +584,14 @@ try {
     mobileAppDownloads.every(item => item.visible && item.insideCard && item.width >= 90),
     `Every mobile Movie App card should show its Download action inside the card: ${JSON.stringify(mobileAppDownloads)}`);
   await mobile.locator('.mode[data-mode="music"]').click();
+  await mobile.waitForFunction(() =>
+    document.getElementById("musicView")?.classList.contains("active") &&
+    !document.getElementById("appsView")?.classList.contains("active")
+  );
+  assert.equal(await mobile.locator(".view.active").count(), 1,
+    "Mobile Music Apps selection should display exactly one category view");
+  assert.equal(await mobile.locator("#musicView .app-card[data-category='movie']").count(), 0,
+    "Mobile Music Apps must not contain Movie Apps cards");
   await auditCardLogos(mobile, "#musicView", "Mobile Music Apps");
   const youtify = mobile.locator('#musicView .app-card[data-name="youtify"] .download-link');
   await youtify.waitFor({ state: "visible" });
