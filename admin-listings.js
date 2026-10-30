@@ -15,7 +15,8 @@
     { label: "Movie App", section: "apps" }, { label: "Music App", section: "music" },
     { label: "Movie Website", section: "sites" }, { label: "Music Website", section: "music" },
     { label: "Anime App/Website", section: "sites" }, { label: "Streaming/Live TV", section: "sites" },
-    { label: "Other App", section: "apps" }, { label: "TV App", section: "tv" },\n    { label: "Gaming Website", section: "gaming" }, { label: "Other Website", section: "sites" },
+    { label: "Other App", section: "apps" }, { label: "TV App", section: "tv" },
+    { label: "Gaming Website", section: "gaming" }, { label: "Other Website", section: "sites" },
     { label: "Custom Category", section: "sites", custom: true }
   ];
 
@@ -61,14 +62,16 @@
   function toCatalog(r) {
     var fresh = Date.now() - new Date(r.created_at).getTime() < 30 * 864e5;
     var item = {
-      listingId: r.id, name: r.name, url: r.url, domain: hostOf(r.url), ads: r.ads == null ? 1 : Number(r.ads),
-      pop: 70, smooth: 70, langs: 70, new: fresh, desc: r.description || "",
-      logoSources: isHttps(r.logo_url) ? [r.logo_url] : []
+      listingId: r.id, name: r.name, url: r.official_url || r.url, domain: hostOf(r.official_url || r.url),
+      ads: r.ads == null ? 1 : Number(r.ads), pop: 70, smooth: 70, langs: 70, new: fresh,
+      desc: r.description || "", logoSources: isHttps(r.logo_url) ? [r.logo_url] : []
     };
-    if (r.section === "apps" || r.section === "music") {
-      item.appType = r.section === "music" ? "music" : "movie";
+    if (r.section === "apps" || r.section === "music" || r.section === "tv") {
+      item.appType = r.section === "music" ? "music" : r.section === "tv" ? "tv" : "movie";
       item.kind = "app";
       if (isHttps(r.download_url)) { item.downloadUrl = r.download_url; item.downloadDirect = !!r.download_verified; }
+    } else if (r.section === "gaming") {
+      item.appType = "gaming";
     }
     return item;
   }
@@ -175,6 +178,11 @@
     ".scx-tabs{max-height:none}.scx-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:0 0 16px}.scx-stat{padding:14px;border:1px solid var(--border,#343434);border-radius:12px;background:var(--card,#242424)}.scx-stat strong{display:block;font-size:24px;margin:0 0 4px;color:#fff}.scx-stat span{display:block;font-size:11px;color:var(--dim,#a7a7a7)}.scx-help{font-size:12px;color:var(--dim,#a7a7a7);line-height:1.5}.scx-divider{height:1px;background:var(--border,#343434);margin:17px 0}.scx-order-list{display:flex;flex-direction:column;gap:7px;margin:10px 0}.scx-order-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 11px;border:1px solid var(--border,#343434);border-radius:10px;background:var(--card,#242424)}.scx-order-row[draggable=true]{cursor:grab}.scx-order-row.dragging{opacity:.4;border-color:var(--red,#e50914)}.scx-order-title{flex:1;min-width:110px;font-size:13px;font-weight:700}.scx-status{font-size:10px;color:var(--dim,#a7a7a7)}.scx-small{font-size:11px;padding:6px 9px}.scx-two{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}@media(max-width:640px){.scx-two{grid-template-columns:1fr}.scx-box{padding:14px}.scx-tabs{gap:8px;grid-template-columns:repeat(auto-fit,minmax(112px,1fr))}.scx-tab{min-height:110px;padding:10px;font-size:12px}}.scx-field-note{font-size:11px;color:var(--dim,#a7a7a7);margin-top:4px}.scx-count{font-size:11px;color:var(--dim,#a7a7a7)}"
   });
   document.head.appendChild(dashboardStyle);
+
+  var addCardsStyle = h("style", { text:
+    ".scx-subtabs{display:flex;gap:8px;margin:0 0 16px;padding:4px;border:1px solid var(--border,#343434);border-radius:12px;background:var(--card,#242424)}.scx-subtab{flex:1;border:1px solid transparent;border-radius:9px;padding:10px 14px;background:transparent;color:var(--dim,#a7a7a7);font:inherit;font-size:13px;font-weight:800;cursor:pointer}.scx-subtab.on{background:var(--red,#e50914);color:#fff}.scx-subpanel[hidden]{display:none!important}.scx-add-preview{margin:14px 0 0;padding:14px;border:1px solid var(--border,#343434);border-radius:12px;background:rgba(255,255,255,.025)}.scx-add-preview h4{margin:0 0 12px;font-size:15px}.scx-add-logo{display:block;width:84px;height:84px;object-fit:contain;padding:8px;margin:0 0 12px;border-radius:14px;background:#111;border:1px solid var(--border,#343434)}.scx-verify-row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.scx-verify{font-size:11px;font-weight:800;border-radius:999px;padding:6px 10px}.scx-verify.ok{color:#9ef0b1;background:rgba(70,211,105,.1);border:1px solid rgba(70,211,105,.25)}.scx-verify.warn{color:#ffe18a;background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.22)}.scx-add-preview .scx-grid{margin-top:12px}@media(max-width:520px){.scx-subtab{padding:10px 8px;font-size:12px}}"
+  });
+  document.head.appendChild(addCardsStyle);
 
   /* ---------- admin modal ---------- */
   var overlay, box, titleEl, bodyEl, lastFocus = null;
@@ -779,8 +787,26 @@
   }
   function readCatalogControls(msg, settings) {
     settings = cloneSettings(settings);
-    var wrap = h("div", {});
-    bodyEl.appendChild(wrap);
+    var root = h("div", {});
+    bodyEl.appendChild(root);
+    var subTabs = h("div", { class: "scx-subtabs", role: "tablist", "aria-label": "All Cards tools" });
+    var manageTab = h("button", { class: "scx-subtab on", type: "button", role: "tab", "aria-selected": "true", text: "Manage Cards" });
+    var addTab = h("button", { class: "scx-subtab", type: "button", role: "tab", "aria-selected": "false", text: "Add Cards" });
+    subTabs.appendChild(manageTab); subTabs.appendChild(addTab); root.appendChild(subTabs);
+    var managePanel = h("section", { class: "scx-subpanel" });
+    var addPanel = h("section", { class: "scx-subpanel", hidden: true });
+    root.appendChild(managePanel); root.appendChild(addPanel);
+    var addCardsBuilt = false;
+    function activateSubtab(which) {
+      var adding = which === "add";
+      managePanel.hidden = adding; addPanel.hidden = !adding;
+      manageTab.classList.toggle("on", !adding); addTab.classList.toggle("on", adding);
+      manageTab.setAttribute("aria-selected", String(!adding)); addTab.setAttribute("aria-selected", String(adding));
+      if (adding && !addCardsBuilt) { buildAddCards(); addCardsBuilt = true; }
+    }
+    manageTab.addEventListener("click", function () { activateSubtab("manage"); });
+    addTab.addEventListener("click", function () { activateSubtab("add"); });
+    var wrap = managePanel;
 
     wrap.appendChild(h("h3", { text: "Edit and arrange cards" }));
 
@@ -977,6 +1003,161 @@
     }).catch(buildOptions);
     buildOptions();
 
+    function buildAddCards() {
+      addPanel.textContent = "";
+      addPanel.appendChild(h("h3", { text: "Add a new card" }));
+      addPanel.appendChild(h("p", { class: "scx-help", text: "Choose the exact public section. Paste an official website/store page when available so AI can read its metadata and official icon. For apps, a direct APK/XAPK link is required and independently verified before publishing." }));
+
+      var category = h("select", { class: "scx-in", "aria-label": "Add card category" });
+      options(category, [
+        { value: "sites", label: "Websites" },
+        { value: "apps", label: "Movie Apps" },
+        { value: "music", label: "Music Apps" },
+        { value: "gaming", label: "Gaming Websites" },
+        { value: "tv", label: "TV Apps" }
+      ], "sites");
+      var categoryWrap = h("label", { class: "scx-f" }, ["Publish in", category]);
+      var source = field("Official website / store page (recommended)", "", "url", { placeholder: "https://official-site.example/" });
+      var download = field("Direct APK / XAPK download URL", "", "url", { placeholder: "https://…/app.apk" });
+      var fieldsTop = h("div", { class: "scx-grid" }, [source.wrap, download.wrap]);
+      var detect = h("button", { class: "scx-btn pri", type: "button", text: "AI Detect & Preview" });
+      var detectMsg = h("p", { class: "scx-help", role: "status", text: "The AI reads the official page, checks icon candidates, and verifies direct app packages. It does not publish automatically." });
+      var preview = h("div", { class: "scx-add-preview", hidden: true });
+      addPanel.appendChild(categoryWrap);
+      addPanel.appendChild(fieldsTop);
+      addPanel.appendChild(h("div", { class: "scx-actions" }, [detect]));
+      addPanel.appendChild(detectMsg);
+      addPanel.appendChild(preview);
+
+      var previewFields = null;
+      var detectedVerification = {};
+      var detectedNotes = [];
+      function isAppCategory() { return category.value === "apps" || category.value === "music" || category.value === "tv"; }
+      function packageUrl(raw) { try { return /\.(?:apk|xapk|apks|zip|aab)$/i.test(new URL(raw).pathname); } catch (e) { return false; } }
+      function updateCategory() {
+        download.wrap.hidden = !isAppCategory();
+        source.wrap.querySelector("span") && (source.wrap.querySelector("span").textContent = isAppCategory()
+          ? "Official website / store page (optional when you only have a direct package link)"
+          : "Official website URL");
+      }
+      category.addEventListener("change", function () { updateCategory(); preview.textContent = ""; preview.hidden = true; });
+      updateCategory();
+
+      function renderPreview(result) {
+        preview.textContent = "";
+        previewFields = {};
+        var item = result.detected || {};
+        detectedVerification = result.verified || {};
+        detectedNotes = Array.isArray(result.notes) ? result.notes : [];
+        preview.hidden = false;
+        preview.appendChild(h("h4", { text: "Review detected card" }));
+        var verification = h("div", { class: "scx-verify-row" }, [
+          h("span", { class: detectedVerification.logo ? "scx-verify ok" : "scx-verify warn", text: detectedVerification.logo ? "Official logo verified" : "Logo needs verification" }),
+          isAppCategory() ? h("span", { class: detectedVerification.download ? "scx-verify ok" : "scx-verify warn", text: detectedVerification.download ? "Direct package verified" : "Package not verified" }) : null
+        ]);
+        preview.appendChild(verification);
+        if (item.logo_url && isHttps(item.logo_url)) {
+          preview.appendChild(h("img", { class: "scx-add-logo", src: item.logo_url, alt: (item.name || "Detected") + " logo", loading: "lazy", referrerpolicy: "no-referrer" }));
+        }
+        if (detectedNotes.length) preview.appendChild(h("ul", { class: "scx-notes" }, detectedNotes.map(function (n) { return h("li", { text: n }); })));
+
+        var grid = h("div", { class: "scx-grid" });
+        function addReview(key, label, value, type, attrs) {
+          var f = field(label, value == null ? "" : value, type || "text", attrs || {});
+          grid.appendChild(f.wrap); previewFields[key] = f.input;
+        }
+        var detectedUrl = item.url || source.input.value || download.input.value;
+        var officialUrl = item.official_url || (!packageUrl(detectedUrl) ? detectedUrl : "");
+        addReview("name", "Card name", item.name || "", "text", { maxlength: "160" });
+        addReview("url", isAppCategory() ? "Official page / card destination (optional if direct file only)" : "Website URL", officialUrl || "", "url", { placeholder: "https://…" });
+        addReview("logo_url", "Official logo image URL", item.logo_url || "", "url", { placeholder: "https://…/logo.png" });
+        addReview("description", "Description", item.description || "", "textarea", { rows: "3", maxlength: "1500" });
+        if (isAppCategory()) {
+          addReview("download_url", "Direct APK / XAPK URL", item.download_url || download.input.value || "", "url", { placeholder: "https://…/app.apk" });
+          addReview("platform", "Platform", item.platform || "Android", "text", { maxlength: "60" });
+          addReview("version", "Version (if detected)", item.version || "", "text", { maxlength: "60" });
+        }
+        var ads = h("select", { class: "scx-in", "aria-label": "Add card ad level" });
+        options(ads, [{ value: "0", label: "No / minimal ads" }, { value: "1", label: "Some ads" }, { value: "2", label: "More / heavier ads" }], "1");
+        grid.appendChild(h("label", { class: "scx-f" }, ["Ad level (estimate)", ads]));
+        previewFields.ads = ads;
+        preview.appendChild(grid);
+
+        preview.appendChild(h("p", { class: "scx-help", text: "Nothing is published yet. Review every field. Logos are checked again on the server; app downloads must pass APK/package signature verification." }));
+        var publish = h("button", { class: "scx-btn pri", type: "button", text: "Confirm & Publish Card" });
+        var redetect = h("button", { class: "scx-btn", type: "button", text: "Back to links" });
+        preview.appendChild(h("div", { class: "scx-actions" }, [publish, redetect]));
+        redetect.addEventListener("click", function () { preview.hidden = true; detect.focus(); });
+        publish.addEventListener("click", function () {
+          var app = isAppCategory();
+          var name = previewFields.name.value.trim();
+          var logoUrl = previewFields.logo_url.value.trim();
+          var official = previewFields.url.value.trim();
+          var packageLink = app ? previewFields.download_url.value.trim() : "";
+          var destination = official || packageLink;
+          var description = previewFields.description.value.trim();
+          if (!name) { say(msg, "err", "AI did not identify a card name. Enter the correct name before publishing."); previewFields.name.focus(); return; }
+          if (!isHttps(destination)) { say(msg, "err", "Enter a valid HTTPS destination or official page URL."); previewFields.url.focus(); return; }
+          if (!isHttps(logoUrl)) { say(msg, "err", "Add the official logo image URL. The server will verify its image signature before saving."); previewFields.logo_url.focus(); return; }
+          if (app && !isHttps(packageLink)) { say(msg, "err", "A direct APK/XAPK URL is required for this app category."); previewFields.download_url.focus(); return; }
+          if (app && detectedVerification.download !== true) { say(msg, "err", "Run AI Detect again with the package URL. The direct download must be verified before publishing."); previewFields.download_url.focus(); return; }
+          if (detectedVerification.logo !== true && !logoUrl) { say(msg, "err", "A verified official logo is required."); return; }
+
+          publish.disabled = true; redetect.disabled = true;
+          var listing = {
+            section: category.value,
+            category: category.value === "sites" ? "Website" : category.value === "apps" ? "Movie App" : category.value === "music" ? "Music App" : category.value === "gaming" ? "Gaming Website" : "TV App",
+            name: name, url: destination, description: description,
+            logo_url: logoUrl, official_url: official || null,
+            download_url: packageLink || null,
+            platform: app ? (previewFields.platform.value.trim() || "Android") : null,
+            version: app ? previewFields.version.value.trim() : null,
+            ads: Number(previewFields.ads.value)
+          };
+          api("admin-listings", { action: "create", listing: listing, requireVerifiedLogo: true, requireVerifiedDownload: app }).then(function (saved) {
+            if (saved.listing) {
+              rows = rows.filter(function (r) { return r.id !== saved.listing.id; });
+              rows.unshift(saved.listing);
+            }
+            preview.hidden = true;
+            source.input.value = ""; download.input.value = "";
+            say(msg, "ok", "Card published in " + SECTION_LABEL[category.value] + ". It has been saved to Supabase and added to the public category.");
+            return refreshPublic().then(function () { buildOptions(); buildFields(); buildOrderList(); });
+          }).catch(function (e) {
+            publish.disabled = false; redetect.disabled = false;
+            if (expired(e)) return;
+            say(msg, "err", e.message || "Could not publish this card.");
+            if (e.info && e.info.fields) {
+              Object.keys(e.info.fields).forEach(function (k) {
+                if (previewFields[k]) previewFields[k].setAttribute("aria-invalid", "true");
+              });
+            }
+          });
+        });
+      }
+
+      detect.addEventListener("click", function () {
+        var app = isAppCategory();
+        var sourceUrl = source.input.value.trim();
+        var packageLink = app ? download.input.value.trim() : "";
+        if (!app && !isHttps(sourceUrl)) { say(msg, "err", "Enter the official website URL first."); source.input.focus(); return; }
+        if (app && !sourceUrl && !isHttps(packageLink)) { say(msg, "err", "Paste a direct APK/XAPK URL, or provide an official page to inspect."); download.input.focus(); return; }
+        if (app && packageLink && !isHttps(packageLink)) { say(msg, "err", "Direct package URL must use HTTPS."); download.input.focus(); return; }
+        if (app && packageLink && !packageUrl(packageLink) && !/github\.com\/.+\/releases\/download\//i.test(packageLink)) {
+          say(msg, "err", "Use a direct .apk/.xapk/.apks file URL, not a download landing page."); download.input.focus(); return;
+        }
+        var requestUrl = sourceUrl || packageLink;
+        detect.disabled = true; detect.textContent = "Checking links…";
+        say(msg, "", "");
+        api("admin-detect", { url: requestUrl, downloadUrl: packageLink || undefined, section: category.value, category: category.options[category.selectedIndex].text, aiProvider: "auto" }).then(function (result) {
+          renderPreview(result);
+          say(msg, "ok", "Detection finished. Review the logo, destination and download status before publishing.");
+        }).catch(function (e) {
+          if (!expired(e)) say(msg, "err", e.message || "AI metadata detection failed.");
+        }).finally(function () { detect.disabled = false; detect.textContent = "AI Detect & Preview"; });
+      });
+    }
+    buildOptions();
 
   }
   function showLayout(msg) {
