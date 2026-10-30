@@ -311,6 +311,7 @@ try {
   assert.equal(await firstWebsiteCard.evaluate(el => el.tagName), "A", "Movie Website cards should be native links");
   assert.equal(await firstWebsiteCard.getAttribute("target"), "_blank", "Movie Website cards should open in a new tab");
   assert.match(await firstWebsiteCard.getAttribute("href") || "", /^https:\/\//, "Movie Website cards should have a valid HTTPS destination");
+  assert.equal(await page.locator("#sitesView .card[title]").count(), 0, "Website cards must not show native hover tooltips with website names");
 
   const imageAudit = {};
   imageAudit.desktopWebsites = await auditCardLogos(page, "#sitesView", "Desktop Movie Websites");
