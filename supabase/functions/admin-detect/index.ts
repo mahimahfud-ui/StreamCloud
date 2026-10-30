@@ -2,6 +2,7 @@ import { json, preflight, readJson } from "../_shared/http.ts";
 import { requireAdmin } from "../_shared/auth.ts";
 import { baseDomain, parsePublicUrl, readLimited, safeFetch } from "../_shared/urls.ts";
 import { verifyApk } from "../_shared/apk.ts";
+import { verifyImageUrl } from "../_shared/images.ts";
 import { extractPage, type PageInfo } from "./page.ts";
 import { askGemini } from "./gemini.ts";
 import { askAutoAI } from "./ai-router.ts";
@@ -11,30 +12,18 @@ import { checkProviderHealth } from "./provider-health.ts";
 type Detected = Record<string, unknown>;
 const norm = (s: string) => s.toLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 
-async function verifyImage(raw: string): Promise<boolean> {
-  try {
-    const { res } = await safeFetch(new URL(raw), { headers: { Range: "bytes=0-1023" }, timeoutMs: 6000 });
-    if (res.status !== 200 && res.status !== 206) { await res.body?.cancel(); return false; }
-    const type = (res.headers.get("content-type") ?? "").toLowerCase();
-    const b = await readLimited(res, 16);
-    const magic = (b[0] === 0x89 && b[1] === 0x50) || (b[0] === 0xff && b[1] === 0xd8) || (b[0] === 0x47 && b[1] === 0x49) ||
-      (b[0] === 0x52 && b[1] === 0x49) || (b[0] === 0 && b[1] === 0 && b[2] === 1 && b[3] === 0) || new TextDecoder().decode(b).includes("<");
-    return type.startsWith("image/") || (magic && !type.startsWith("text/html"));
-  } catch { return false; }
-}
-
 async function pickLogo(page: PageInfo | null, origin: URL): Promise<string | null> {
   // Prefer a real site icon; Open Graph/JSON-LD images are useful fallbacks for sites
   // whose favicon is missing or unreadable.
   const candidates = [...(page?.icons ?? []).slice(0, 4), ...(page?.images ?? []).slice(0, 8), new URL("/favicon.ico", origin).href];
-  for (const c of [...new Set(candidates)].slice(0, 10)) if (parsePublicUrl(c) && await verifyImage(c)) return c;
+  for (const c of [...new Set(candidates)].slice(0, 10)) if (parsePublicUrl(c) && await verifyImageUrl(c)) return c;
   return null;
 }
 
 async function pickPageImage(page: PageInfo | null): Promise<string | null> {
   if (!page) return null;
   for (const c of (page.images ?? []).slice(0, 8)) {
-    if (parsePublicUrl(c) && await verifyImage(c)) return c;
+    if (parsePublicUrl(c) && await verifyImageUrl(c)) return c;
   }
   return null;
 }
@@ -123,27 +112,34 @@ Deno.serve(async (req) => {
     }
   }
 
-  const target = parsePublicUrl(body.url);
-  if (!target) return json(req, { error: "Enter a valid public https:// URL." }, 400);
+  if (!["movie", "series", "sites", "apps", "music", "gaming", "tv"].includes(section)) {
+    return json(req, { error: "Choose a supported StreamCloud category." }, 422);
+  }
+  const downloadTarget = body.downloadUrl ? parsePublicUrl(body.downloadUrl) : null;
+  if (body.downloadUrl && !downloadTarget) return json(req, { error: "Direct download URL must be a public HTTPS link." }, 400);
+  const sourceRaw = typeof body.url === "string" && body.url.trim() ? body.url : String(body.downloadUrl ?? "");
+  const target = parsePublicUrl(sourceRaw);
+  if (!target) return json(req, { error: "Enter a valid public HTTPS website or direct download URL." }, 400);
   const notes: string[] = [];
   const out: Detected = { url: target.href };
   const verified = { imdb: false, download: false, logo: false };
   const isTitle = section === "movie" || section === "series";
-  const isApp = section === "apps" || section === "music";
+  const isApp = section === "apps" || section === "music" || section === "tv";
+  const isWebsite = section === "sites" || section === "gaming";
 
-  // 1. Read the submitted page (size/time limited, SSRF-guarded).
+  // Fetch an official/source page when available. Package URLs are verified as files, never parsed as HTML.
   let page: PageInfo | null = null;
-  const looksApk = /\.apk$/i.test(target.pathname);
-  if (!looksApk) {
+  const isPackageUrl = (u: URL) => /\\.(?:apk|xapk|apks|zip|aab)$/i.test(u.pathname);
+  const looksPackage = isPackageUrl(target);
+  if (!looksPackage) {
     try {
       const { res, url } = await safeFetch(target, { headers: { Accept: "text/html,application/xhtml+xml" } });
       const type = (res.headers.get("content-type") ?? "").toLowerCase();
       if (res.ok && (type.includes("html") || type === "")) {
         page = extractPage(new TextDecoder().decode(await readLimited(res, 600_000)), url);
-      } else { await res.body?.cancel(); notes.push(`The page could not be read (status ${res.status}). Fill the fields manually.`); }
-    } catch (e) { notes.push(`The page could not be read: ${(e as Error).message}. Fill the fields manually.`); }
+      } else { await res.body?.cancel(); notes.push("The source page could not be read (status " + res.status + "). Review the details manually."); }
+    } catch (e) { notes.push("The source page could not be read: " + ((e as Error).message || "network error") + ". Review the details manually."); }
   }
-
   // 2. Automatically select an AI provider for this task and fail over on errors.
   let ai: Awaited<ReturnType<typeof askGemini>> = null;
   if (page) {
@@ -193,22 +189,23 @@ Deno.serve(async (req) => {
   }
 
   // 4. Apps: logo, official site, verified direct APK link only.
-  if (isApp || section === "sites") {
+  if (isApp || isWebsite) {
     out.logo_url = await pickLogo(page, target);
     verified.logo = !!out.logo_url;
     if (!out.description) out.description = page?.structured?.description || page?.description || null;
   }
   if (isApp) {
-    let apkCandidate: string | null = looksApk ? target.href : null;
-    if (target.hostname === "github.com") {
-      const gh = await githubApk(target, notes);
+    let apkCandidate: string | null = downloadTarget?.href ?? (looksPackage ? target.href : null);
+    const githubSource = downloadTarget?.hostname === "github.com" ? downloadTarget : target;
+    if (githubSource.hostname === "github.com") {
+      const gh = await githubApk(githubSource, notes);
       if (gh) {
         out.name = out.name && out.name !== "GitHub" ? out.name : gh.name ?? out.name;
         out.description = out.description || gh.description || null;
-        if (!out.logo_url && gh.logo && await verifyImage(gh.logo)) { out.logo_url = gh.logo; verified.logo = true; }
-        if (gh.apk) apkCandidate = gh.apk;
+        if (gh.apk) apkCandidate = apkCandidate ?? gh.apk;
         if (gh.version) { out.version = out.version || gh.version; }
-        out.official_url = target.href;
+        const repoPath = githubSource.pathname.match(/^\/([\w.-]+)\/([\w.-]+)/);
+        out.official_url = repoPath ? "https://github.com/" + repoPath[1] + "/" + repoPath[2] : "https://github.com/";
       }
     } else if (page) {
       out.official_url = page.canonical && parsePublicUrl(page.canonical)?.hostname.endsWith(baseDomain(target.hostname)) ? page.canonical : target.origin + "/";
@@ -224,7 +221,8 @@ Deno.serve(async (req) => {
       const v = await verifyApk(apkCandidate);
       if (v.ok) { out.download_url = apkCandidate; verified.download = true; out.platform = out.platform ?? "Android"; }
       else notes.push(`APK link found but not verified (${v.reason}). Left empty.`);
-    } else notes.push("No verified direct APK link was found. Add one manually if you have it.");
+    } else notes.push("No verified direct APK/package link was found. Paste a direct APK/XAPK URL; app pages alone are not accepted as direct downloads.");
+    if (!verified.logo) notes.push("No official app logo could be verified from this source. Add the official website/store URL or an official logo URL in the review step.");
   }
 
   // 5. Sanity: never keep a name that is just a generic site label.
