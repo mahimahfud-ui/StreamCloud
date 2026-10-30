@@ -415,6 +415,22 @@ try {
   await page.keyboard.press("Escape");
   await page.waitForFunction(() => !document.getElementById("detailModal")?.classList.contains("open"));
 
+  const categoryOrder = await page.locator(".mode-switch .mode").evaluateAll(nodes => nodes.map(node => node.dataset.mode));
+  assert.equal(categoryOrder.indexOf("tv"), categoryOrder.indexOf("gaming") + 1,
+    "TV Apps tab must appear immediately to the right of Gaming Websites");
+  await page.locator('.mode[data-mode="tv"]').click();
+  await page.waitForFunction(() =>
+    window.STREAMCLOUD_ACTIVE_CATEGORY === "tv" &&
+    document.getElementById("tvView")?.classList.contains("active") &&
+    !document.getElementById("gamingView")?.classList.contains("active")
+  );
+  assert.equal(await page.locator(".view.active").count(), 1,
+    "TV Apps selection should display exactly one catalogue view");
+  assert.equal(await page.locator("#tvView .card").count(), 0,
+    "TV Apps should remain empty until real TV app entries are added");
+  assert.match(await page.locator("#empty").innerText(), /TV Apps are ready/i,
+    "Empty TV Apps view should explain that listings will be added later");
+
   await page.locator('.mode[data-mode="sites"]').click();
   const search = page.locator("#q");
   await search.fill("Movy");
@@ -597,6 +613,17 @@ try {
   await youtify.waitFor({ state: "visible" });
   assert.match(await youtify.innerText(), /Download XAPK/i, "Youtify should identify its package as XAPK instead of APK");
   assert.equal(await youtify.getAttribute("data-direct-download"), "true", "Youtify's direct file link should be marked explicitly");
+  await mobile.locator('.mode[data-mode="gaming"]').click();
+  await mobile.waitForFunction(() => document.getElementById("gamingView")?.classList.contains("active"));
+  await mobile.locator('.mode[data-mode="tv"]').click();
+  await mobile.waitForFunction(() =>
+    document.getElementById("tvView")?.classList.contains("active") &&
+    !document.getElementById("gamingView")?.classList.contains("active")
+  );
+  assert.equal(await mobile.locator(".view.active").count(), 1,
+    "Mobile TV Apps selection should display exactly one category view");
+  assert.match(await mobile.locator("#empty").innerText(), /TV Apps are ready/i,
+    "Mobile TV Apps view should show its empty-ready message");
   await mobile.close();
 
   if (failures.length) throw new Error(failures.join("\n"));
