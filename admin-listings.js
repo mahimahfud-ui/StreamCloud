@@ -397,7 +397,7 @@
       return wrapEl;
     }
     var V = ui.verified || {};
-    var isTitle = section === "movie" || section === "series", isApp = section === "apps" || section === "music";
+    var isTitle = section === "movie" || section === "series", isApp = section === "apps" || section === "music" || section === "tv";
     var grid = h("div", { class: "scx-grid" });
     var secSel = sectionSelect(section);
     secSel.addEventListener("change", function () { f = collect(); f.section = secSel.value; ui.form = f; ui.section = f.section; showHome("add"); });
@@ -814,7 +814,8 @@
     var group = h("select", { class: "scx-in", "aria-label": "Card category" });
     options(group, [
       { value: "sites", label: "Websites" }, { value: "apps", label: "Movie Apps" },
-      { value: "music", label: "Music Apps" }, { value: "gaming", label: "Gaming Websites" },\n      { value: "tv", label: "TV Apps" }, { value: "movie", label: "Movies" }, { value: "series", label: "Web Series" }
+      { value: "music", label: "Music Apps" }, { value: "gaming", label: "Gaming Websites" },
+      { value: "tv", label: "TV Apps" }, { value: "movie", label: "Movies" }, { value: "series", label: "Web Series" }
     ], ui.controlSection || "sites");
     var itemSelect = h("select", { class: "scx-in", "aria-label": "Select card" });
     var selectRow = h("div", { class: "scx-row" }, [
