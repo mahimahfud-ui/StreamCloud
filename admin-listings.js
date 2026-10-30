@@ -1081,7 +1081,7 @@
           addReview("version", "Version (if detected)", item.version || "", "text", { maxlength: "60" });
         }
         var ads = h("select", { class: "scx-in", "aria-label": "Add card ad level" });
-        options(ads, [{ value: "0", label: "No / minimal ads" }, { value: "1", label: "Some ads" }, { value: "2", label: "More / heavier ads" }], "1");
+        options(ads, [{ value: "0", label: "No / minimal ads" }, { value: "1", label: "Some ads" }, { value: "2", label: "More / heavier ads" }], item.ads === 0 || item.ads === 1 || item.ads === 2 ? String(item.ads) : "1");
         grid.appendChild(h("label", { class: "scx-f" }, ["Ad level (estimate)", ads]));
         previewFields.ads = ads;
         preview.appendChild(grid);
