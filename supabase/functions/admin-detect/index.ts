@@ -163,9 +163,6 @@ Deno.serve(async (req) => {
   }
   const downloadTarget = body.downloadUrl ? parsePublicUrl(body.downloadUrl) : null;
   if (body.downloadUrl && !downloadTarget) return json(req, { error: "Direct download URL must be a public HTTPS link." }, 400);
-  if (downloadTarget && !/\.(?:apk|xapk|apks)$/i.test(downloadTarget.pathname)) {
-    return json(req, { error: "Paste a direct .apk, .xapk or .apks file URL, not a web page or generic ZIP." }, 422);
-  }
   const sourceRaw = typeof body.url === "string" && body.url.trim() ? body.url : String(body.downloadUrl ?? "");
   const target = parsePublicUrl(sourceRaw);
   if (!target) return json(req, { error: "Enter a valid public HTTPS website or direct download URL." }, 400);
@@ -179,7 +176,7 @@ Deno.serve(async (req) => {
   // Fetch an official/source page when available. Package URLs are verified as files, never parsed as HTML.
   let page: PageInfo | null = null;
   const isPackageUrl = (u: URL) => /\.(?:apk|xapk|apks)$/i.test(u.pathname);
-  const looksPackage = isPackageUrl(target);
+  const looksPackage = isPackageUrl(target) || (!!downloadTarget && downloadTarget.href === target.href);
   let readerFallbackAllowed = false;
   let primaryReadNote = "";
   if (!looksPackage) {
