@@ -1033,6 +1033,7 @@
       var previewFields = null;
       var detectedVerification = {};
       var detectedNotes = [];
+      var lastCheckedDownloadUrl = "";
       function isAppCategory() { return category.value === "apps" || category.value === "music" || category.value === "tv"; }
       function packageUrl(raw) { try { return /\.(?:apk|xapk|apks)$/i.test(new URL(raw).pathname); } catch (e) { return false; } }
       function updateCategory() {
@@ -1052,6 +1053,7 @@
         var item = result.detected || {};
         detectedVerification = result.verified || {};
         detectedNotes = Array.isArray(result.notes) ? result.notes : [];
+        lastCheckedDownloadUrl = isAppCategory() ? (download.input.value.trim() || item.download_url || "") : "";
         preview.hidden = false;
         preview.appendChild(h("h4", { text: "Review detected card" }));
         var verification = h("div", { class: "scx-verify-row" }, [
@@ -1069,8 +1071,7 @@
           var f = field(label, value == null ? "" : value, type || "text", attrs || {});
           grid.appendChild(f.wrap); previewFields[key] = f.input;
         }
-        var detectedUrl = item.url || source.input.value || download.input.value;
-        var officialUrl = item.official_url || (!packageUrl(detectedUrl) ? detectedUrl : "");
+        var officialUrl = item.official_url || source.input.value.trim() || "";
         addReview("name", "Card name", item.name || "", "text", { maxlength: "160" });
         addReview("url", isAppCategory() ? "Official page / card destination (optional if direct file only)" : "Website URL", officialUrl || "", "url", { placeholder: "https://…" });
         addReview("logo_url", "Official logo image URL", item.logo_url || "", "url", { placeholder: "https://…/logo.png" });
@@ -1103,8 +1104,50 @@
           if (!isHttps(destination)) { say(msg, "err", "Enter a valid HTTPS destination or official page URL."); previewFields.url.focus(); return; }
           if (!isHttps(logoUrl)) { say(msg, "err", "Add the official logo image URL. The server will verify its image signature before saving."); previewFields.logo_url.focus(); return; }
           if (app && !isHttps(packageLink)) { say(msg, "err", "A direct APK/XAPK URL is required for this app category."); previewFields.download_url.focus(); return; }
-          if (app && detectedVerification.download !== true) { say(msg, "err", "Run AI Detect again with the package URL. The direct download must be verified before publishing."); previewFields.download_url.focus(); return; }
           if (detectedVerification.logo !== true && !logoUrl) { say(msg, "err", "A verified official logo is required."); return; }
+
+          // Re-check the exact URL currently in the review form. This prevents a
+          // stale verification state when the admin edits the package URL after AI detection.
+          if (app && (detectedVerification.download !== true || packageLink !== lastCheckedDownloadUrl)) {
+            publish.disabled = true; redetect.disabled = true;
+            publish.textContent = "Verifying package…";
+            api("admin-detect", {
+              url: official || source.input.value.trim() || packageLink,
+              downloadUrl: packageLink,
+              section: category.value,
+              category: category.options[category.selectedIndex].text,
+              aiProvider: "auto"
+            }).then(function (result) {
+              lastCheckedDownloadUrl = packageLink;
+              detectedVerification = result.verified || {};
+              detectedNotes = Array.isArray(result.notes) ? result.notes : [];
+              var badges = preview.querySelectorAll(".scx-verify");
+              if (badges.length > 1) {
+                badges[1].className = detectedVerification.download ? "scx-verify ok" : "scx-verify warn";
+                badges[1].textContent = detectedVerification.download ? "Direct package verified" : "Package not verified";
+              }
+              var noteList = preview.querySelector(".scx-notes");
+              if (noteList) noteList.remove();
+              if (detectedNotes.length) {
+                preview.insertBefore(h("ul", { class: "scx-notes" }, detectedNotes.map(function (n) { return h("li", { text: n }); })),
+                  preview.querySelector(".scx-grid"));
+              }
+              if (detectedVerification.download !== true) {
+                publish.disabled = false; redetect.disabled = false; publish.textContent = "Confirm & Publish Card";
+                var reason = detectedNotes.find(function (n) { return /package|apk|download|file|http|blocked|reader/i.test(n); });
+                say(msg, "err", reason || "This URL did not return a verifiable APK/XAPK package. Check that it downloads the actual app file, then try again.");
+                previewFields.download_url.focus();
+                return;
+              }
+              publish.disabled = false; redetect.disabled = false; publish.textContent = "Confirm & Publish Card";
+              say(msg, "ok", "Direct app package verified. Publishing the reviewed card…");
+              publish.click();
+            }).catch(function (e) {
+              publish.disabled = false; redetect.disabled = false; publish.textContent = "Confirm & Publish Card";
+              if (!expired(e)) say(msg, "err", e.message || "Could not verify the direct package URL.");
+            });
+            return;
+          }
 
           publish.disabled = true; redetect.disabled = true;
           var listing = {
@@ -1142,13 +1185,12 @@
       detect.addEventListener("click", function () {
         var app = isAppCategory();
         var sourceUrl = source.input.value.trim();
-        var packageLink = app ? download.input.value.trim() : "";
+        var packageLink = app
+          ? ((previewFields && previewFields.download_url ? previewFields.download_url.value.trim() : "") || download.input.value.trim())
+          : "";
         if (!app && !isHttps(sourceUrl)) { say(msg, "err", "Enter the official website URL first."); source.input.focus(); return; }
         if (app && !sourceUrl && !isHttps(packageLink)) { say(msg, "err", "Paste a direct APK/XAPK URL, or provide an official page to inspect."); download.input.focus(); return; }
         if (app && packageLink && !isHttps(packageLink)) { say(msg, "err", "Direct package URL must use HTTPS."); download.input.focus(); return; }
-        if (app && packageLink && !packageUrl(packageLink) && !/github\.com\/.+\/releases\/download\//i.test(packageLink)) {
-          say(msg, "err", "Use a direct .apk/.xapk/.apks file URL, not a download landing page."); download.input.focus(); return;
-        }
         var requestUrl = sourceUrl || packageLink;
         detect.disabled = true; detect.textContent = "Checking links…";
         say(msg, "", "");
