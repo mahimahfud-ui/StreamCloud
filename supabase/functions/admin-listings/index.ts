@@ -250,17 +250,11 @@ Deno.serve(async (req) => {
     if (body.requireVerifiedDownload === true && !row!.download_url) {
       return json(req, { error: "A direct app package URL is required.", fields: { download_url: "Paste a direct APK/XAPK package URL." } }, 422);
     }
-    if (body.requireVerifiedDownload === true && row!.download_url) {
-      const packageUrl = new URL(String(row!.download_url));
-      if (!/\.(?:apk|xapk|apks)$/i.test(packageUrl.pathname)) {
-        return json(req, { error: "Only direct APK/XAPK/APKS package files can be published as app downloads.", fields: { download_url: "Use a direct .apk, .xapk or .apks file URL." } }, 422);
-      }
-    }
     if (row!.download_url) {
       const v = await verifyApk(String(row!.download_url));
       if (v.ok) row!.download_verified = true;
       else if (body.requireVerifiedDownload === true || body.keepUnverifiedDownload !== true) {
-        return json(req, { error: "Download link not verified: " + v.reason, fields: { download_url: "Not a verified APK/package file. Paste a direct package URL and run detection again." } }, 422);
+        return json(req, { error: "Download link not verified: " + v.reason, fields: { download_url: "The URL did not return a valid APK/XAPK archive. Use a direct file URL, then try verification again." } }, 422);
       }
     }
     const q = action === "create"
