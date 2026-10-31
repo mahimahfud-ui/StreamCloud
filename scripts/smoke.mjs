@@ -530,8 +530,14 @@ try {
   assert.ok(mockState.calls.some((x) => x.section === "tv" && x.downloadUrl === "https://example.com/tv-player.apk"),
     "AI detection should send the selected TV Apps category and direct package URL");
   await page.getByLabel("Card name").fill("TV Smoke App");
+  // Simulate editing the package URL after AI detection. Confirm must re-check
+  // this latest review value, including CDN URLs without a .apk filename suffix.
+  const latestPackageUrl = "https://cdn.example.com/download?id=tv-player";
+  await page.getByLabel("Direct APK / XAPK URL").fill(latestPackageUrl);
   await page.getByRole("button", { name: "Confirm & Publish Card" }).click();
   await page.getByText("Card published in TV Apps.", { exact: false }).waitFor({ timeout: 8000 });
+  assert.ok(mockState.calls.some((x) => x.section === "tv" && x.downloadUrl === latestPackageUrl),
+    "Confirm should re-run server verification with the latest package URL entered in the review field");
   const addCardCall = mockState.calls.find((x) => x.action === "create" && x.listing?.name === "TV Smoke App");
   assert.ok(addCardCall && addCardCall.requireVerifiedLogo === true && addCardCall.requireVerifiedDownload === true,
     "Publishing an app should require server-side logo and package verification");
