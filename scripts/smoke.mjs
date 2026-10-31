@@ -543,7 +543,7 @@ try {
     "Publishing an app should require server-side logo and package verification");
   assert.ok(mockState.listings.some((x) => x.name === "TV Smoke App" && x.section === "tv" && x.download_verified),
     "Confirmed Add Cards should persist a verified TV App row");
-  await page.locator('#tvView .app-card[data-name="tv smoke app"]').waitFor({ timeout: 8000 });
+  await page.locator('#tvView .app-card[data-name="tv smoke app"]').waitFor({ state: "attached", timeout: 8000 });
 
   await page.locator('select[aria-label="Card category"]').selectOption("sites");
   await page.locator('select[aria-label="Select card"] option').filter({ hasText: "Smoke test listing" }).waitFor({ state: "attached", timeout: 8000 });
